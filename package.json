@@ -7,7 +7,7 @@
         "start": "nodemon index",
         "db:migrate": "npx sequelize-cli db:migrate",
         "db:revert": "npx sequelize-cli db:migrate:undo:all",
-        "db:fresh": "npm run db:migrate & npm run db:revert",
+        "db:fresh": "npm run db:revert & npm run db:migrate",
         "db:seed": "npx sequelize-cli db:seed:all"
     },
     "keywords": [],
