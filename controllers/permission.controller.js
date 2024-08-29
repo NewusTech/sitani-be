@@ -60,4 +60,19 @@ module.exports = {
             }
         }
     },
+
+    getAll: async (req, res) => {
+        try {
+            const permissions = await Permission.findAll();
+
+            res.status(200).json(response(200, 'Get permissions successfully', permissions));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
 }
