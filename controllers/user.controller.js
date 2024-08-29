@@ -42,9 +42,9 @@ module.exports = {
                 },
             };
 
-            const { password, pangkat, email, name, nip } = req.body;
-
             const validate = v.validate({ password, pangkat, email, name, nip }, schema);
+
+            const { password, pangkat, email, name, nip } = req.body;
 
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
@@ -125,4 +125,94 @@ module.exports = {
             res.status(500).json(response(500, 'Internal server error', err));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const user = await User.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                email: {
+                    type: "string",
+                    pattern: /^\S+@\S+\.\S+$/,
+                    optional: true,
+                    max: 100,
+                    min: 1,
+                },
+                password: {
+                    type: "string",
+                    optional: true,
+                    max: 100,
+                    min: 6,
+                },
+                name: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                },
+                nip: {
+                    type: "number",
+                    max: 99999999999,
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                },
+                pangkat: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                },
+            };
+
+            let { password, pangkat, email, name, nip } = req.body;
+
+            const validate = v.validate({ password, pangkat, email, name, nip }, schema);
+
+            if (!user) {
+                res.status(404).json(response(404, 'User not found'));
+                return;
+            }
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            password = password ? passwordHash.generate(password) : user.password;
+            pangkat = pangkat ?? user.pangkat;
+            email = email ?? user.email;
+            name = name ?? user.name;
+            nip = nip ?? user.nip;
+
+            await user.update({ password, pangkat, email, name, nip });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update user successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            if (err.name === 'SequelizeUniqueConstraintError') {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'duplicate',
+                        message: 'Cannot updated user, please use another email',
+                        field: 'email',
+                    }
+                ]));
+            } else {
+                res.status(500).json(response(500, 'Internal server error', err));
+            }
+        }
+    }
 }
