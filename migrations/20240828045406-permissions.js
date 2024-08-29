@@ -11,7 +11,7 @@ module.exports = {
          */
         await queryInterface.createTable('permissions', {
             id: {
-                type: Sequelize.BIGINT.UNSIGNED,
+                type: Sequelize.BIGINT,
                 autoIncrement: true,
                 primaryKey: true,
                 allowNull: false,

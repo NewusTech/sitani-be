@@ -11,7 +11,7 @@ module.exports = {
          */
         await queryInterface.createTable('user_roles', {
             user_id: {
-                type: Sequelize.BIGINT.UNSIGNED,
+                type: Sequelize.BIGINT,
                 primaryKey: true,
                 references: {
                     model: 'users',
@@ -19,7 +19,7 @@ module.exports = {
                 }
             },
             role_id: {
-                type: Sequelize.BIGINT.UNSIGNED,
+                type: Sequelize.BIGINT,
                 references: {
                     model: 'roles',
                     key: 'id'
