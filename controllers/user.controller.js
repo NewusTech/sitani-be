@@ -42,9 +42,9 @@ module.exports = {
                 },
             };
 
-            const validate = v.validate({ password, pangkat, email, name, nip }, schema);
-
             const { password, pangkat, email, name, nip } = req.body;
+            
+            const validate = v.validate({ password, pangkat, email, name, nip }, schema);
 
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
