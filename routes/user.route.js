@@ -7,6 +7,7 @@ let prefix = '/user';
 /* -- ROUTE -- */
 route.post(prefix + '/create', userController.create);
 route.get(prefix + '/get', userController.getAll);
+route.get(prefix + '/get/:id', userController.getOneById);
 /* -- ROUTE -- */
 
 module.exports = route;

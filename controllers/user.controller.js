@@ -100,4 +100,29 @@ module.exports = {
             res.status(500).json(response(500, 'Internal server error', err));
         }
     },
+
+    getOneById: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const user = await User.findOne({
+                where: { id },
+                attributes: { exclude: ['password'] },
+            });
+
+            if (!user) {
+                res.status(404).json(response(404, 'User not found'));
+                return;
+            }
+
+            res.status(200).json(response(200, 'Get user successfully', user));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, 'Internal server error', err));
+        }
+    },
 }
