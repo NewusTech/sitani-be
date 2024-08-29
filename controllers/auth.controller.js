@@ -68,7 +68,7 @@ module.exports = {
 			logger.error(`Error : ${err}`);
 			logger.error(`Error message: ${err.message}`);
 
-			res.status(500).json(response(500, 'Internal server error', err));
+			res.status(500).json(response(500, 'Internal server error'));
 		}
 	},
 }
