@@ -1,36 +1,40 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
-    static associate(models) {
-      User.belongsTo(models.Role, {
-        foreignKey: 'role_id',
-      });
-
-      User.belongsTo(models.Userinfo, {
-        foreignKey: 'userinfo_id',
-      });
-
-      User.belongsToMany(models.Permission, {
-        through: 'Userpermissions',
-        as: 'permissions',
-        foreignKey: 'user_id'
-      });
+    class User extends Model {
+        static associate(models) {
+        }
     }
-  }
-  User.init({
-    password: DataTypes.STRING,
-    slug: DataTypes.STRING,
-    role_id: DataTypes.INTEGER,
-    userinfo_id: DataTypes.INTEGER,
-    deletedAt: DataTypes.DATE,
-    resetpasswordtoken: DataTypes.STRING,
-    resetpasswordexpires: DataTypes.DATE,
-  }, {
-    sequelize,
-    modelName: 'User',
-  });
-  return User;
+
+    User.init({
+        email: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+            unique: true
+        },
+        password: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+        },
+        name: DataTypes.STRING,
+        nip: DataTypes.INTEGER,
+        pangkat: DataTypes.STRING,
+        createdAt: {
+            type: DataTypes.DATE,
+            field: 'created_at',
+            allowNull: false,
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            field: 'updated_at',
+            allowNull: false,
+        },
+    }, {
+        sequelize,
+        modelName: 'User',
+    });
+
+    return User;
 };
