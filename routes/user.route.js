@@ -8,7 +8,7 @@ let prefix = '/user';
 route.post(prefix + '/create', userController.create);
 route.get(prefix + '/get', userController.getAll);
 route.get(prefix + '/get/:id', userController.getOneById);
-route.post(prefix + '/update/:id', userController.update);
+route.put(prefix + '/update/:id', userController.update);
 route.delete(prefix + '/delete/:id', userController.delete);
 /* -- ROUTE -- */
 
