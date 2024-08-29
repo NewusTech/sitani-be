@@ -166,4 +166,36 @@ module.exports = {
             }
         }
     },
+
+    delete: async (req, res) => {
+        const transaction = await sequelize.transaction();
+        
+        try {
+            const { id } = req.params;
+
+            const permission = await Permission.findOne({
+                where: { id },
+            });
+
+            if (!permission) {
+                res.status(404).json(response(404, 'Permission not found'));
+                return;
+            }
+
+            await permission.destroy();
+
+            await transaction.commit();
+            
+            res.status(200).json(response(200, 'Delete permission successfully'));
+        } catch (err) {
+            console.log(err);
+            
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+            
+            await transaction.rollback();
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
 }
