@@ -8,6 +8,7 @@ let prefix = '/permission';
 route.post(prefix + '/create', permissionController.create);
 route.get(prefix + '/get', permissionController.getAll);
 route.get(prefix + '/get/:id', permissionController.getOneById);
+route.put(prefix + '/update/:id', permissionController.update);
 /* -- ROUTE -- */
 
 module.exports = route;
