@@ -75,4 +75,28 @@ module.exports = {
             res.status(500).json(response(500, 'Internal server error'));
         }
     },
+
+    getOneById: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const role = await Role.findOne({
+                where: { id },
+            });
+
+            if (!role) {
+                res.status(404).json(response(404, 'Role not found'));
+                return;
+            }
+
+            res.status(200).json(response(200, 'Get role successfully', role));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
 }
