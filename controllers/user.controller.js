@@ -31,7 +31,6 @@ module.exports = {
                 nip: {
                     type: "number",
                     max: 99999999999,
-                    optional: true,
                     positive: true,
                     integer: true,
                 },
@@ -74,9 +73,14 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: 'Cannot created user, please use another email',
+                        message: 'Cannot created user, please use another email or nip',
                         field: 'email',
-                    }
+                    },
+                    {
+                        type: 'duplicate',
+                        message: 'Cannot created user, please use another email or nip',
+                        field: 'nip',
+                    },
                 ]));
             } else {
                 res.status(500).json(response(500, 'Internal server error'));
@@ -206,9 +210,14 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: 'Cannot updated user, please use another email',
+                        message: 'Cannot updated user, please use another email or nip',
                         field: 'email',
-                    }
+                    },
+                    {
+                        type: 'duplicate',
+                        message: 'Cannot updated user, please use another email or nip',
+                        field: 'nip',
+                    },
                 ]));
             } else {
                 res.status(500).json(response(500, 'Internal server error'));
