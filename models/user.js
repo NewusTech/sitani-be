@@ -14,12 +14,16 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             unique: true
         },
+        nip: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            unique: true
+        },
         password: {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
         name: DataTypes.STRING,
-        nip: DataTypes.INTEGER,
         pangkat: DataTypes.STRING,
         createdAt: {
             type: DataTypes.DATE,

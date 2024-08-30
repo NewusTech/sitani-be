@@ -21,15 +21,17 @@ module.exports = {
                 allowNull: false,
                 unique: true
             },
+            nip: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+                unique: true
+            },
             password: {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
             name: {
                 type: Sequelize.STRING,
-            },
-            nip: {
-                type: Sequelize.INTEGER,
             },
             pangkat: {
                 type: Sequelize.STRING,
