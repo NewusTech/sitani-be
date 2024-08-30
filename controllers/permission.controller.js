@@ -1,175 +1,201 @@
-const { response } = require('../helpers/response.formatter');
-
-const { Permission } = require('../models');
+const { Permission, sequelize } = require('../models');
+const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
+const { response } = require('../helpers');
+
 const v = new Validator();
 
 module.exports = {
+    create: async (req, res) => {
+        const transaction = await sequelize.transaction();
 
-    //membuat permission
-    createpermission: async (req, res) => {
         try {
-
-            //membuat schema untuk validasi
             const schema = {
-                name: {
+                permission_name: {
                     type: "string",
-                    min: 3,
+                    max: 50,
+                    min: 1,
                 },
-            }
+                description: {
+                    type: "string",
+                    optional: true,
+                }
+            };
 
-            //buat object permission
-            let permissionCreateObj = {
-                name: req.body.name,
-            }
+            const { permission_name, description } = req.body;
 
-            //validasi menggunakan module fastest-validator
-            const validate = v.validate(permissionCreateObj, schema);
+            const validate = v.validate({ permission_name, description }, schema);
+
             if (validate.length > 0) {
-                res.status(400).json(response(400, 'validation failed', validate));
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
-            //buat permission
-            let permissionCreate = await Permission.create(permissionCreateObj);
-
-            res.status(201).json(response(201, 'success create permission', permissionCreate));
-        } catch (err) {
-            res.status(500).json(response(500, 'internal server error', err));
-            console.log(err);
-        }
-    },
-
-    //mendapatkan semua data permission
-    getpermission: async (req, res) => {
-        try {
-            //mendapatkan data semua permission
-            let permissionGets = await Permission.findAll({
-                order: [['id', 'ASC']]
+            await Permission.create({
+                permissionName: permission_name,
+                description,
             });
 
-            res.status(200).json(response(200, 'success get permission', permissionGets));
+            await transaction.commit();
 
+            res.status(201).json(response(201, 'Permission created'));
         } catch (err) {
-            res.status(500).json(response(500, 'internal server error', err));
             console.log(err);
-        }
-    },
 
-    //mendapatkan data permission berdasarkan id
-    getpermissionById: async (req, res) => {
-        try {
-            //mendapatkan data permission berdasarkan id
-            let permissionGet = await Permission.findOne({
-                where: {
-                    id: req.params.id
-                },
-            });
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
 
-            //cek jika permission tidak ada
-            if (!permissionGet) {
-                res.status(404).json(response(404, 'permission not found'));
-                return;
-            }
+            await transaction.rollback();
 
-            res.status(200).json(response(200, 'success get permission by id', permissionGet));
-        } catch (err) {
-            res.status(500).json(response(500, 'internal server error', err));
-            console.log(err);
-        }
-    },
-
-    //mengupdate permission berdasarkan id
-    updatepermission: async (req, res) => {
-        try {
-            //mendapatkan data permission untuk pengecekan
-            let permissionGet = await Permission.findOne({
-                where: {
-                    id: req.params.id
-                }
-            })
-
-            //cek apakah data permission ada
-            if (!permissionGet) {
-                res.status(404).json(response(404, 'permission not found'));
-                return;
-            }
-
-            //membuat schema untuk validasi
-            const schema = {
-                name: {
-                    type: "string",
-                    min: 3,
-                    optional: true
-                },
-            }
-
-            //buat object permission
-            let permissionUpdateObj = {
-                name: req.body.name,
-            }
-
-            //validasi menggunakan module fastest-validator
-            const validate = v.validate(permissionUpdateObj, schema);
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'validation failed', validate));
-                return;
-            }
-
-            //update permission
-            await Permission.update(permissionUpdateObj, {
-                where: {
-                    id: req.params.id,
-                }
-            })
-
-            //mendapatkan data permission setelah update
-            let permissionAfterUpdate = await Permission.findOne({
-                where: {
-                    id: req.params.id,
-                }
-            })
-
-            res.status(200).json(response(200, 'success update permission', permissionAfterUpdate));
-
-        } catch (err) {
-            res.status(500).json(response(500, 'internal server error', err));
-            console.log(err);
-        }
-    },
-
-    //menghapus permission berdasarkan id
-    deletepermission: async (req, res) => {
-        try {
-
-            //mendapatkan data permission untuk pengecekan
-            let permissionGet = await Permission.findOne({
-                where: {
-                    id: req.params.id
-                }
-            })
-
-            //cek apakah data permission ada
-            if (!permissionGet) {
-                res.status(404).json(response(404, 'permission not found'));
-                return;
-            }
-
-            await Permission.destroy({
-                where: {
-                    id: req.params.id,
-                }
-            })
-
-            res.status(200).json(response(200, 'success delete permission'));
-
-        } catch (err) {
-            if (err.name === 'SequelizeForeignKeyConstraintError') {
-                res.status(400).json(response(400, 'Data tidak bisa dihapus karena masih digunakan pada tabel lain'));
+            if (err.name === 'SequelizeUniqueConstraintError') {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'duplicate',
+                        message: 'Cannot created permission, please use another permission name',
+                        field: 'permission_name',
+                    }
+                ]));
             } else {
-                res.status(500).json(response(500, 'Internal server error', err));
-                console.log(err);
+                res.status(500).json(response(500, 'Internal server error'));
             }
         }
-    }
+    },
+
+    getAll: async (req, res) => {
+        try {
+            const permissions = await Permission.findAll();
+
+            res.status(200).json(response(200, 'Get permissions successfully', permissions));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
+
+    getOneById: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const permission = await Permission.findOne({
+                where: { id },
+            });
+
+            if (!permission) {
+                res.status(404).json(response(404, 'Permission not found'));
+                return;
+            }
+
+            res.status(200).json(response(200, 'Get permission successfully', permission));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const permission = await Permission.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                permission_name: {
+                    type: "string",
+                    optional: true,
+                    max: 50,
+                    min: 1,
+                },
+                description: {
+                    type: "string",
+                    optional: true,
+                }
+            };
+
+            let { permission_name, description } = req.body;
+
+            const validate = v.validate({ permission_name, description }, schema);
+
+            if (!permission) {
+                res.status(404).json(response(404, 'Permission not found'));
+                return;
+            }
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            permission_name = permission_name ?? permission.permissionName;
+            description = description ?? permission.description;
+
+            await permission.update({ permissionName: permission_name, description });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update permission successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            if (err.name === 'SequelizeUniqueConstraintError') {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'duplicate',
+                        message: 'Cannot updated permission, please use another permission name',
+                        field: 'permission_name',
+                    }
+                ]));
+            } else {
+                res.status(500).json(response(500, 'Internal server error'));
+            }
+        }
+    },
+
+    delete: async (req, res) => {
+        const transaction = await sequelize.transaction();
+        
+        try {
+            const { id } = req.params;
+
+            const permission = await Permission.findOne({
+                where: { id },
+            });
+
+            if (!permission) {
+                res.status(404).json(response(404, 'Permission not found'));
+                return;
+            }
+
+            await permission.destroy();
+
+            await transaction.commit();
+            
+            res.status(200).json(response(200, 'Delete permission successfully'));
+        } catch (err) {
+            console.log(err);
+            
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+            
+            await transaction.rollback();
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
 }
