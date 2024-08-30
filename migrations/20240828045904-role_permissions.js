@@ -12,7 +12,6 @@ module.exports = {
         await queryInterface.createTable('role_permissions', {
             role_id: {
                 type: Sequelize.BIGINT,
-                primaryKey: true,
                 references: {
                     model: 'roles',
                     key: 'id'
