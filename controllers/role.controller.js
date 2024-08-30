@@ -99,4 +99,71 @@ module.exports = {
             res.status(500).json(response(500, 'Internal server error'));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const role = await Role.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                role_name: {
+                    type: "string",
+                    optional: true,
+                    max: 50,
+                    min: 1,
+                },
+                description: {
+                    type: "string",
+                    optional: true,
+                }
+            };
+
+            let { role_name, description } = req.body;
+
+            const validate = v.validate({ role_name, description }, schema);
+
+            if (!role) {
+                res.status(404).json(response(404, 'Role not found'));
+                return;
+            }
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            description = description ?? role.description;
+            role_name = role_name ?? role.roleName;
+
+            await role.update({ roleName: role_name, description });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update role successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            if (err.name === 'SequelizeUniqueConstraintError') {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'duplicate',
+                        message: 'Cannot updated role, please use another role name',
+                        field: 'role_name',
+                    }
+                ]));
+            } else {
+                res.status(500).json(response(500, 'Internal server error'));
+            }
+        }
+    },
 }
