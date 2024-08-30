@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
     }, {
+        tableName: 'users',
         modelName: 'User',
         sequelize,
     });

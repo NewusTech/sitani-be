@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         description: DataTypes.TEXT,
     }, {
+        tableName: 'permissions',
         modelName: 'Permission',
         createdAt: false,
         updatedAt: false,
