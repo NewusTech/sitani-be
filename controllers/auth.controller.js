@@ -3,6 +3,7 @@ const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const passwordHash = require('password-hash');
 const { User } = require('../models');
+const { Op } = require('sequelize');
 
 const v = new Validator();
 
@@ -15,18 +16,26 @@ module.exports = {
 					max: 100,
 					min: 6,
 				},
-				email: {
-					type: "string",
-					pattern: /^\S+@\S+\.\S+$/,
-					max: 100,
-					min: 1,
-				},
-
+				email_or_nip: [
+					{
+						type: "string",
+						pattern: /^\S+@\S+\.\S+$/,
+						max: 100,
+						min: 1,
+					},
+					{
+						type: "number",
+						max: 99999999999,
+						optional: true,
+						positive: true,
+						integer: true,
+					},
+				],
 			};
 
-			const { password, email } = req.body;
+			const { password, email_or_nip } = req.body;
 
-			const validate = v.validate({ password, email }, schema);
+			const validate = v.validate({ password, email_or_nip }, schema);
 
 			if (validate.length > 0) {
 				res.status(400).json(response(400, 'Bad Request', validate));
@@ -34,24 +43,24 @@ module.exports = {
 			}
 
 			let user = await User.findOne({
-				where: { email },
-				attributes: [
-					'id',
-					'email',
-					'password',
-				],
+				where: {
+					[Op.or]: [
+						{ email: email_or_nip },
+						{ nip: email_or_nip }
+					]
+				},
 			});
 
 			if (user === null || !passwordHash.verify(password, user?.password)) {
 				res.status(400).json(response(400, 'Bad Requests', [
 					{
 						type: 'wrong',
-						message: 'Email or password is wrong',
-						field: 'email',
+						message: 'Email or nip or password is wrong',
+						field: 'email_or_nip',
 					},
 					{
 						type: 'wrong',
-						message: 'Email or password is wrong',
+						message: 'Email or nip or password is wrong',
 						field: 'password',
 					}
 				]));
