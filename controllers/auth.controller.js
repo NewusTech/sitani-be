@@ -16,21 +16,11 @@ module.exports = {
 					max: 100,
 					min: 6,
 				},
-				email_or_nip: [
-					{
-						type: "string",
-						pattern: /^\S+@\S+\.\S+$/,
-						max: 100,
-						min: 1,
-					},
-					{
-						type: "number",
-						max: 99999999999,
-						optional: true,
-						positive: true,
-						integer: true,
-					},
-				],
+				email_or_nip: {
+					type: "string",
+					max: 100,
+					min: 1,
+				},
 			};
 
 			const { password, email_or_nip } = req.body;
