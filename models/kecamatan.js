@@ -3,12 +3,12 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class MasterKecamatan extends Model {
+    class Kecamatan extends Model {
         static associate(models) {
         }
     }
 
-    MasterKecamatan.init({
+    Kecamatan.init({
         nama: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -25,9 +25,9 @@ module.exports = (sequelize, DataTypes) => {
         },
     }, {
         tableName: 'master_kecamatan',
-        modelName: 'MasterKecamatan',
+        modelName: 'Kecamatan',
         sequelize,
     });
 
-    return MasterKecamatan;
+    return Kecamatan;
 };
