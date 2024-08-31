@@ -36,7 +36,7 @@ module.exports = {
 				where: {
 					[Op.or]: [
 						{ email: email_or_nip },
-						{ nip: email_or_nip }
+						{ nip: isNaN(parseInt(email_or_nip)) ? 0 : parseInt(email_or_nip) }
 					]
 				},
 			});
