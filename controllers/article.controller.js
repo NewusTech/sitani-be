@@ -3,23 +3,36 @@ const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Article, User } = require('../models');
 const { response } = require('../helpers');
+const { Op } = require('sequelize');
 
 const v = new Validator();
 
 module.exports = {
 	getAllWithPagination: async (req, res) => {
 		try {
-			let { page, sortby } = req.query;
+			let { page, search, sortby } = req.query;
 			const limit = 6;
 
 			page = page || 1;
 
 			const offset = (page - 1) * limit;
 
+			let where = {};
 			const order = [['created_at', 'ASC']];
 
 			if (sortby === 'judul') {
 				order.push(['judul', 'ASC']);
+			}
+			if (search) {
+				where = {
+					[Op.or]: {
+						judul: { [Op.like]: `%${search}%` },
+						slug: { [Op.like]: `%${search}%` },
+						keyword: { [Op.like]: `%${search}%` },
+						tag: { [Op.like]: `%${search}%` },
+						konten: { [Op.like]: `%${search}%` },
+					}
+				};
 			}
 
 			const [articles, count] = await Promise.all([
@@ -31,11 +44,12 @@ module.exports = {
 							as: 'User',
 						},
 					],
-					limit: limit,
 					offset: offset,
+					limit: limit,
 					order,
+					where,
 				}),
-				Article.count()
+				Article.count({ where })
 			]);
 
 			const pagination = generatePagination(count, page, limit, '/api/article/get');
