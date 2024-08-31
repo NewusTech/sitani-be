@@ -9,10 +9,18 @@ const v = new Validator();
 module.exports = {
 	getAllWithPagination: async (req, res) => {
 		try {
-			const page = parseInt(req.query.page) || 1;
+			let { page, sortby } = req.query;
 			const limit = 6;
 
+			page = page || 1;
+
 			const offset = (page - 1) * limit;
+
+			const order = [['created_at', 'ASC']];
+
+			if (sortby === 'judul') {
+				order.push(['judul', 'ASC']);
+			}
 
 			const [articles, count] = await Promise.all([
 				Article.findAll({
@@ -25,7 +33,7 @@ module.exports = {
 					],
 					limit: limit,
 					offset: offset,
-					order: [['created_at', 'ASC']],
+					order,
 				}),
 				Article.count()
 			]);
