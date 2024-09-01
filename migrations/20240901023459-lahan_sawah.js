@@ -31,34 +31,34 @@ module.exports = {
                 }
             },
             irigasi_teknis: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             irigasi_setengah_teknis: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             irigasi_sederhana: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             irigasi_desa: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             tadah_hujan: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             pasang_surut: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             lebak: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             lainnya: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             jumlah: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.INTEGER,
             },
             keterangan: {
-                type: Sequelize.DOUBLE,
+                type: Sequelize.STRING,
                 allowNull: false,
             },
             created_at: {
