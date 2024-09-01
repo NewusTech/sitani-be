@@ -1,16 +1,24 @@
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
-const { Kecamatan } = require('../models');
+const { Desa } = require('../models');
 
 const v = new Validator();
 
 module.exports = {
     getAll: async (req, res) => {
         try {
-            const kecamatan = await Kecamatan.findAll();
+			let { kecamatan } = req.query;
 
-            res.status(200).json(response(200, 'Get kecamatan successfully', kecamatan));
+            let where = {};
+
+            if (kecamatan && !isNaN(parseInt(kecamatan))) {
+                where.kecamatanId = parseInt(kecamatan);
+            }
+
+            const desa = await Desa.findAll({ where });
+
+            res.status(200).json(response(200, 'Get desa successfully', desa));
         } catch (err) {
             console.log(err);
 
