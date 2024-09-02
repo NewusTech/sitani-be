@@ -8,6 +8,12 @@ module.exports = (sequelize, DataTypes) => {
             PenyuluhKecamatan.belongsTo(models.Kecamatan, {
                 foreignKey: 'kecamatanId'
             });
+            PenyuluhKecamatan.belongsToMany(models.Desa, {
+                through: 'penyuluh_kecamatan_desabinaan',
+                foreignKey: 'penyuluh_kecamatan_id',
+                otherKey: 'desa_id',
+                as: 'desa',
+            });
         }
     }
 

@@ -107,4 +107,26 @@ module.exports = {
             res.status(500).json(response(500, 'Internal server error'));
         }
     },
+
+    getAll: async (req, res) => {
+        try {
+            const penyuluhKecamatan = await PenyuluhKecamatan.findAll({
+                include: [
+                    {
+                        model: Desa,
+                        as: 'desa',
+                    },
+                ],
+            });
+
+            res.status(200).json(response(200, 'Get penyuluh kecamatan successfully', penyuluhKecamatan));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
 }
