@@ -40,8 +40,8 @@ module.exports = {
 					include: [
 						{
 							model: User,
-							attributes: { exclude: ['password'] },
-							as: 'User',
+							attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'id'] },
+							as: 'user',
 						},
 					],
 					offset: offset,
@@ -74,8 +74,8 @@ module.exports = {
 				include: [
 					{
 						model: User,
-						attributes: { exclude: ['password'] },
-						as: 'User',
+						attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'id'] },
+						as: 'user',
 					},
 				],
 			});

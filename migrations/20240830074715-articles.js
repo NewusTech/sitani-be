@@ -16,33 +16,13 @@ module.exports = {
                 primaryKey: true,
                 allowNull: false,
             },
-            judul: {
-                type: Sequelize.STRING,
-                allowNull: false,
-            },
             slug: {
                 type: Sequelize.STRING,
                 allowNull: false,
                 unique: true,
             },
-            keyword: {
+            judul: {
                 type: Sequelize.STRING,
-                allowNull: false,
-            },
-            excerpt: {
-                type: Sequelize.STRING,
-                allowNull: false,
-            },
-            tag: {
-                type: Sequelize.TEXT,
-                allowNull: false,
-            },
-            alt_image: {
-                type: Sequelize.STRING,
-                allowNull: false,
-            },
-            status: {
-                type: Sequelize.BOOLEAN,
                 allowNull: false,
             },
             image: {
@@ -52,6 +32,23 @@ module.exports = {
             konten: {
                 type: Sequelize.TEXT,
                 allowNull: false,
+            },
+            excerpt: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
+            status: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+            },
+            keyword: {
+                type: Sequelize.STRING,
+            },
+            tag: {
+                type: Sequelize.TEXT,
+            },
+            alt_image: {
+                type: Sequelize.STRING,
             },
             created_by: {
                 type: Sequelize.BIGINT,

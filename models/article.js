@@ -6,40 +6,20 @@ module.exports = (sequelize, DataTypes) => {
     class Article extends Model {
         static associate(models) {
             Article.belongsTo(models.User, {
-                foreignKey: 'createdBy'
+                foreignKey: 'createdBy',
+                as: 'user',
             });
         }
     }
 
     Article.init({
-        judul: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
         slug: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
         },
-        keyword: {
+        judul: {
             type: DataTypes.STRING,
-            allowNull: false,
-        },
-        excerpt: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        tag: {
-            type: DataTypes.TEXT,
-            allowNull: false,
-        },
-        altImage: {
-            type: DataTypes.STRING,
-            field: 'alt_image',
-            allowNull: false,
-        },
-        status: {
-            type: DataTypes.BOOLEAN,
             allowNull: false,
         },
         image: {
@@ -49,6 +29,24 @@ module.exports = (sequelize, DataTypes) => {
         konten: {
             type: DataTypes.TEXT,
             allowNull: false,
+        },
+        excerpt: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        status: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+        },
+        keyword: {
+            type: DataTypes.STRING,
+        },
+        tag: {
+            type: DataTypes.TEXT,
+        },
+        altImage: {
+            type: DataTypes.STRING,
+            field: 'alt_image',
         },
         createdBy: {
             type: DataTypes.BIGINT,
