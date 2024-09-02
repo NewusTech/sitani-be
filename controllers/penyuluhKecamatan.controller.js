@@ -1,4 +1,4 @@
-const { PenyuluhKecamatan, Kecamatan, sequelize } = require('../models');
+const { PenyuluhKecamatanDesabinaan, PenyuluhKecamatan, Kecamatan, Desa, sequelize } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
@@ -42,6 +42,15 @@ module.exports = {
                     max: 255,
                     min: 1,
                 },
+                desa_list: {
+                    type: "array",
+                    min: 1,
+                    items: {
+                        type: "number",
+                        positive: true,
+                        integer: true,
+                    }
+                },
             };
 
             const validate = v.validate(req.body, schema);
@@ -51,7 +60,7 @@ module.exports = {
                 return;
             }
 
-            const { kecamatan_id, keterangan, golongan, pangkat, nama, nip } = req.body;
+            const { kecamatan_id, keterangan, desa_list, golongan, pangkat, nama, nip } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
 
@@ -66,7 +75,7 @@ module.exports = {
                 return;
             }
 
-            await PenyuluhKecamatan.create({
+            const penyuluhKecamatan = await PenyuluhKecamatan.create({
                 kecamatanId: kecamatan.id,
                 keterangan,
                 golongan,
@@ -74,6 +83,15 @@ module.exports = {
                 nama,
                 nip,
             });
+
+            const desaList = await Desa.findAll({ where: { id: desa_list } });
+
+            for (const desa of desaList) {
+                await PenyuluhKecamatanDesabinaan.create({
+                    penyuluhKecamatanId: penyuluhKecamatan.id,
+                    desaId: desa.id,
+                });
+            }
 
             await transaction.commit();
 
