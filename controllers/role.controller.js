@@ -22,14 +22,14 @@ module.exports = {
                 }
             };
 
-            const { role_name, description } = req.body;
-
-            const validate = v.validate({ role_name, description }, schema);
-
+            const validate = v.validate(req.body, schema);
+            
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
+            
+            const { role_name, description } = req.body;
 
             await Role.create({
                 roleName: role_name,
@@ -123,19 +123,19 @@ module.exports = {
                 }
             };
 
-            let { role_name, description } = req.body;
-
-            const validate = v.validate({ role_name, description }, schema);
-
-            if (!role) {
-                res.status(404).json(response(404, 'Role not found'));
-                return;
-            }
+            const validate = v.validate(req.body, schema);
 
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
+            
+            if (!role) {
+                res.status(404).json(response(404, 'Role not found'));
+                return;
+            }
+            
+            let { role_name, description } = req.body;
 
             description = description ?? role.description;
             role_name = role_name ?? role.roleName;

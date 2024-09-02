@@ -13,8 +13,7 @@ module.exports = {
         try {
             const schema = {
                 email: {
-                    type: "string",
-                    pattern: /^\S+@\S+\.\S+$/,
+                    type: "email",
                     max: 100,
                     min: 1,
                 },
@@ -41,14 +40,14 @@ module.exports = {
                 },
             };
 
-            const { password, pangkat, email, name, nip } = req.body;
-            
-            const validate = v.validate({ password, pangkat, email, name, nip }, schema);
+            const validate = v.validate(req.body, schema);
 
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
+
+            const { password, pangkat, email, name, nip } = req.body;
 
             await User.create({
                 password: passwordHash.generate(password),
@@ -142,8 +141,7 @@ module.exports = {
 
             const schema = {
                 email: {
-                    type: "string",
-                    pattern: /^\S+@\S+\.\S+$/,
+                    type: "email",
                     optional: true,
                     max: 100,
                     min: 1,
@@ -173,19 +171,19 @@ module.exports = {
                 },
             };
 
-            let { password, pangkat, email, name, nip } = req.body;
-
-            const validate = v.validate({ password, pangkat, email, name, nip }, schema);
-
-            if (!user) {
-                res.status(404).json(response(404, 'User not found'));
-                return;
-            }
-
+            const validate = v.validate(req.body, schema);
+            
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
+            
+            if (!user) {
+                res.status(404).json(response(404, 'User not found'));
+                return;
+            }
+            
+            let { password, pangkat, email, name, nip } = req.body;
 
             password = password ? passwordHash.generate(password) : user.password;
             pangkat = pangkat ?? user.pangkat;
@@ -227,7 +225,7 @@ module.exports = {
 
     delete: async (req, res) => {
         const transaction = await sequelize.transaction();
-        
+
         try {
             const { id } = req.params;
 
@@ -243,14 +241,14 @@ module.exports = {
             await user.destroy();
 
             await transaction.commit();
-            
+
             res.status(200).json(response(200, 'Delete user successfully'));
         } catch (err) {
             console.log(err);
-            
+
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
-            
+
             await transaction.rollback();
 
             res.status(500).json(response(500, 'Internal server error'));
