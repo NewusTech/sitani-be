@@ -31,31 +31,31 @@ module.exports = {
                 }
             },
             irigasi_teknis: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             irigasi_setengah_teknis: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             irigasi_sederhana: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             irigasi_desa: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             tadah_hujan: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             pasang_surut: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             lebak: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             lainnya: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             jumlah: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             keterangan: {
                 type: Sequelize.STRING,

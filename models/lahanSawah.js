@@ -24,37 +24,37 @@ module.exports = (sequelize, DataTypes) => {
             field: 'desa_id',
         },
         irigasiTeknis: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
             field: 'irigasi_teknis',
         },
         irigasiSetengahTeknis: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
             field: 'irigasi_setengah_teknis',
         },
         irigasiSederhana: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
             field: 'irigasi_sederhana',
         },
         irigasiDesa: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
             field: 'irigasi_desa',
         },
         tadahHujan: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
             field: 'tadah_hujan',
         },
         pasangSurut: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
             field: 'pasang_surut',
         },
         lebak: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
         },
         lainnya: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
         },
         jumlah: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
         },
         keterangan: {
             type: DataTypes.STRING,

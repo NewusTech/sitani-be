@@ -31,37 +31,37 @@ module.exports = {
                 }
             },
             tegal: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             ladang: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             perkebunan: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             hutan_rakyat: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             padang_rumput: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             hutan_negara: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             smt_tidakdiusahakan: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             lainnya: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             jml_lahan_bukan_sawah: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             jalan_permukiman_perkantoran: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             total: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DOUBLE,
             },
             created_at: {
                 type: Sequelize.DATE,
