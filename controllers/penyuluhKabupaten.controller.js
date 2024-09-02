@@ -256,4 +256,40 @@ module.exports = {
             res.status(500).json(response(500, 'Internal server error'));
         }
     },
+
+    delete: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const penyuluhKabupaten = await PenyuluhKabupaten.findOne({
+                where: { id },
+            });
+
+            if (!penyuluhKabupaten) {
+                res.status(404).json(response(404, 'Penyuluh kabupaten not found'));
+                return;
+            }
+
+            await PenyuluhKabupatenDesabinaan.destroy({
+                where: { penyuluhKabupatenId: penyuluhKabupaten.id }
+            });
+
+            await penyuluhKabupaten.destroy();
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Delete penyuluh kabupaten successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
 }
