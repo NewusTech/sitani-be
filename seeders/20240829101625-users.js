@@ -37,7 +37,7 @@ module.exports = {
             },
         ];
 
-        await queryInterface.bulkInsert({ tableName: 'users', schema: 'users' }, users, {});
+        await queryInterface.bulkInsert({ tableName: 'users' }, users, {});
     },
 
     async down(queryInterface, Sequelize) {
