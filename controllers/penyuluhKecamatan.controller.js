@@ -44,6 +44,7 @@ module.exports = {
                 },
                 desa_list: {
                     type: "array",
+                    unique: true,
                     min: 1,
                     items: {
                         type: "number",
@@ -155,6 +156,136 @@ module.exports = {
 
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const penyuluhKecamatan = await PenyuluhKecamatan.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                kecamatan_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                },
+                nama: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                nip: {
+                    type: "number",
+                    max: 99999999999,
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                },
+                pangkat: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                golongan: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                keterangan: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                desa_list: {
+                    type: "array",
+                    optional: true,
+                    unique: true,
+                    min: 1,
+                    items: {
+                        type: "number",
+                        positive: true,
+                        integer: true,
+                    }
+                },
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            if (!penyuluhKecamatan) {
+                res.status(404).json(response(404, 'Penyuluh kecamatan not found'));
+                return;
+            }
+
+            let { kecamatan_id, keterangan, desa_list, golongan, pangkat, nama, nip } = req.body;
+
+            if (kecamatan_id) {
+                const kecamatan = await Kecamatan.findByPk(kecamatan_id);
+
+                kecamatan_id = kecamatan?.id ?? penyuluhKecamatan.kecamatanId;
+            } else {
+                kecamatan_id = penyuluhKecamatan.kecamatanId;
+            }
+
+            keterangan = keterangan ?? penyuluhKecamatan.keterangan;
+            golongan = golongan ?? penyuluhKecamatan.golongan;
+            pangkat = pangkat ?? penyuluhKecamatan.pangkat;
+            nama = nama ?? penyuluhKecamatan.nama;
+            nip = nip ?? penyuluhKecamatan.nip;
+
+            await penyuluhKecamatan.update({
+                kecamatanId: kecamatan_id,
+                keterangan,
+                golongan,
+                pangkat,
+                nama,
+                nip,
+            });
+
+            if (desa_list?.length) {
+                const desaList = await Desa.findAll({ where: { id: desa_list } });
+
+                if (desaList?.length) {
+                    await PenyuluhKecamatanDesabinaan.destroy({
+                        where: { penyuluhKecamatanId: penyuluhKecamatan.id }
+                    });
+
+                    for (const desa of desaList) {
+                        await PenyuluhKecamatanDesabinaan.create({
+                            penyuluhKecamatanId: penyuluhKecamatan.id,
+                            desaId: desa.id,
+                        });
+                    }
+                }
+            }
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update penyuluh kecamatan successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
 
             res.status(500).json(response(500, 'Internal server error'));
         }

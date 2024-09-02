@@ -8,6 +8,7 @@ let prefix = '/penyuluh-kecamatan';
 route.post(prefix + '/create', penyuluhKecamatanController.create);
 route.get(prefix + '/get', penyuluhKecamatanController.getAll);
 route.get(prefix + '/get/:id', penyuluhKecamatanController.getOneById);
+route.put(prefix + '/update/:id', penyuluhKecamatanController.update);
 /* -- ROUTE -- */
 
 module.exports = route;
