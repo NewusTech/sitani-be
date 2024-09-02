@@ -50,7 +50,7 @@ module.exports = {
             },
         ];
 
-        await queryInterface.bulkInsert({ tableName: 'master_desa' }, desa, {});
+        await queryInterface.bulkInsert({ tableName: "master_desa" }, desa, {});
     },
 
     async down(queryInterface, Sequelize) {
@@ -60,6 +60,6 @@ module.exports = {
          * Example:
          * await queryInterface.bulkDelete('People', null, {});
          */
-        await queryInterface.bulkDelete({ tableName: 'master_desa' }, null, {});
+        await queryInterface.bulkDelete({ tableName: "master_desa" }, null, {});
     }
 };
