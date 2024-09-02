@@ -65,12 +65,12 @@ module.exports = {
 		}
 	},
 
-	getOneById: async (req, res) => {
+	getOneBySlug: async (req, res) => {
 		try {
-			const { id } = req.params;
+			const { slug } = req.params;
 
 			const article = await Article.findOne({
-				where: { id },
+				where: { slug },
 				include: [
 					{
 						model: User,
