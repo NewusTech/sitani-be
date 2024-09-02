@@ -33,8 +33,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: false,
         },
-        alt_image: {
+        altImage: {
             type: DataTypes.STRING,
+            field: 'alt_image',
             allowNull: false,
         },
         status: {

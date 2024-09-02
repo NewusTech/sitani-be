@@ -7,6 +7,7 @@ const galeriRoute = require('./galeri.route');
 const authRoute = require('./auth.route');
 const desaRoute = require('./desa.route');
 const roleRoute = require('./role.route');
+const seedRoute = require('./seed.route');
 const userRoute = require('./user.route');
 
 module.exports = function (app, urlApi) {
@@ -19,5 +20,6 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, authRoute);
     app.use(urlApi, desaRoute);
     app.use(urlApi, roleRoute);
+    app.use(urlApi, seedRoute);
     app.use(urlApi, userRoute);
 }
