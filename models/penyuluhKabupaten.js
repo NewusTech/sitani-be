@@ -5,6 +5,12 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class PenyuluhKabupaten extends Model {
         static associate(models) {
+            PenyuluhKabupaten.belongsToMany(models.Kecamatan, {
+                through: 'penyuluh_kabupaten_desabinaan',
+                foreignKey: 'penyuluh_kabupaten_id',
+                otherKey: 'kecamatan_id',
+                as: 'kecamatan',
+            });
         }
     }
 
