@@ -141,4 +141,119 @@ module.exports = {
             res.status(500).json(response(500, 'Internal server error'));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const penyuluhKabupaten = await PenyuluhKabupaten.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                nama: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                nip: {
+                    type: "number",
+                    max: 99999999999,
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                },
+                pangkat: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                golongan: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                keterangan: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                kecamatan_list: {
+                    type: "array",
+                    optional: true,
+                    unique: true,
+                    min: 1,
+                    items: {
+                        type: "number",
+                        positive: true,
+                        integer: true,
+                    }
+                },
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            if (!penyuluhKabupaten) {
+                res.status(404).json(response(404, 'Penyuluh kecamatan not found'));
+                return;
+            }
+
+            let { kecamatan_list, keterangan, golongan, pangkat, nama, nip } = req.body;
+
+            keterangan = keterangan ?? penyuluhKabupaten.keterangan;
+            golongan = golongan ?? penyuluhKabupaten.golongan;
+            pangkat = pangkat ?? penyuluhKabupaten.pangkat;
+            nama = nama ?? penyuluhKabupaten.nama;
+            nip = nip ?? penyuluhKabupaten.nip;
+
+            await penyuluhKabupaten.update({
+                keterangan,
+                golongan,
+                pangkat,
+                nama,
+                nip,
+            });
+
+            if (kecamatan_list?.length) {
+                const kecamatanList = await Kecamatan.findAll({ where: { id: kecamatan_list } });
+
+                if (kecamatanList?.length) {
+                    await PenyuluhKabupatenDesabinaan.destroy({
+                        where: { penyuluhKabupatenId: penyuluhKabupaten.id }
+                    });
+
+                    for (const kecamatan of kecamatanList) {
+                        await PenyuluhKabupatenDesabinaan.create({
+                            penyuluhKabupatenId: penyuluhKabupaten.id,
+                            kecamatanId: kecamatan.id,
+                        });
+                    }
+                }
+            }
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update penyuluh kabupaten successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            res.status(500).json(response(500, 'Internal server error'));
+        }
+    },
 }
