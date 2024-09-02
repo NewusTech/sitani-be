@@ -45,7 +45,7 @@ module.exports = {
             },
         ];
 
-        await queryInterface.bulkInsert('master_kecamatan', kecamatan, {});
+        await queryInterface.bulkInsert({ tableName: 'master_kecamatan' }, kecamatan, {});
     },
 
     async down(queryInterface, Sequelize) {
@@ -55,6 +55,6 @@ module.exports = {
          * Example:
          * await queryInterface.bulkDelete('People', null, {});
          */
-        await queryInterface.bulkDelete('master_kecamatan', null, {});
+        await queryInterface.bulkDelete({ tableName: 'master_kecamatan' }, null, {});
     }
 };
