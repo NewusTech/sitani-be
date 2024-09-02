@@ -23,14 +23,14 @@ module.exports = {
 				},
 			};
 
-			const { password, email_or_nip } = req.body;
-
-			const validate = v.validate({ password, email_or_nip }, schema);
-
+			const validate = v.validate(req.body, schema);
+			
 			if (validate.length > 0) {
 				res.status(400).json(response(400, 'Bad Request', validate));
 				return;
 			}
+			
+			const { password, email_or_nip } = req.body;
 
 			let user = await User.findOne({
 				where: {

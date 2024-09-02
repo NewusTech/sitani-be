@@ -6,7 +6,7 @@ const route = express.Router();
 let prefix = '/article';
 /* -- ROUTE -- */
 route.get(prefix + '/get', articleController.getAllWithPagination);
-route.get(prefix + '/get/:id', articleController.getOneById);
+route.get(prefix + '/get/:slug', articleController.getOneBySlug);
 /* -- ROUTE -- */
 
 module.exports = route;

@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         slug: {
             type: DataTypes.STRING,
             allowNull: false,
+            unique: true,
         },
         keyword: {
             type: DataTypes.STRING,
@@ -32,8 +33,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: false,
         },
-        alt_image: {
+        altImage: {
             type: DataTypes.STRING,
+            field: 'alt_image',
             allowNull: false,
         },
         status: {

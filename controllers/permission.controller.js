@@ -22,14 +22,14 @@ module.exports = {
                 }
             };
 
-            const { permission_name, description } = req.body;
-
-            const validate = v.validate({ permission_name, description }, schema);
-
+            const validate = v.validate(req.body, schema);
+            
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
+            
+            const { permission_name, description } = req.body;
 
             await Permission.create({
                 permissionName: permission_name,
@@ -123,19 +123,19 @@ module.exports = {
                 }
             };
 
-            let { permission_name, description } = req.body;
-
-            const validate = v.validate({ permission_name, description }, schema);
-
+            const validate = v.validate(req.body, schema);
+            
             if (!permission) {
                 res.status(404).json(response(404, 'Permission not found'));
                 return;
             }
-
+            
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
+            
+            let { permission_name, description } = req.body;
 
             permission_name = permission_name ?? permission.permissionName;
             description = description ?? permission.description;

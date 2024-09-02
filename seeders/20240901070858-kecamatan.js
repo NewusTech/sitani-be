@@ -1,7 +1,5 @@
 'use strict';
 
-const passwordHash = require('password-hash');
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
@@ -14,30 +12,40 @@ module.exports = {
          *   isBetaMember: false
          * }], {});
         */
-        const users = [
+        const kecamatan = [
             {
                 id: 1,
-                email: "test@test.com",
-                password: passwordHash.generate('test111'),
-                name: "test 1",
-                nip: 123456789,
-                pangkat: "test 1",
+                nama: "Kecamatan A",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 2,
-                email: "test1@test.com",
-                password: passwordHash.generate('test222'),
-                name: "test 2",
-                nip: 234567891,
-                pangkat: "test 2",
+                nama: "Kecamatan B",
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: 3,
+                nama: "Kecamatan C",
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: 4,
+                nama: "Kecamatan D",
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: 5,
+                nama: "Kecamatan E",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
         ];
 
-        await queryInterface.bulkInsert({ tableName: "users" }, users, {});
+        await queryInterface.bulkInsert({ tableName: "master_kecamatan" }, kecamatan, {});
     },
 
     async down(queryInterface, Sequelize) {
@@ -46,7 +54,7 @@ module.exports = {
          *
          * Example:
          * await queryInterface.bulkDelete('People', null, {});
-        */
-        await queryInterface.bulkDelete({ tableName: "users" }, null, {});
+         */
+        await queryInterface.bulkDelete({ tableName: "master_kecamatan" }, null, {});
     }
 };
