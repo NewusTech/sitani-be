@@ -112,21 +112,18 @@ module.exports = {
 		}
 	},
 
-	getAllWithPagination: async (req, res) => {
+	getAll: async (req, res) => {
 		try {
-			let { page, search, sortby } = req.query;
-			const limit = 6;
+			let { withPagination, search, limit, page } = req.query;
 
-			page = page || 1;
+			limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
 			const offset = (page - 1) * limit;
 
-			let where = {};
 			const order = [['created_at', 'ASC']];
 
-			if (sortby === 'judul') {
-				order.push(['judul', 'ASC']);
-			}
+			let where = {};
 			if (search) {
 				where = {
 					[Op.or]: {
@@ -139,8 +136,24 @@ module.exports = {
 				};
 			}
 
-			const [articles, count] = await Promise.all([
-				Article.findAll({
+			let pagination = null;
+			let articles = [];
+			let count = 0;
+
+			if (withPagination === 'false') {
+				articles = await Article.findAll({
+					include: [
+						{
+							model: User,
+							attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'id'] },
+							as: 'user',
+						},
+					],
+					order,
+					where,
+				});
+			} else {
+				articles = await Article.findAll({
 					include: [
 						{
 							model: User,
@@ -152,11 +165,10 @@ module.exports = {
 					limit: limit,
 					order,
 					where,
-				}),
-				Article.count({ where })
-			]);
-
-			const pagination = generatePagination(count, page, limit, '/api/article/get');
+				});
+				count = await Article.count({ where });
+				pagination = generatePagination(count, page, limit, '/api/article/get');
+			}
 
 			res.status(200).json(response(200, 'Get articles successfully', { data: articles, pagination }));
 		} catch (err) {
