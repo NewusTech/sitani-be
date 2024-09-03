@@ -92,25 +92,43 @@ module.exports = {
 		}
 	},
 
-	getAllWithPagination: async (req, res) => {
+	getAll: async (req, res) => {
 		try {
-			let { page } = req.query;
-			const limit = 6;
+			let { withPagination, search, limit, page } = req.query;
 
-			page = page || 1;
+			limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
 			const offset = (page - 1) * limit;
 
-			const [galeri, count] = await Promise.all([
-				Galeri.findAll({
-					order: [['created_at', 'ASC']],
+			const order = [['created_at', 'ASC']];
+
+			let where = {};
+			if (search) {
+				where = {
+					deskripsi: { [Op.like]: `%${search}%` },
+				};
+			}
+
+			let pagination = null;
+			let galeri = [];
+			let count = 0;
+
+			if (withPagination === 'false') {
+				galeri = await Galeri.findAll({
+					order,
+					where,
+				});
+			} else {
+				galeri = await Galeri.findAll({
 					offset: offset,
 					limit: limit,
-				}),
-				Galeri.count()
-			]);
-
-			const pagination = generatePagination(count, page, limit, '/api/galeri/get');
+					order,
+					where,
+				});
+				count = await Galeri.count({ where });
+				pagination = generatePagination(count, page, limit, '/api/galeri/get');
+			}
 
 			res.status(200).json(response(200, 'Get galeri successfully', { data: galeri, pagination }));
 		} catch (err) {
