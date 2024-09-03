@@ -163,4 +163,39 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getOneById: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const pspPenerimaUppo = await PspPenerimaUppo.findOne({
+                where: { id },
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatan',
+                    },
+                    {
+                        model: Desa,
+                        as: 'desa',
+                    },
+                ],
+            });
+
+            if (!pspPenerimaUppo) {
+                res.status(404).json(response(404, 'Psp penerima uppo not found'));
+                return;
+            }
+
+            res.status(200).json(response(200, 'Get PSP penerima uppo successfully', pspPenerimaUppo));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
