@@ -97,71 +97,71 @@ module.exports = {
         }
     },
 
-    // getAll: async (req, res) => {
-    //     try {
-    //         let { kecamatan, startDate, endDate, search, limit, page } = req.query;
+    getAll: async (req, res) => {
+        try {
+            let { kecamatan, startDate, endDate, search, limit, page } = req.query;
 
-    //         limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
-    //         page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
-    //         const offset = (page - 1) * limit;
+            const offset = (page - 1) * limit;
 
-    //         let where = {};
-    //         if (search) {
-    //             where = {
-    //                 [Op.or]: {
-    //                     namaPoktan: { [Op.like]: `%${search}%` },
-    //                     ketuaPoktan: { [Op.like]: `%${search}%` },
-    //                 }
-    //             };
-    //         }
-    //         if (!isNaN(parseInt(kecamatan))) {
-    //             where.kecamatanId = parseInt(kecamatan);
-    //         }
-    //         if (startDate) {
-    //             startDate = new Date(startDate);
-    //             if (startDate instanceof Date && !isNaN(startDate)) {
-    //                 where.createdAt = { [Op.gte]: startDate };
-    //             }
-    //         }
-    //         if (endDate) {
-    //             endDate = new Date(endDate);
-    //             if (endDate instanceof Date && !isNaN(endDate)) {
-    //                 where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
-    //             }
-    //         }
+            let where = {};
+            if (search) {
+                where = {
+                    [Op.or]: {
+                        jenisBantuan: { [Op.like]: `%${search}%` },
+                        keterangan: { [Op.like]: `%${search}%` },
+                    }
+                };
+            }
+            if (!isNaN(parseInt(kecamatan))) {
+                where.kecamatanId = parseInt(kecamatan);
+            }
+            if (startDate) {
+                startDate = new Date(startDate);
+                if (startDate instanceof Date && !isNaN(startDate)) {
+                    where.periode = { [Op.gte]: startDate };
+                }
+            }
+            if (endDate) {
+                endDate = new Date(endDate);
+                if (endDate instanceof Date && !isNaN(endDate)) {
+                    where.periode = { ...where.periode, [Op.lte]: endDate };
+                }
+            }
 
-    //         const pspBantuan = await PspBantuan.findAll({
-    //             include: [
-    //                 {
-    //                     model: Kecamatan,
-    //                     as: 'kecamatan',
-    //                 },
-    //                 {
-    //                     model: Desa,
-    //                     as: 'desa',
-    //                 },
-    //             ],
-    //             offset,
-    //             limit,
-    //             where,
-    //         });
+            const pspBantuan = await PspBantuan.findAll({
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatan',
+                    },
+                    {
+                        model: Desa,
+                        as: 'desa',
+                    },
+                ],
+                offset,
+                limit,
+                where,
+            });
 
-    //         const count = await PspBantuan.count({ where });
+            const count = await PspBantuan.count({ where });
 
-    //         const pagination = generatePagination(count, page, limit, '/api/psp/penerima-uppo/get');
+            const pagination = generatePagination(count, page, limit, '/api/psp/bantuan/get');
 
-    //         res.status(200).json(response(200, 'Get PSP penerima uppo successfully', { data: pspBantuan, pagination }));
-    //     } catch (err) {
-    //         console.log(err);
+            res.status(200).json(response(200, 'Get PSP bantuan successfully', { data: pspBantuan, pagination }));
+        } catch (err) {
+            console.log(err);
 
-    //         logger.error(`Error : ${err}`);
-    //         logger.error(`Error message: ${err.message}`);
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
 
-    //         // res.status(500).json(response(500, 'Internal server error'));
-    //         res.status(500).json(response(500, err.message));
-    //     }
-    // },
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 
     // getOneById: async (req, res) => {
     //     try {
