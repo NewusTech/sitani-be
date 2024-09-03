@@ -126,11 +126,11 @@ module.exports = {
                 let nipSearchTemp = isNaN(parseInt(search)) ? 0 : parseInt(search);
 				where = {
 					[Op.or]: {
-						nip: { [Op.like]: `%${nipSearchTemp}%` },
-						keterangan: { [Op.like]: `%${search}%` },
+                        keterangan: { [Op.like]: `%${search}%` },
 						golongan: { [Op.like]: `%${search}%` },
 						pangkat: { [Op.like]: `%${search}%` },
 						nama: { [Op.like]: `%${search}%` },
+						nip: nipSearchTemp,
 					}
 				};
 			}

@@ -3,7 +3,7 @@ const express = require('express');
 
 const route = express.Router();
 
-let prefix = '/penerima-uppo';
+let prefix = '/psp/penerima-uppo';
 /* -- ROUTE -- */
 route.post(prefix + '/create', pspPenerimaUppoController.create);
 route.get(prefix + '/get', pspPenerimaUppoController.getAll);

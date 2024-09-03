@@ -150,7 +150,7 @@ module.exports = {
 
             const count = await PspPenerimaUppo.count({ where });
 
-            const pagination = generatePagination(count, page, limit, '/api/penerima-uppo/get');
+            const pagination = generatePagination(count, page, limit, '/api/psp/penerima-uppo/get');
 
             res.status(200).json(response(200, 'Get PSP penerima uppo successfully', { data: pspPenerimaUppo, pagination }));
         } catch (err) {
