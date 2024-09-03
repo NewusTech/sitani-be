@@ -9,53 +9,24 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('articles', {
+        await queryInterface.createTable('master_komoditas', {
             id: {
                 type: Sequelize.BIGINT,
                 autoIncrement: true,
                 primaryKey: true,
                 allowNull: false,
             },
-            slug: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                unique: true,
-            },
-            judul: {
+            nama: {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            image: {
+            satuan: {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            konten: {
-                type: Sequelize.TEXT,
+            harga: {
+                type: Sequelize.INTEGER,
                 allowNull: false,
-            },
-            excerpt: {
-                type: Sequelize.STRING,
-                allowNull: false,
-            },
-            status: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-            },
-            keyword: {
-                type: Sequelize.STRING,
-            },
-            tag: {
-                type: Sequelize.TEXT,
-            },
-            alt_image: {
-                type: Sequelize.STRING,
-            },
-            created_by: {
-                type: Sequelize.BIGINT,
-                references: {
-                    model: 'users',
-                    key: 'id'
-                }
             },
             created_at: {
                 type: Sequelize.DATE,
@@ -74,7 +45,7 @@ module.exports = {
          *
          * Example:
          * await queryInterface.dropTable('users');
-        */
-        await queryInterface.dropTable('articles');
+         */
+        await queryInterface.dropTable('master_komoditas');
     }
 };
