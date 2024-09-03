@@ -8,7 +8,7 @@ let prefix = '/psp/pupuk';
 route.post(prefix + '/create', pspPupukController.create);
 route.get(prefix + '/get', pspPupukController.getAll);
 route.get(prefix + '/get/:id', pspPupukController.getOneById);
-// route.put(prefix + '/update/:id', pspPupukController.update);
+route.put(prefix + '/update/:id', pspPupukController.update);
 // route.delete(prefix + '/delete/:id', pspPupukController.delete);
 /* -- ROUTE -- */
 
