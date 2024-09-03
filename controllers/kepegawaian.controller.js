@@ -388,35 +388,35 @@ module.exports = {
         }
     },
 
-    // delete: async (req, res) => {
-    //     const transaction = await sequelize.transaction();
+    delete: async (req, res) => {
+        const transaction = await sequelize.transaction();
         
-    //     try {
-    //         const { id } = req.params;
+        try {
+            const { id } = req.params;
 
-    //         const role = await Role.findOne({
-    //             where: { id },
-    //         });
+            const pegawai = await Kepegawaian.findOne({
+                where: { id },
+            });
 
-    //         if (!role) {
-    //             res.status(404).json(response(404, 'Role not found'));
-    //             return;
-    //         }
+            if (!pegawai) {
+                res.status(404).json(response(404, 'data not found'));
+                return;
+            }
 
-    //         await role.destroy();
+            await pegawai.destroy();
 
-    //         await transaction.commit();
+            await transaction.commit();
             
-    //         res.status(200).json(response(200, 'Delete role successfully'));
-    //     } catch (err) {
-    //         console.log(err);
+            res.status(200).json(response(200, 'Delete successfully'));
+        } catch (err) {
+            console.log(err);
             
-    //         logger.error(`Error : ${err}`);
-    //         logger.error(`Error message: ${err.message}`);
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
             
-    //         await transaction.rollback();
+            await transaction.rollback();
 
-    //         res.status(500).json(response(500, 'Internal server error'));
-    //     }
-    // },
+            res.status(500).json(response(500, `${err.message}`));
+        }
+    }
 }
