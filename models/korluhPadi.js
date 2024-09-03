@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             field: 'hibrida_non_bantuan_pemerintah_lahan_sawah_panen',
         },
-        hibrida_non_bantuan_pemerintah_lahan_sawah_tanam: {
+        hibridaNonBantuanPemerintahLahanSawahTanam: {
             type: DataTypes.DOUBLE,
             field: 'hibrida_non_bantuan_pemerintah_lahan_sawah_tanam',
         },
