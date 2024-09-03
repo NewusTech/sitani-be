@@ -9,8 +9,7 @@ route.get(prefix + '/get', kepegawaianController.get);
 route.post(prefix + '/create', kepegawaianController.create);
 route.get(prefix + '/get/:id', kepegawaianController.getOneById);
 route.put(prefix + '/update/:id', kepegawaianController.update);
-
-// route.get(prefix + '/get/:id', articleController.getOneById);
+route.delete(prefix + '/delete/:id', kepegawaianController.delete);
 /* -- ROUTE -- */
 
 module.exports = route;
