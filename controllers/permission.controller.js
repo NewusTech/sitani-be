@@ -23,12 +23,12 @@ module.exports = {
             };
 
             const validate = v.validate(req.body, schema);
-            
+
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
-            
+
             const { permission_name, description } = req.body;
 
             await Permission.create({
@@ -56,7 +56,8 @@ module.exports = {
                     }
                 ]));
             } else {
-                res.status(500).json(response(500, 'Internal server error'));
+                // res.status(500).json(response(500, 'Internal server error'));
+                res.status(500).json(response(500, err.message));
             }
         }
     },
@@ -72,7 +73,8 @@ module.exports = {
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -96,7 +98,8 @@ module.exports = {
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -124,17 +127,17 @@ module.exports = {
             };
 
             const validate = v.validate(req.body, schema);
-            
+
             if (!permission) {
                 res.status(404).json(response(404, 'Permission not found'));
                 return;
             }
-            
+
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
-            
+
             let { permission_name, description } = req.body;
 
             permission_name = permission_name ?? permission.permissionName;
@@ -162,14 +165,15 @@ module.exports = {
                     }
                 ]));
             } else {
-                res.status(500).json(response(500, 'Internal server error'));
+                // res.status(500).json(response(500, 'Internal server error'));
+                res.status(500).json(response(500, err.message));
             }
         }
     },
 
     delete: async (req, res) => {
         const transaction = await sequelize.transaction();
-        
+
         try {
             const { id } = req.params;
 
@@ -185,17 +189,18 @@ module.exports = {
             await permission.destroy();
 
             await transaction.commit();
-            
+
             res.status(200).json(response(200, 'Delete permission successfully'));
         } catch (err) {
             console.log(err);
-            
+
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
-            
+
             await transaction.rollback();
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 }

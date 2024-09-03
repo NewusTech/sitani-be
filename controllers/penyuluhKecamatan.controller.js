@@ -1,7 +1,9 @@
 const { PenyuluhKecamatanDesabinaan, PenyuluhKecamatan, Kecamatan, Desa, sequelize } = require('../models');
+const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
+const { Op } = require('sequelize');
 
 const v = new Validator();
 
@@ -105,12 +107,37 @@ module.exports = {
 
             await transaction.rollback();
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
     getAll: async (req, res) => {
         try {
+			let { kecamatan, search, limit, page } = req.query;
+
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+			const offset = (page - 1) * limit;
+
+			let where = {};
+			if (search) {
+                let nipSearchTemp = isNaN(parseInt(search)) ? 0 : parseInt(search);
+				where = {
+					[Op.or]: {
+                        keterangan: { [Op.like]: `%${search}%` },
+						golongan: { [Op.like]: `%${search}%` },
+						pangkat: { [Op.like]: `%${search}%` },
+						nama: { [Op.like]: `%${search}%` },
+						nip: nipSearchTemp,
+					}
+				};
+			}
+            if (!isNaN(parseInt(kecamatan))) {
+                where.kecamatanId = parseInt(kecamatan);
+            }
+
             const penyuluhKecamatan = await PenyuluhKecamatan.findAll({
                 include: [
                     {
@@ -118,16 +145,24 @@ module.exports = {
                         as: 'desa',
                     },
                 ],
+                offset,
+                limit,
+                where,
             });
 
-            res.status(200).json(response(200, 'Get penyuluh kecamatan successfully', penyuluhKecamatan));
+            const count = await PenyuluhKecamatan.count({ where });
+            
+            const pagination = generatePagination(count, page, limit, '/api/penyuluh-kecamatan/get');
+
+            res.status(200).json(response(200, 'Get penyuluh kecamatan successfully', { data: penyuluhKecamatan, pagination }));
         } catch (err) {
             console.log(err);
 
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -157,7 +192,8 @@ module.exports = {
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -287,7 +323,8 @@ module.exports = {
 
             await transaction.rollback();
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -323,7 +360,8 @@ module.exports = {
 
             await transaction.rollback();
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 }

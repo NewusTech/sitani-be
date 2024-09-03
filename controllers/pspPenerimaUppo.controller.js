@@ -1,4 +1,4 @@
-const { PenyuluhKabupatenDesabinaan, PenyuluhKabupaten, Kecamatan, sequelize } = require('../models');
+const { PspPenerimaUppo, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -13,41 +13,30 @@ module.exports = {
 
         try {
             const schema = {
-                nama: {
-                    type: "string",
-                    max: 255,
-                    min: 1,
-                },
-                nip: {
+                kecamatan_id: {
                     type: "number",
-                    max: 99999999999,
                     positive: true,
                     integer: true,
                 },
-                pangkat: {
+                desa_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                },
+                nama_poktan: {
                     type: "string",
                     max: 255,
                     min: 1,
                 },
-                golongan: {
+                ketua_poktan: {
                     type: "string",
                     max: 255,
                     min: 1,
                 },
-                keterangan: {
+                titik_koordinat: {
                     type: "string",
+                    optional: true,
                     max: 255,
-                    min: 1,
-                },
-                kecamatan_list: {
-                    type: "array",
-                    unique: true,
-                    min: 1,
-                    items: {
-                        type: "number",
-                        positive: true,
-                        integer: true,
-                    }
                 },
             };
 
@@ -58,28 +47,44 @@ module.exports = {
                 return;
             }
 
-            const { kecamatan_list, keterangan, golongan, pangkat, nama, nip } = req.body;
+            const { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id } = req.body;
 
-            const penyuluhKabupaten = await PenyuluhKabupaten.create({
-                keterangan,
-                golongan,
-                pangkat,
-                nama,
-                nip,
-            });
+            const kecamatan = await Kecamatan.findByPk(kecamatan_id);
+            const desa = await Desa.findByPk(desa_id);
 
-            const kecamatanList = await Kecamatan.findAll({ where: { id: kecamatan_list } });
-
-            for (const kecamatan of kecamatanList) {
-                await PenyuluhKabupatenDesabinaan.create({
-                    penyuluhKabupatenId: penyuluhKabupaten.id,
-                    kecamatanId: kecamatan.id,
-                });
+            if (!kecamatan) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: "Kecamatan doesn't exists",
+                        field: 'kecamatan_id',
+                    },
+                ]));
+                return;
             }
+
+            if (!desa) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: "Desa doesn't exists",
+                        field: 'desa_id',
+                    },
+                ]));
+                return;
+            }
+
+            await PspPenerimaUppo.create({
+                kecamatanId: kecamatan.id,
+                desaId: desa.id,
+                titikKoordinat: titik_koordinat,
+                ketuaPoktan: ketua_poktan,
+                namaPoktan: nama_poktan,
+            });
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Penyuluh kabupaten created'));
+            res.status(201).json(response(201, 'PSP penerima uppo created'));
         } catch (err) {
             console.log(err);
 
@@ -95,7 +100,7 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { search, limit, page } = req.query;
+            let { kecamatan, startDate, endDate, search, limit, page } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
@@ -104,23 +109,38 @@ module.exports = {
 
             let where = {};
             if (search) {
-                let nipSearchTemp = isNaN(parseInt(search)) ? 0 : parseInt(search);
                 where = {
                     [Op.or]: {
-                        keterangan: { [Op.like]: `%${search}%` },
-                        golongan: { [Op.like]: `%${search}%` },
-                        pangkat: { [Op.like]: `%${search}%` },
-                        nama: { [Op.like]: `%${search}%` },
-                        nip: nipSearchTemp,
+                        namaPoktan: { [Op.like]: `%${search}%` },
+                        ketuaPoktan: { [Op.like]: `%${search}%` },
                     }
                 };
             }
+            if (!isNaN(parseInt(kecamatan))) {
+                where.kecamatanId = parseInt(kecamatan);
+            }
+            if (startDate) {
+                startDate = new Date(startDate);
+                if (startDate instanceof Date && !isNaN(startDate)) {
+                    where.createdAt = { [Op.gte]: startDate };
+                }
+            }
+            if (endDate) {
+                endDate = new Date(endDate);
+                if (endDate instanceof Date && !isNaN(endDate)) {
+                    where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
+                }
+            }
 
-            const penyuluhKabupaten = await PenyuluhKabupaten.findAll({
+            const pspPenerimaUppo = await PspPenerimaUppo.findAll({
                 include: [
                     {
                         model: Kecamatan,
                         as: 'kecamatan',
+                    },
+                    {
+                        model: Desa,
+                        as: 'desa',
                     },
                 ],
                 offset,
@@ -128,11 +148,11 @@ module.exports = {
                 where,
             });
 
-            const count = await PenyuluhKabupaten.count({ where });
-            
-            const pagination = generatePagination(count, page, limit, '/api/penyuluh-kabupaten/get');
+            const count = await PspPenerimaUppo.count({ where });
 
-            res.status(200).json(response(200, 'Get penyuluh kabupaten successfully', { data: penyuluhKabupaten, pagination }));
+            const pagination = generatePagination(count, page, limit, '/api/psp/penerima-uppo/get');
+
+            res.status(200).json(response(200, 'Get PSP penerima uppo successfully', { data: pspPenerimaUppo, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -148,22 +168,26 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const penyuluhKabupaten = await PenyuluhKabupaten.findOne({
+            const pspPenerimaUppo = await PspPenerimaUppo.findOne({
                 where: { id },
                 include: [
                     {
                         model: Kecamatan,
                         as: 'kecamatan',
                     },
+                    {
+                        model: Desa,
+                        as: 'desa',
+                    },
                 ],
             });
 
-            if (!penyuluhKabupaten) {
-                res.status(404).json(response(404, 'Penyuluh kabupaten not found'));
+            if (!pspPenerimaUppo) {
+                res.status(404).json(response(404, 'Psp penerima uppo not found'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get penyuluh kabupaten successfully', penyuluhKabupaten));
+            res.status(200).json(response(200, 'Get PSP penerima uppo successfully', pspPenerimaUppo));
         } catch (err) {
             console.log(err);
 
@@ -181,52 +205,39 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const penyuluhKabupaten = await PenyuluhKabupaten.findOne({
+            const pspPenerimaUppo = await PspPenerimaUppo.findOne({
                 where: { id },
             });
 
             const schema = {
-                nama: {
-                    type: "string",
-                    optional: true,
-                    max: 255,
-                    min: 1,
-                },
-                nip: {
+                kecamatan_id: {
                     type: "number",
-                    max: 99999999999,
                     optional: true,
                     positive: true,
                     integer: true,
                 },
-                pangkat: {
+                desa_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                },
+                nama_poktan: {
                     type: "string",
                     optional: true,
                     max: 255,
                     min: 1,
                 },
-                golongan: {
+                ketua_poktan: {
                     type: "string",
                     optional: true,
                     max: 255,
                     min: 1,
                 },
-                keterangan: {
+                titik_koordinat: {
                     type: "string",
                     optional: true,
                     max: 255,
-                    min: 1,
-                },
-                kecamatan_list: {
-                    type: "array",
-                    optional: true,
-                    unique: true,
-                    min: 1,
-                    items: {
-                        type: "number",
-                        positive: true,
-                        integer: true,
-                    }
                 },
             };
 
@@ -237,47 +248,44 @@ module.exports = {
                 return;
             }
 
-            if (!penyuluhKabupaten) {
-                res.status(404).json(response(404, 'Penyuluh kecamatan not found'));
+            if (!pspPenerimaUppo) {
+                res.status(404).json(response(404, 'Psp penerima uppo not found'));
                 return;
             }
 
-            let { kecamatan_list, keterangan, golongan, pangkat, nama, nip } = req.body;
+            let { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id } = req.body;
 
-            keterangan = keterangan ?? penyuluhKabupaten.keterangan;
-            golongan = golongan ?? penyuluhKabupaten.golongan;
-            pangkat = pangkat ?? penyuluhKabupaten.pangkat;
-            nama = nama ?? penyuluhKabupaten.nama;
-            nip = nip ?? penyuluhKabupaten.nip;
+            if (kecamatan_id) {
+                const kecamatan = await Kecamatan.findByPk(kecamatan_id);
 
-            await penyuluhKabupaten.update({
-                keterangan,
-                golongan,
-                pangkat,
-                nama,
-                nip,
-            });
-
-            if (kecamatan_list?.length) {
-                const kecamatanList = await Kecamatan.findAll({ where: { id: kecamatan_list } });
-
-                if (kecamatanList?.length) {
-                    await PenyuluhKabupatenDesabinaan.destroy({
-                        where: { penyuluhKabupatenId: penyuluhKabupaten.id }
-                    });
-
-                    for (const kecamatan of kecamatanList) {
-                        await PenyuluhKabupatenDesabinaan.create({
-                            penyuluhKabupatenId: penyuluhKabupaten.id,
-                            kecamatanId: kecamatan.id,
-                        });
-                    }
-                }
+                kecamatan_id = kecamatan?.id ?? pspPenerimaUppo.kecamatanId;
+            } else {
+                kecamatan_id = pspPenerimaUppo.kecamatanId;
             }
+
+            if (desa_id) {
+                const desa = await Desa.findByPk(desa_id);
+
+                desa_id = desa?.id ?? pspPenerimaUppo.desaId;
+            } else {
+                desa_id = pspPenerimaUppo.desaId;
+            }
+
+            titik_koordinat = titik_koordinat ?? pspPenerimaUppo.titikKoordinat;
+            ketua_poktan = ketua_poktan ?? pspPenerimaUppo.ketuaPoktan;
+            nama_poktan = nama_poktan ?? pspPenerimaUppo.namaPoktan;
+
+            await pspPenerimaUppo.update({
+                kecamatanId: kecamatan_id,
+                desaId: desa_id,
+                titikKoordinat: titik_koordinat,
+                ketuaPoktan: ketua_poktan,
+                namaPoktan: nama_poktan,
+            });
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update penyuluh kabupaten successfully'));
+            res.status(200).json(response(200, 'Update PSP penerima uppo successfully'));
         } catch (err) {
             console.log(err);
 
@@ -297,24 +305,20 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const penyuluhKabupaten = await PenyuluhKabupaten.findOne({
+            const pspPenerimaUppo = await PspPenerimaUppo.findOne({
                 where: { id },
             });
 
-            if (!penyuluhKabupaten) {
-                res.status(404).json(response(404, 'Penyuluh kabupaten not found'));
+            if (!pspPenerimaUppo) {
+                res.status(404).json(response(404, 'PSP penerima uppo not found'));
                 return;
             }
 
-            await PenyuluhKabupatenDesabinaan.destroy({
-                where: { penyuluhKabupatenId: penyuluhKabupaten.id }
-            });
-
-            await penyuluhKabupaten.destroy();
+            await pspPenerimaUppo.destroy();
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete penyuluh kabupaten successfully'));
+            res.status(200).json(response(200, 'Delete PSP penerima uppo successfully'));
         } catch (err) {
             console.log(err);
 
