@@ -82,7 +82,8 @@ module.exports = {
                     },
                 ]));
             } else {
-                res.status(500).json(response(500, 'Internal server error'));
+                // res.status(500).json(response(500, 'Internal server error'));
+                res.status(500).json(response(500, err.message));
             }
         }
     },
@@ -100,7 +101,8 @@ module.exports = {
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -125,7 +127,8 @@ module.exports = {
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -172,17 +175,17 @@ module.exports = {
             };
 
             const validate = v.validate(req.body, schema);
-            
+
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
-            
+
             if (!user) {
                 res.status(404).json(response(404, 'User not found'));
                 return;
             }
-            
+
             let { password, pangkat, email, name, nip } = req.body;
 
             password = password ? passwordHash.generate(password) : user.password;
@@ -218,7 +221,8 @@ module.exports = {
                     },
                 ]));
             } else {
-                res.status(500).json(response(500, 'Internal server error'));
+                // res.status(500).json(response(500, 'Internal server error'));
+                res.status(500).json(response(500, err.message));
             }
         }
     },
@@ -251,7 +255,8 @@ module.exports = {
 
             await transaction.rollback();
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 }

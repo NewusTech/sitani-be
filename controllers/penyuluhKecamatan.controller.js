@@ -105,7 +105,8 @@ module.exports = {
 
             await transaction.rollback();
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -127,7 +128,8 @@ module.exports = {
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -157,7 +159,8 @@ module.exports = {
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -287,7 +290,8 @@ module.exports = {
 
             await transaction.rollback();
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 
@@ -323,7 +327,8 @@ module.exports = {
 
             await transaction.rollback();
 
-            res.status(500).json(response(500, 'Internal server error'));
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
         }
     },
 }
