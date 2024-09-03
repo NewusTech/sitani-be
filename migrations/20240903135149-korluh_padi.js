@@ -62,13 +62,13 @@ module.exports = {
             },
 
             // Unggul bantuan pemerintah lahan bukan sawah
-            unggul_bantuan_pemerintah_lahan_sawah_panen: {
+            unggul_bantuan_pemerintah_lahan_bukan_sawah_panen: {
                 type: Sequelize.DOUBLE,
             },
-            unggul_bantuan_pemerintah_lahan_sawah_tanam: {
+            unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam: {
                 type: Sequelize.DOUBLE,
             },
-            unggul_bantuan_pemerintah_lahan_sawah_puso: {
+            unggul_bantuan_pemerintah_lahan_bukan_sawah_puso: {
                 type: Sequelize.DOUBLE,
             },
 
@@ -84,13 +84,13 @@ module.exports = {
             },
 
             // Unggul non bantuan pemerintah lahan bukan sawah
-            unggul_non_bantuan_pemerintah_lahan_sawah_panen: {
+            unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen: {
                 type: Sequelize.DOUBLE,
             },
-            unggul_non_bantuan_pemerintah_lahan_sawah_tanam: {
+            unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam: {
                 type: Sequelize.DOUBLE,
             },
-            unggul_non_bantuan_pemerintah_lahan_sawah_puso: {
+            unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso: {
                 type: Sequelize.DOUBLE,
             },
 
@@ -106,13 +106,13 @@ module.exports = {
             },
 
             // Lokal lahan bukan sawah
-            lokal_lahan_sawah_panen: {
+            lokal_lahan_bukan_sawah_panen: {
                 type: Sequelize.DOUBLE,
             },
-            lokal_lahan_sawah_tanam: {
+            lokal_lahan_bukan_sawah_tanam: {
                 type: Sequelize.DOUBLE,
             },
-            lokal_lahan_sawah_puso: {
+            lokal_lahan_bukan_sawah_puso: {
                 type: Sequelize.DOUBLE,
             },
 
