@@ -1,4 +1,4 @@
-const { PenyuluhKecamatanDesabinaan, PenyuluhKecamatan, PspPenerimaUppo, Kecamatan, Desa, sequelize } = require('../models');
+const { PspPenerimaUppo, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -92,6 +92,72 @@ module.exports = {
             logger.error(`Error message: ${err.message}`);
 
             await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    getAll: async (req, res) => {
+        try {
+            let { kecamatan, startDate, endDate, search, limit, page } = req.query;
+
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+            const offset = (page - 1) * limit;
+
+            let where = {};
+            if (search) {
+                where = {
+                    [Op.or]: {
+                        namaPoktan: { [Op.like]: `%${search}%` },
+                        ketuaPoktan: { [Op.like]: `%${search}%` },
+                    }
+                };
+            }
+            if (!isNaN(parseInt(kecamatan))) {
+                where.kecamatanId = parseInt(kecamatan);
+            }
+            if (startDate) {
+                startDate = new Date(startDate);
+                if (startDate instanceof Date && !isNaN(startDate)) {
+                    where.createdAt = { [Op.gte]: startDate };
+                }
+            }
+            if (endDate) {
+                endDate = new Date(endDate);
+                if (endDate instanceof Date && !isNaN(endDate)) {
+                    where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
+                }
+            }
+
+            const pspPenerimaUppo = await PspPenerimaUppo.findAll({
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatan',
+                    },
+                    {
+                        model: Desa,
+                        as: 'desa',
+                    },
+                ],
+                offset,
+                limit,
+                where,
+            });
+
+            const count = await PspPenerimaUppo.count({ where });
+
+            const pagination = generatePagination(count, page, limit, '/api/penerima-uppo/get');
+
+            res.status(200).json(response(200, 'Get PSP penerima uppo successfully', { data: pspPenerimaUppo, pagination }));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
 
             // res.status(500).json(response(500, 'Internal server error'));
             res.status(500).json(response(500, err.message));

@@ -6,6 +6,7 @@ const route = express.Router();
 let prefix = '/penerima-uppo';
 /* -- ROUTE -- */
 route.post(prefix + '/create', pspPenerimaUppoController.create);
+route.get(prefix + '/get', pspPenerimaUppoController.getAll);
 /* -- ROUTE -- */
 
 module.exports = route;
