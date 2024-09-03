@@ -124,40 +124,30 @@ module.exports = {
         }
     },
 
-    // getOneById: async (req, res) => {
-    //     try {
-    //         const { id } = req.params;
+    getOneById: async (req, res) => {
+        try {
+            const { id } = req.params;
 
-    //         const pspPupuk = await PspPupuk.findOne({
-    //             where: { id },
-    //             include: [
-    //                 {
-    //                     model: Kecamatan,
-    //                     as: 'kecamatan',
-    //                 },
-    //                 {
-    //                     model: Desa,
-    //                     as: 'desa',
-    //                 },
-    //             ],
-    //         });
+            const pspPupuk = await PspPupuk.findOne({
+                where: { id },
+            });
 
-    //         if (!pspPupuk) {
-    //             res.status(404).json(response(404, 'Psp penerima uppo not found'));
-    //             return;
-    //         }
+            if (!pspPupuk) {
+                res.status(404).json(response(404, 'Psp pupuk not found'));
+                return;
+            }
 
-    //         res.status(200).json(response(200, 'Get PSP penerima uppo successfully', pspPupuk));
-    //     } catch (err) {
-    //         console.log(err);
+            res.status(200).json(response(200, 'Get PSP pupuk successfully', pspPupuk));
+        } catch (err) {
+            console.log(err);
 
-    //         logger.error(`Error : ${err}`);
-    //         logger.error(`Error message: ${err.message}`);
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
 
-    //         // res.status(500).json(response(500, 'Internal server error'));
-    //         res.status(500).json(response(500, err.message));
-    //     }
-    // },
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 
     // update: async (req, res) => {
     //     const transaction = await sequelize.transaction();
