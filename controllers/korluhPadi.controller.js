@@ -1,4 +1,4 @@
-const { KorluhPadi, Desa, sequelize } = require('../models');
+const { KorluhPadi, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -171,6 +171,11 @@ module.exports = {
 
         try {
             const schema = {
+                kecamatan_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                },
                 desa_id: {
                     type: "number",
                     positive: true,
@@ -191,6 +196,7 @@ module.exports = {
             }
 
             const {
+                kecamatan_id,
                 desa_id,
                 tanggal,
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
@@ -231,8 +237,19 @@ module.exports = {
                 sawah_rawa_lebak_lahan_sawah_puso,
             } = req.body;
 
+            const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
 
+            if (!kecamatan) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: "Kecamatan doesn't exists",
+                        field: 'kecamatan_id',
+                    },
+                ]));
+                return;
+            }
             if (!desa) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
@@ -246,8 +263,9 @@ module.exports = {
 
             const korluhPadiExists = await KorluhPadi.findOne({
                 where: {
+                    tanggal: { [Op.eq]: tanggal },
+                    kecamatanId: kecamatan_id,
                     desaId: desa_id,
-                    tanggal: { [Op.eq]: tanggal }
                 }
             });
 
@@ -263,6 +281,7 @@ module.exports = {
             }
 
             await KorluhPadi.create({
+                kecamatanId: kecamatan.id,
                 desaId: desa.id,
                 tanggal,
                 hibridaBantuanPemerintahLahanSawahPanen: hibrida_bantuan_pemerintah_lahan_sawah_panen,

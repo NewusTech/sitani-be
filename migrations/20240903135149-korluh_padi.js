@@ -16,6 +16,13 @@ module.exports = {
                 primaryKey: true,
                 allowNull: false,
             },
+            kecamatan_id: {
+                type: Sequelize.BIGINT,
+                references: {
+                    model: 'master_kecamatan',
+                    key: 'id'
+                }
+            },
             desa_id: {
                 type: Sequelize.BIGINT,
                 references: {

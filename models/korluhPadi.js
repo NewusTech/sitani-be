@@ -5,6 +5,10 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class KorluhPadi extends Model {
         static associate(models) {
+            KorluhPadi.belongsTo(models.Kecamatan, {
+                foreignKey: 'kecamatanId',
+                as: 'kecamatan',
+            });
             KorluhPadi.belongsTo(models.Desa, {
                 foreignKey: 'desaId',
                 as: 'desa'
@@ -13,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     KorluhPadi.init({
+        kecamatanId: {
+            type: DataTypes.BIGINT,
+            field: 'kecamatan_id',
+        },
         desaId: {
             type: DataTypes.BIGINT,
             field: 'desa_id',
