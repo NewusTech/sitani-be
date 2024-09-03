@@ -13,6 +13,7 @@ route.post(prefix + '/create', upload.fields([{ name: 'image', maxCount: 1 }]), 
 route.get(prefix + '/get', galeriController.getAll);
 route.get(prefix + '/get/:id', galeriController.getOneById);
 route.put(prefix + '/update/:id', upload.fields([{ name: 'image', maxCount: 1 }]), galeriController.update);
+route.delete(prefix + '/delete/:id', galeriController.delete);
 /* -- ROUTE -- */
 
 module.exports = route;

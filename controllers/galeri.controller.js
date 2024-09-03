@@ -269,4 +269,50 @@ module.exports = {
 			res.status(500).json(response(500, 'Internal server error'));
 		}
 	},
+
+	delete: async (req, res) => {
+		const transaction = await sequelize.transaction();
+
+		try {
+			const { id } = req.params;
+
+			const galeri = await Galeri.findOne({
+				where: { id },
+			});
+
+			if (!galeri) {
+				res.status(404).json(response(404, 'Galeri not found'));
+				return;
+			}
+
+			const oldImage = galeri.image;
+
+			await galeri.destroy();
+
+			const length = 8 + process.env.AWS_S3_BUCKET.length + 4 + process.env.AWS_REGION.length + 15 + process.env.PATH_AWS.length + 8;
+
+			if (oldImage?.length > length) {
+				const oldImageName = oldImage.substring(length, oldImage.length);
+				const deleteCommand = new DeleteObjectCommand({
+					Bucket: process.env.AWS_S3_BUCKET,
+					Key: `${process.env.PATH_AWS}/galeri/${oldImageName}`,
+				});
+
+				await s3Client.send(deleteCommand);
+			}
+
+			await transaction.commit();
+
+			res.status(200).json(response(200, 'Delete galeri successfully'));
+		} catch (err) {
+			console.log(err);
+
+			logger.error(`Error : ${err}`);
+			logger.error(`Error message: ${err.message}`);
+
+			await transaction.rollback();
+
+			res.status(500).json(response(500, 'Internal server error'));
+		}
+	},
 }
