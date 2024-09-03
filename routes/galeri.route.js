@@ -12,6 +12,7 @@ let prefix = '/galeri';
 route.post(prefix + '/create', upload.fields([{ name: 'image', maxCount: 1 }]), galeriController.create);
 route.get(prefix + '/get', galeriController.getAll);
 route.get(prefix + '/get/:id', galeriController.getOneById);
+route.put(prefix + '/update/:id', upload.fields([{ name: 'image', maxCount: 1 }]), galeriController.update);
 /* -- ROUTE -- */
 
 module.exports = route;

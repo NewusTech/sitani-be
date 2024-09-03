@@ -164,4 +164,109 @@ module.exports = {
 			res.status(500).json(response(500, 'Internal server error'));
 		}
 	},
+
+	update: async (req, res) => {
+		const transaction = await sequelize.transaction();
+
+		try {
+			const { id } = req.params;
+
+			const galeri = await Galeri.findOne({
+				where: { id },
+			});
+
+			const schema = {
+				deskripsi: {
+					type: "string",
+					optional: true,
+					max: 255,
+					min: 1,
+				},
+				image: {
+					type: "string",
+					optional: true,
+					min: 1,
+				},
+			};
+
+			const { deskripsi } = req.body;
+
+			let uniqueFilenameTemp, mimetypeTemp, bufferTemp;
+			let galeriObj = { deskripsi };
+
+			const files = req.files;
+			const key = 'image';
+
+			if (files) {
+				if (files[key] && files[key][0]) {
+					const file = files[key][0];
+					const { mimetype, buffer, originalname } = file;
+
+					const now = new Date();
+					const timestamp = now.toISOString().replace(/[-:.]/g, '');
+					const uniqueFilename = `${originalname.split('.')[0]}_${timestamp}`;
+
+					galeriObj[key] = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.PATH_AWS}/galeri/${uniqueFilename}`;
+
+					uniqueFilenameTemp = uniqueFilename;
+					mimetypeTemp = mimetype;
+					bufferTemp = buffer;
+				}
+			}
+
+			const validate = v.validate(galeriObj, schema);
+
+			if (validate.length > 0) {
+				res.status(400).json(response(400, 'Bad Request', validate));
+				return;
+			}
+
+			if (!galeri) {
+				res.status(404).json(response(404, 'Galeri not found'));
+				return;
+			}
+
+			let oldImage = galeri?.image;
+
+			await galeri.update(galeriObj);
+
+			if (uniqueFilenameTemp && bufferTemp && mimetypeTemp) {
+				const uploadParams = {
+					Bucket: process.env.AWS_S3_BUCKET,
+					Key: `${process.env.PATH_AWS}/galeri/${uniqueFilenameTemp}`,
+					Body: Buffer.from(bufferTemp),
+					ACL: 'public-read',
+					ContentType: mimetypeTemp
+				};
+				const putCommand = new PutObjectCommand(uploadParams);
+
+				await s3Client.send(putCommand);
+
+				const length = 8 + process.env.AWS_S3_BUCKET.length + 4 + process.env.AWS_REGION.length + 15 + process.env.PATH_AWS.length + 8;
+
+				if (oldImage?.length > length) {
+					const oldImageName = oldImage.substring(length, oldImage.length);
+					const deleteCommand = new DeleteObjectCommand({
+						Bucket: process.env.AWS_S3_BUCKET,
+						Key: `${process.env.PATH_AWS}/galeri/${oldImageName}`,
+					});
+
+					await s3Client.send(deleteCommand);
+				}
+			}
+
+			await transaction.commit();
+
+			res.status(200).json(response(200, 'Update galeri successfully'));
+		} catch (err) {
+			console.log(err);
+
+			logger.error(`Error : ${err}`);
+			logger.error(`Error message: ${err.message}`);
+
+			await transaction.rollback();
+
+			res.status(500).json(response(500, 'Internal server error'));
+		}
+	},
 }
