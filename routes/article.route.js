@@ -13,6 +13,7 @@ route.post(prefix + '/create', upload.fields([{ name: 'image', maxCount: 1 }]), 
 route.get(prefix + '/get', articleController.getAll);
 route.get(prefix + '/get/:slug', articleController.getOneBySlug);
 route.put(prefix + '/update/:slug', upload.fields([{ name: 'image', maxCount: 1 }]), articleController.update);
+route.delete(prefix + '/delete/:slug', articleController.delete);
 /* -- ROUTE -- */
 
 module.exports = route;

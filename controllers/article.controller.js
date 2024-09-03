@@ -254,13 +254,13 @@ module.exports = {
 				if (files[key] && files[key][0]) {
 					const file = files[key][0];
 					const { mimetype, buffer, originalname } = file;
-	
+
 					const now = new Date();
 					const timestamp = now.toISOString().replace(/[-:.]/g, '');
 					const uniqueFilename = `${originalname.split('.')[0]}_${timestamp}`;
-	
+
 					articleObj[key] = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.PATH_AWS}/acticles/${uniqueFilename}`;
-	
+
 					uniqueFilenameTemp = uniqueFilename;
 					mimetypeTemp = mimetype;
 					bufferTemp = buffer;
@@ -303,14 +303,14 @@ module.exports = {
 				await s3Client.send(putCommand);
 
 				const length = 8 + process.env.AWS_S3_BUCKET.length + 4 + process.env.AWS_REGION.length + 15 + process.env.PATH_AWS.length + 10;
-				
+
 				if (oldImage?.length > length) {
 					const oldImageName = oldImage.substring(length, oldImage.length);
 					const deleteCommand = new DeleteObjectCommand({
 						Bucket: process.env.AWS_S3_BUCKET,
 						Key: `${process.env.PATH_AWS}/acticles/${oldImageName}`,
 					});
-	
+
 					await s3Client.send(deleteCommand);
 				}
 			}
@@ -337,6 +337,52 @@ module.exports = {
 			} else {
 				res.status(500).json(response(500, 'Internal server error'));
 			}
+		}
+	},
+
+	delete: async (req, res) => {
+		const transaction = await sequelize.transaction();
+
+		try {
+			const { slug } = req.params;
+
+			const article = await Article.findOne({
+				where: { slug },
+			});
+
+			if (!article) {
+				res.status(404).json(response(404, 'Article not found'));
+				return;
+			}
+
+			const oldImage = article.image;
+
+			await article.destroy();
+
+			const length = 8 + process.env.AWS_S3_BUCKET.length + 4 + process.env.AWS_REGION.length + 15 + process.env.PATH_AWS.length + 10;
+
+			if (oldImage?.length > length) {
+				const oldImageName = oldImage.substring(length, oldImage.length);
+				const deleteCommand = new DeleteObjectCommand({
+					Bucket: process.env.AWS_S3_BUCKET,
+					Key: `${process.env.PATH_AWS}/acticles/${oldImageName}`,
+				});
+
+				await s3Client.send(deleteCommand);
+			}
+
+			await transaction.commit();
+
+			res.status(200).json(response(200, 'Delete article successfully'));
+		} catch (err) {
+			console.log(err);
+
+			logger.error(`Error : ${err}`);
+			logger.error(`Error message: ${err.message}`);
+
+			await transaction.rollback();
+
+			res.status(500).json(response(500, 'Internal server error'));
 		}
 	},
 }
