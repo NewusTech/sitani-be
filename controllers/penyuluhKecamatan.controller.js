@@ -1,4 +1,5 @@
 const { PenyuluhKecamatanDesabinaan, PenyuluhKecamatan, Kecamatan, Desa, sequelize } = require('../models');
+const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
@@ -112,6 +113,30 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
+			let { kecamatan, search, limit, page } = req.query;
+
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+			const offset = (page - 1) * limit;
+
+			let where = {};
+			if (search) {
+                let nipSearchTemp = isNaN(parseInt(search)) ? 0 : parseInt(search);
+				where = {
+					[Op.or]: {
+						nip: { [Op.like]: `%${nipSearchTemp}%` },
+						keterangan: { [Op.like]: `%${search}%` },
+						golongan: { [Op.like]: `%${search}%` },
+						pangkat: { [Op.like]: `%${search}%` },
+						nama: { [Op.like]: `%${search}%` },
+					}
+				};
+			}
+            if (!isNaN(parseInt(kecamatan))) {
+                where.kecamatanId = parseInt(kecamatan);
+            }
+
             const penyuluhKecamatan = await PenyuluhKecamatan.findAll({
                 include: [
                     {
@@ -119,9 +144,16 @@ module.exports = {
                         as: 'desa',
                     },
                 ],
+                offset: offset,
+                limit: limit,
+                where,
             });
 
-            res.status(200).json(response(200, 'Get penyuluh kecamatan successfully', penyuluhKecamatan));
+            const count = await PenyuluhKecamatan.count({ where });
+            
+            const pagination = generatePagination(count, page, limit, '/api/penyuluh-kecamatan/get');
+
+            res.status(200).json(response(200, 'Get penyuluh kecamatan successfully', { data: penyuluhKecamatan, pagination }));
         } catch (err) {
             console.log(err);
 
