@@ -12,6 +12,7 @@ let prefix = '/article';
 route.post(prefix + '/create', upload.fields([{ name: 'image', maxCount: 1 }]), articleController.create);
 route.get(prefix + '/get', articleController.getAll);
 route.get(prefix + '/get/:slug', articleController.getOneBySlug);
+route.put(prefix + '/update/:slug', upload.fields([{ name: 'image', maxCount: 1 }]), articleController.update);
 /* -- ROUTE -- */
 
 module.exports = route;
