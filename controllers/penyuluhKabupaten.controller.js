@@ -1,7 +1,9 @@
 const { PenyuluhKabupatenDesabinaan, PenyuluhKabupaten, Kecamatan, sequelize } = require('../models');
+const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
+const { Op } = require('sequelize');
 
 const v = new Validator();
 
@@ -93,6 +95,27 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
+            let { search, limit, page } = req.query;
+
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+            const offset = (page - 1) * limit;
+
+            let where = {};
+            if (search) {
+                let nipSearchTemp = isNaN(parseInt(search)) ? 0 : parseInt(search);
+                where = {
+                    [Op.or]: {
+                        nip: { [Op.like]: `%${nipSearchTemp}%` },
+                        keterangan: { [Op.like]: `%${search}%` },
+                        golongan: { [Op.like]: `%${search}%` },
+                        pangkat: { [Op.like]: `%${search}%` },
+                        nama: { [Op.like]: `%${search}%` },
+                    }
+                };
+            }
+
             const penyuluhKabupaten = await PenyuluhKabupaten.findAll({
                 include: [
                     {
@@ -100,9 +123,16 @@ module.exports = {
                         as: 'kecamatan',
                     },
                 ],
+                offset,
+                limit,
+                where,
             });
 
-            res.status(200).json(response(200, 'Get penyuluh kabupaten successfully', penyuluhKabupaten));
+            const count = await PenyuluhKabupaten.count({ where });
+            
+            const pagination = generatePagination(count, page, limit, '/api/penyuluh-kabupaten/get');
+
+            res.status(200).json(response(200, 'Get penyuluh kabupaten successfully', { data: penyuluhKabupaten, pagination }));
         } catch (err) {
             console.log(err);
 
