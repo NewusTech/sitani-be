@@ -229,36 +229,36 @@ module.exports = {
         }
     },
 
-    // delete: async (req, res) => {
-    //     const transaction = await sequelize.transaction();
+    delete: async (req, res) => {
+        const transaction = await sequelize.transaction();
 
-    //     try {
-    //         const { id } = req.params;
+        try {
+            const { id } = req.params;
 
-    //         const pspPupuk = await PspPupuk.findOne({
-    //             where: { id },
-    //         });
+            const pspPupuk = await PspPupuk.findOne({
+                where: { id },
+            });
 
-    //         if (!pspPupuk) {
-    //             res.status(404).json(response(404, 'PSP penerima uppo not found'));
-    //             return;
-    //         }
+            if (!pspPupuk) {
+                res.status(404).json(response(404, 'PSP pupuk not found'));
+                return;
+            }
 
-    //         await pspPupuk.destroy();
+            await pspPupuk.destroy();
 
-    //         await transaction.commit();
+            await transaction.commit();
 
-    //         res.status(200).json(response(200, 'Delete PSP penerima uppo successfully'));
-    //     } catch (err) {
-    //         console.log(err);
+            res.status(200).json(response(200, 'Delete PSP pupuk successfully'));
+        } catch (err) {
+            console.log(err);
 
-    //         logger.error(`Error : ${err}`);
-    //         logger.error(`Error message: ${err.message}`);
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
 
-    //         await transaction.rollback();
+            await transaction.rollback();
 
-    //         // res.status(500).json(response(500, 'Internal server error'));
-    //         res.status(500).json(response(500, err.message));
-    //     }
-    // },
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
