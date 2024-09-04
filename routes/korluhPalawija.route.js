@@ -6,6 +6,7 @@ const route = express.Router();
 let prefix = '/korluh/palawija';
 /* -- ROUTE -- */
 route.post(prefix + '/create', korluhPalawijaController.create);
+route.get(prefix + '/get', korluhPalawijaController.getAll);
 /* -- ROUTE -- */
 
 module.exports = route;
