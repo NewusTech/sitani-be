@@ -11,157 +11,193 @@ const coreSchema = {
     hibrida_bantuan_pemerintah_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     hibrida_bantuan_pemerintah_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     hibrida_bantuan_pemerintah_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     hibrida_non_bantuan_pemerintah_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     hibrida_non_bantuan_pemerintah_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     hibrida_non_bantuan_pemerintah_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     unggul_bantuan_pemerintah_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     unggul_bantuan_pemerintah_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     unggul_bantuan_pemerintah_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     unggul_bantuan_pemerintah_lahan_bukan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     unggul_bantuan_pemerintah_lahan_bukan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     unggul_non_bantuan_pemerintah_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     unggul_non_bantuan_pemerintah_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     unggul_non_bantuan_pemerintah_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     lokal_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     lokal_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     lokal_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     lokal_lahan_bukan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     lokal_lahan_bukan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     lokal_lahan_bukan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     sawah_irigasi_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     sawah_irigasi_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     sawah_irigasi_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     sawah_tadah_hujan_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     sawah_tadah_hujan_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     sawah_tadah_hujan_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     sawah_rawa_pasang_surut_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     sawah_rawa_pasang_surut_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     sawah_rawa_pasang_surut_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 
     sawah_rawa_lebak_lahan_sawah_panen: {
         type: "number",
         optional: true,
+        convert: true,
     },
     sawah_rawa_lebak_lahan_sawah_tanam: {
         type: "number",
         optional: true,
+        convert: true,
     },
     sawah_rawa_lebak_lahan_sawah_puso: {
         type: "number",
         optional: true,
+        convert: true,
     },
 }
 
@@ -175,11 +211,13 @@ module.exports = {
                     type: "number",
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 desa_id: {
                     type: "number",
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 tanggal: {
                     type: "date",
@@ -474,12 +512,14 @@ module.exports = {
                     optional: true,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 desa_id: {
                     type: "number",
                     optional: true,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 tanggal: {
                     type: "date",
