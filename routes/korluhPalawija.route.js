@@ -7,6 +7,7 @@ let prefix = '/korluh/palawija';
 /* -- ROUTE -- */
 route.post(prefix + '/create', korluhPalawijaController.create);
 route.get(prefix + '/get', korluhPalawijaController.getAll);
+route.get(prefix + '/get/one', korluhPalawijaController.getOne);
 /* -- ROUTE -- */
 
 module.exports = route;

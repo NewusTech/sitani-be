@@ -992,4 +992,56 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getOne: async (req, res) => {
+        try {
+            let { equalDate, desa } = req.query;
+
+            let where = {};
+
+            if (!isNaN(parseInt(desa))) {
+                where.desaId = parseInt(desa);
+            }
+            if (equalDate) {
+                equalDate = new Date(equalDate);
+                if (equalDate instanceof Date && !isNaN(equalDate)) {
+                    where.tanggal = { [Op.eq]: equalDate };
+                }
+            }
+
+            if (!where?.desaId || !where?.tanggal) {
+                res.status(404).json(response(404, 'Korluh palawija not found'));
+                return;
+            }
+
+            const korluhPalawija = await KorluhPalawija.findOne({
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatan',
+                    },
+                    {
+                        model: Desa,
+                        as: 'desa',
+                    },
+                ],
+                where,
+            });
+
+            if (!korluhPalawija) {
+                res.status(404).json(response(404, 'Korluh palawija not found'));
+                return;
+            }
+
+            res.status(200).json(response(200, 'Get korluh palawija successfully', korluhPalawija));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
