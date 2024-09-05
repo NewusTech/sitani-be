@@ -2,26 +2,51 @@ const { Kepegawaian, sequelize } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
+const { generatePagination } = require('../pagination/pagination');
+const { Op } = require('sequelize');
 
 const v = new Validator();
 
 module.exports = {
     get: async (req, res) => {
         try {
-            let {page} = req.query
-            const limit = 10
-            page = page || 1
-            const offset = (page - 1) * limit
+            let {withPagination, search, limit, page} = req.query
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
-            const [kepegawaian, count] = await Promise.all([
-                Kepegawaian.findAll({
-                    order: [['created_at', 'DESC']],
+            const offset = (page - 1) * limit
+			const order = [['created_at', 'DESC']];
+
+            let where = {}
+            if (search) {
+                where = {
+                    nama: {
+                        [Op.like]: `%${search}%`
+                    }
+                }
+            }
+
+            let pagination = null
+            let kepegawaian = []
+            let count = 0
+
+            if (withPagination === 'false') {
+                kepegawaian = await Kepegawaian.findAll({
+                    order, where
+                })
+            } else {
+                kepegawaian = await Kepegawaian.findAll({
                     offset: offset,
-                    limit:limit
-                }),
-                Kepegawaian.count()
-            ]) 
-            res.status(200).json(response(200, 'Get successfully', kepegawaian));
+                    limit: limit,
+                    order,
+                    where
+                })
+
+                count = await Kepegawaian.count({ where })
+                pagination = generatePagination(count, page, limit, '/api/kepegawaian/get')
+            }
+           
+            res.status(200).json(response(200, 'Get successfully', { data: kepegawaian, pagination}));
         } catch (err) {
             console.log(err);
 
@@ -418,5 +443,5 @@ module.exports = {
 
             res.status(500).json(response(500, `${err.message}`));
         }
-    }
+    },
 }
