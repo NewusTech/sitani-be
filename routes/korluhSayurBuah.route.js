@@ -8,6 +8,8 @@ let prefix = '/korluh/sayur-buah';
 route.post(prefix + '/create', korluhSayurBuahController.create);
 route.get(prefix + '/get', korluhSayurBuahController.getAll);
 route.get(prefix + '/get/one', korluhSayurBuahController.getOne);
+// UPDATE - UNDONE
+route.delete(prefix + '/delete/:id', korluhSayurBuahController.delete);
 /* -- ROUTE -- */
 
 module.exports = route;
