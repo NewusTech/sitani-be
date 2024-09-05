@@ -32,171 +32,135 @@ module.exports = (sequelize, DataTypes) => {
         },
 
         // Hibrida bantuan pemerintah lahan sawah
-        hibridaBantuanPemerintahLahanSawahPanen: {
+        hibrida_bantuan_pemerintah_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'hibrida_bantuan_pemerintah_lahan_sawah_panen',
         },
-        hibridaBantuanPemerintahLahanSawahTanam: {
+        hibrida_bantuan_pemerintah_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'hibrida_bantuan_pemerintah_lahan_sawah_tanam',
         },
-        hibridaBantuanPemerintahLahanSawahPuso: {
+        hibrida_bantuan_pemerintah_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'hibrida_bantuan_pemerintah_lahan_sawah_puso'
         },
         
         // Hibrida non bantuan pemerintah lahan sawah
-        hibridaNonBantuanPemerintahLahanSawahPanen: {
+        hibrida_non_bantuan_pemerintah_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'hibrida_non_bantuan_pemerintah_lahan_sawah_panen',
         },
-        hibridaNonBantuanPemerintahLahanSawahTanam: {
+        hibrida_non_bantuan_pemerintah_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'hibrida_non_bantuan_pemerintah_lahan_sawah_tanam',
         },
-        hibridaNonBantuanPemerintahLahanSawahPuso: {
+        hibrida_non_bantuan_pemerintah_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'hibrida_non_bantuan_pemerintah_lahan_sawah_puso',
         },
 
         // Unggul bantuan pemerintah lahan sawah
-        unggulBantuanPemerintahLahanSawahPanen: {
+        unggul_bantuan_pemerintah_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_bantuan_pemerintah_lahan_sawah_panen'
         },
-        unggulBantuanPemerintahLahanSawahTanam: {
+        unggul_bantuan_pemerintah_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_bantuan_pemerintah_lahan_sawah_tanam',
         },
-        unggulBantuanPemerintahLahanSawahPuso: {
+        unggul_bantuan_pemerintah_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_bantuan_pemerintah_lahan_sawah_puso',
         },
 
         // Unggul bantuan pemerintah lahan bukan sawah
-        unggulBantuanPemerintahLahanBukanSawahPanen: {
+        unggul_bantuan_pemerintah_lahan_bukan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_bantuan_pemerintah_lahan_bukan_sawah_panen',
         },
-        unggulBantuanPemerintahLahanBukanSawahTanam: {
+        unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam',
         },
-        unggulBantuanPemerintahLahanBukanSawahPuso: {
+        unggul_bantuan_pemerintah_lahan_bukan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_bantuan_pemerintah_lahan_bukan_sawah_puso',
         },
 
         // Unggul non bantuan pemerintah lahan sawah
-        unggulNonBantuanPemerintahLahanSawahPanen: {
+        unggul_non_bantuan_pemerintah_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_non_bantuan_pemerintah_lahan_sawah_panen',
         },
-        unggulNonBantuanPemerintahLahanSawahTanam: {
+        unggul_non_bantuan_pemerintah_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_non_bantuan_pemerintah_lahan_sawah_tanam',
         },
-        unggulNonBantuanPemerintahLahanSawahPuso: {
+        unggul_non_bantuan_pemerintah_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_non_bantuan_pemerintah_lahan_sawah_puso',
         },
 
         // Unggul non bantuan pemerintah lahan bukan sawah
-        unggulNonBantuanPemerintahLahanBukanSawahPanen: {
+        unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen',
         },
-        unggulNonBantuanPemerintahLahanBukanSawahTanam: {
+        unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam',
         },
-        unggulNonBantuanPemerintahLahanBukanSawahPuso: {
+        unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso',
         },
 
         // Lokal lahan sawah
-        lokalLahanSawahPanen: {
+        lokal_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'lokal_lahan_sawah_panen'
         },
-        lokalLahanSawahTanam: {
+        lokal_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'lokal_lahan_sawah_tanam'
         },
-        lokalLahanSawahPuso: {
+        lokal_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'lokal_lahan_sawah_puso'
         },
 
         // Lokal lahan bukan sawah
-        lokalLahanBukanSawahPanen: {
+        lokal_lahan_bukan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'lokal_lahan_bukan_sawah_panen',
         },
-        lokalLahanBukanSawahTanam: {
+        lokal_lahan_bukan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'lokal_lahan_bukan_sawah_tanam',
         },
-        lokalLahanBukanSawahPuso: {
+        lokal_lahan_bukan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'lokal_lahan_bukan_sawah_puso'
         },
 
         // Sawah irigasi lahan sawah
-        sawahIrigasiLahanSawahPanen: {
+        sawah_irigasi_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_irigasi_lahan_sawah_panen',
         },
-        sawahIrigasiLahanSawahTanam: {
+        sawah_irigasi_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_irigasi_lahan_sawah_tanam',
         },
-        sawahIrigasiLahanSawahPuso: {
+        sawah_irigasi_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_irigasi_lahan_sawah_puso',
         },
 
         // Sawah tadah hujan lahan sawah
-        sawahTadahHujanLahanSawahPanen: {
+        sawah_tadah_hujan_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_tadah_hujan_lahan_sawah_panen',
         },
-        sawahTadahHujanLahanSawahTanam: {
+        sawah_tadah_hujan_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_tadah_hujan_lahan_sawah_tanam',
         },
-        sawahTadahHujanLahanSawahPuso: {
+        sawah_tadah_hujan_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_tadah_hujan_lahan_sawah_puso',
         },
 
         // Sawah rawa pasang surut lahan sawah
-        sawahRawaPasangSurutLahanSawahPanen: {
+        sawah_rawa_pasang_surut_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_rawa_pasang_surut_lahan_sawah_panen',
         },
-        sawahRawaPasangSurutLahanSawahTanam: {
+        sawah_rawa_pasang_surut_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_rawa_pasang_surut_lahan_sawah_tanam',
         },
-        sawahRawaPasangSurutLahanSawahPuso: {
+        sawah_rawa_pasang_surut_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_rawa_pasang_surut_lahan_sawah_puso',
         },
 
         // Sawah rawa lebak lahan sawah
-        sawahRawaLebakLahanSawahPanen: {
+        sawah_rawa_lebak_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_rawa_lebak_lahan_sawah_panen',
         },
-        sawahRawaLebakLahanSawahTanam: {
+        sawah_rawa_lebak_lahan_sawah_tanam: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_rawa_lebak_lahan_sawah_tanam',
         },
-        sawahRawaLebakLahanSawahPuso: {
+        sawah_rawa_lebak_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
-            field: 'sawah_rawa_lebak_lahan_sawah_puso',
         },
 
         createdAt: {
