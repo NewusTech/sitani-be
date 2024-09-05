@@ -1,3 +1,4 @@
+const korluhMasterSayurBuahRoute = require('./korluhMasterSayurBuah.route');
 const penyuluhKabupatenRoute = require('./penyuluhKabupaten.route');
 const penyuluhKecamatanRoute = require('./penyuluhKecamatan.route');
 const pspPenerimaUppoRoute = require('./pspPenerimaUppo.route');
@@ -17,6 +18,7 @@ const seedRoute = require('./seed.route');
 const userRoute = require('./user.route');
 
 module.exports = function (app, urlApi) {
+    app.use(urlApi, korluhMasterSayurBuahRoute);
     app.use(urlApi, penyuluhKabupatenRoute);
     app.use(urlApi, penyuluhKecamatanRoute);
     app.use(urlApi, pspPenerimaUppoRoute);
