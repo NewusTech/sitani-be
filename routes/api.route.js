@@ -18,6 +18,7 @@ const desaRoute = require('./desa.route');
 const roleRoute = require('./role.route');
 const seedRoute = require('./seed.route');
 const userRoute = require('./user.route');
+const bidangRoute = require('./bidang.route');
 
 module.exports = function (app, urlApi) {
     app.use(urlApi, korluhMasterHasilSayurBuahRoute);
@@ -39,5 +40,5 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, desaRoute);
     app.use(urlApi, roleRoute);
     app.use(urlApi, seedRoute);
-    app.use(urlApi, userRoute);
+    app.use(urlApi, bidangRoute);
 }
