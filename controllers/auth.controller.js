@@ -86,10 +86,10 @@ module.exports = {
 				]));
 				return;
 			}
-
-			let accessToken = jwtGenerate({ sub: user.id }, 60 * 60 * 24);
-
+			
 			let permissions = user.roles[0].permissions.map(permission => permission.permissionName);
+
+			let accessToken = jwtGenerate({ sub: user.id, permissions }, 60 * 60 * 24);
 
 			res.status(200).json(response(200, 'Login success', {
 				access_token: accessToken,
