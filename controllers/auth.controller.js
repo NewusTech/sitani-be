@@ -89,10 +89,7 @@ module.exports = {
 
 			let accessToken = jwtGenerate({ sub: user.id }, 60 * 60 * 24);
 
-			let permissions = [];
-			for (let permission of user.roles[0].permissions) {
-				permissions.push(permission.permissionName);
-			}
+			let permissions = user.roles[0].permissions.map(permission => permission.permissionName);
 
 			res.status(200).json(response(200, 'Login success', {
 				access_token: accessToken,
