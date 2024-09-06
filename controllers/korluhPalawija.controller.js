@@ -118,7 +118,14 @@ module.exports = {
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
 
-            const korluhMasterPalawija = await KorluhMasterPalawija.findByPk(korluh_master_palawija_id);
+            const korluhMasterPalawija = await KorluhMasterPalawija.findByPk(korluh_master_palawija_id, {
+                include: [
+                    {
+                        model: KorluhMasterPalawija,
+                        as: 'anak',
+                    }
+                ]
+            });
 
             if (!kecamatan) {
                 res.status(400).json(response(400, 'Bad Request', [
@@ -145,6 +152,16 @@ module.exports = {
                     {
                         type: 'notFound',
                         message: "Korluh master palawija doesn't exists",
+                        field: 'korluh_master_palawija_id',
+                    },
+                ]));
+                return;
+            }
+            if (korluhMasterPalawija.anak.length) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'errorType',
+                        message: "Do not use parent of master palawija",
                         field: 'korluh_master_palawija_id',
                     },
                 ]));
