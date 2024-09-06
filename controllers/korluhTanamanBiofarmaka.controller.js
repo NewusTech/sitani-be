@@ -299,4 +299,109 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const korluhTanamanBiofarmakaList = await KorluhTanamanBiofarmakaList.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                nama_tanaman: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            if (!korluhTanamanBiofarmakaList) {
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka not found'));
+                return;
+            }
+
+            let {
+                nama_tanaman,
+                luas_panen_habis,
+                luas_panen_belum_habis,
+                luas_rusak,
+                luas_penanaman_baru,
+                produksi_habis,
+                produksi_belum_habis,
+                rerata_harga,
+                keterangan,
+            } = req.body;
+
+            if (nama_tanaman) {
+                const namaTanamanExists = await KorluhTanamanBiofarmakaList.findOne({
+                    where: {
+                        korluhTanamanBiofarmakaId: korluhTanamanBiofarmakaList.korluhTanamanBiofarmakaId,
+                        id: { [Op.not]: korluhTanamanBiofarmakaList.id },
+                        namaTanaman: { [Op.like]: nama_tanaman },
+                    }
+                });
+
+                if (namaTanamanExists) {
+                    res.status(400).json(response(400, 'Bad Request', [
+                        {
+                            type: 'duplicate',
+                            message: "Cannot updated korluh tanaman biofarmaka, please use another name",
+                            field: 'nama_tanaman',
+                        },
+                    ]));
+                    return;
+                }
+            } else {
+                nama_tanaman = korluhTanamanBiofarmakaList.namaTanaman;
+            }
+
+            nama_tanaman = nama_tanaman ?? korluhTanamanBiofarmakaList.namaTanaman;
+            luas_panen_habis = luas_panen_habis ?? korluhTanamanBiofarmakaList.luasPanenHabis;
+            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhTanamanBiofarmakaList.luasPanenBelumHabis;
+            luas_rusak = luas_rusak ?? korluhTanamanBiofarmakaList.luasRusak;
+            luas_penanaman_baru = luas_penanaman_baru ?? korluhTanamanBiofarmakaList.luasPenanamanBaru;
+            produksi_habis = produksi_habis ?? korluhTanamanBiofarmakaList.produksiHabis;
+            produksi_belum_habis = produksi_belum_habis ?? korluhTanamanBiofarmakaList.produksiBelumHabis;
+            rerata_harga = rerata_harga ?? korluhTanamanBiofarmakaList.rerataHarga;
+            keterangan = keterangan ?? korluhTanamanBiofarmakaList.keterangan;
+
+            await korluhTanamanBiofarmakaList.update({
+                namaTanaman: nama_tanaman,
+                luasPanenHabis: luas_panen_habis,
+                luasPanenBelumHabis: luas_panen_belum_habis,
+                luasRusak: luas_rusak,
+                luasPenanamanBaru: luas_penanaman_baru,
+                produksiHabis: produksi_habis,
+                produksiBelumHabis: produksi_belum_habis,
+                rerataHarga: rerata_harga,
+                keterangan,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update korluh tanaman biofarmaka successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
