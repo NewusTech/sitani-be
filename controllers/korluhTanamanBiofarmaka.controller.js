@@ -258,4 +258,45 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getOne: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const korluhTanamanBiofarmakaList = await KorluhTanamanBiofarmakaList.findOne({
+                where: { id },
+                include: [
+                    {
+                        model: KorluhTanamanBiofarmaka,
+                        as: 'korluhTanamanBiofarmaka',
+                        include: [
+                            {
+                                model: Kecamatan,
+                                as: 'kecamatan',
+                            },
+                            {
+                                model: Desa,
+                                as: 'desa',
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (!korluhTanamanBiofarmakaList) {
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka not found'));
+                return;
+            }
+
+            res.status(200).json(response(200, 'Get korluh tanaman biofarmaka successfully', korluhTanamanBiofarmakaList));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
