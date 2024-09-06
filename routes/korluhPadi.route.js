@@ -7,7 +7,7 @@ let prefix = '/korluh/padi';
 /* -- ROUTE -- */
 route.post(prefix + '/create', korluhPadiController.create);
 route.get(prefix + '/get', korluhPadiController.getAll);
-route.get(prefix + '/get/one', korluhPadiController.getOne);
+route.get(prefix + '/get/:id', korluhPadiController.getOne);
 route.put(prefix + '/update/:id', korluhPadiController.update);
 route.delete(prefix + '/delete/:id', korluhPadiController.delete);
 /* -- ROUTE -- */

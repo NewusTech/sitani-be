@@ -446,26 +446,10 @@ module.exports = {
 
     getOne: async (req, res) => {
         try {
-            let { equalDate, desa } = req.query;
-
-            let where = {};
-
-            if (!isNaN(parseInt(desa))) {
-                where.desaId = parseInt(desa);
-            }
-            if (equalDate) {
-                equalDate = new Date(equalDate);
-                if (equalDate instanceof Date && !isNaN(equalDate)) {
-                    where.tanggal = { [Op.eq]: equalDate };
-                }
-            }
-
-            if (!where?.desaId || !where?.tanggal) {
-                res.status(404).json(response(404, 'Korluh padi not found'));
-                return;
-            }
+            const { id } = req.params;
 
             const korluhPadi = await KorluhPadi.findOne({
+                where: { id },
                 include: [
                     {
                         model: Kecamatan,
@@ -476,7 +460,6 @@ module.exports = {
                         as: 'desa',
                     },
                 ],
-                where,
             });
 
             if (!korluhPadi) {
