@@ -343,4 +343,146 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const korluhPalawijaList = await KorluhPalawijaList.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                kecamatan_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                desa_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                tanggal: {
+                    type: "date",
+                    optional: true,
+                    convert: true,
+                },
+                korluh_master_palawija_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            if (!korluhPalawijaList) {
+                res.status(404).json(response(404, 'Korluh palawija not found'));
+                return;
+            }
+
+            let {
+                korluh_master_palawija_id,
+                lahan_sawah_panen,
+                lahan_sawah_panen_muda,
+                lahan_sawah_panen_hijauan_pakan_ternak,
+                lahan_sawah_tanam,
+                lahan_sawah_puso,
+                lahan_bukan_sawah_panen,
+                lahan_bukan_sawah_panen_muda,
+                lahan_bukan_sawah_panen_hijauan_pakan_ternak,
+                lahan_bukan_sawah_tanam,
+                lahan_bukan_sawah_puso,
+            } = req.body;
+
+            if (korluh_master_palawija_id) {
+                const korluhMasterPalawija = await KorluhMasterPalawija.findByPk(korluh_master_palawija_id, {
+                    include: [
+                        {
+                            model: KorluhMasterPalawija,
+                            as: 'anak',
+                        }
+                    ]
+                });
+
+                if (korluhMasterPalawija?.anak?.length) {
+                    res.status(400).json(response(400, 'Bad Request', [
+                        {
+                            type: 'errorType',
+                            message: "Do not use parent of master palawija",
+                            field: 'korluh_master_palawija_id',
+                        },
+                    ]));
+                    return;
+                }
+
+                korluh_master_palawija_id = korluhMasterPalawija?.id ?? korluhPalawijaList.korluhMasterPalawijaId;
+            } else {
+                korluh_master_palawija_id = korluhPalawijaList.korluhMasterPalawijaId;
+            }
+
+            const korluhPalawijaListExists = await KorluhPalawijaList.findOne({
+                where: {
+                    korluhPalawijaId: korluhPalawijaList.korluhPalawijaId,
+                    korluhMasterPalawijaId: korluh_master_palawija_id,
+                    id: { [Op.not]: korluhPalawijaList.id },
+                }
+            });
+
+            if (korluhPalawijaListExists) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'duplicate',
+                        message: "Cannot updated korluh palawija, please use another master",
+                        field: 'korluh_master_palawija_id',
+                    },
+                ]));
+                return;
+            }
+
+
+            await korluhPalawijaList.update({
+                korluhMasterPalawijaId: korluh_master_palawija_id,
+                lahanSawahPanen: lahan_sawah_panen,
+                lahanSawahPanenMuda: lahan_sawah_panen_muda,
+                lahanSawahPanenHijauanPakanTernak: lahan_sawah_panen_hijauan_pakan_ternak,
+                lahanSawahTanam: lahan_sawah_tanam,
+                lahanSawahPuso: lahan_sawah_puso,
+                lahanBukanSawahPanen: lahan_bukan_sawah_panen,
+                lahanBukanSawahPanenMuda: lahan_bukan_sawah_panen_muda,
+                lahanBukanSawahPanenHijauanPakanTernak: lahan_bukan_sawah_panen_hijauan_pakan_ternak,
+                lahanBukanSawahTanam: lahan_bukan_sawah_tanam,
+                lahanBukanSawahPuso: lahan_bukan_sawah_puso,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update korluh palawija successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
