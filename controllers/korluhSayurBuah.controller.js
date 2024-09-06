@@ -405,4 +405,49 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    delete: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const korluhSayurBuahList = await KorluhSayurBuahList.findOne({
+                where: { id },
+            });
+
+            if (!korluhSayurBuahList) {
+                res.status(404).json(response(404, 'Korluh sayur dan buah not found'));
+                return;
+            }
+
+            const korluhSayurBuahId = korluhSayurBuahList.korluhSayurBuahId;
+
+            await korluhSayurBuahList.destroy();
+
+            const korluhSayurBuahExits = await KorluhSayurBuahList.findOne({
+                where: { korluhSayurBuahId }
+            });
+
+            if (!korluhSayurBuahExits) {
+                await KorluhSayurBuah.destroy({
+                    where: { id: korluhSayurBuahId }
+                });
+            }
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Delete korluh sayur dan buah successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
