@@ -9,31 +9,53 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('korluh_tanaman_hias', {
+        await queryInterface.createTable('korluh_tanaman_hias_list', {
             id: {
                 type: Sequelize.BIGINT,
                 autoIncrement: true,
                 primaryKey: true,
                 allowNull: false,
             },
-            kecamatan_id: {
+            korluh_tanaman_hias_id: {
                 type: Sequelize.BIGINT,
                 references: {
-                    model: 'master_kecamatan',
+                    model: 'korluh_tanaman_hias',
                     key: 'id'
                 }
             },
-            desa_id: {
-                type: Sequelize.BIGINT,
-                references: {
-                    model: 'master_desa',
-                    key: 'id'
-                }
-            },
-            tanggal: {
-                type: Sequelize.DATE,
+
+            nama_tanaman: {
+                type: Sequelize.STRING,
                 allowNull: false,
             },
+            luas_panen_habis: {
+                type: Sequelize.DOUBLE,
+            },
+            luas_panen_belum_habis: {
+                type: Sequelize.DOUBLE,
+            },
+            luas_rusak: {
+                type: Sequelize.DOUBLE,
+            },
+            luas_penanaman_baru: {
+                type: Sequelize.DOUBLE,
+            },
+            produksi_habis: {
+                type: Sequelize.DOUBLE,
+            },
+            produksi_belum_habis: {
+                type: Sequelize.DOUBLE,
+            },
+            satuan_produksi: {
+                type: Sequelize.STRING,
+            },
+            rerata_harga: {
+                type: Sequelize.INTEGER,
+            },
+            keterangan: {
+                type: Sequelize.STRING,
+            },
+
             created_at: {
                 type: Sequelize.DATE,
                 allowNull: false,
@@ -52,6 +74,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        await queryInterface.dropTable('korluh_tanaman_hias');
+        await queryInterface.dropTable('korluh_tanaman_hias_list');
     }
 };
