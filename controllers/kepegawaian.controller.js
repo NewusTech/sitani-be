@@ -1,4 +1,4 @@
-const { Kepegawaian, sequelize } = require('../models');
+const { Kepegawaian, Bidang, sequelize } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
@@ -32,10 +32,21 @@ module.exports = {
 
             if (withPagination === 'false') {
                 kepegawaian = await Kepegawaian.findAll({
-                    order, where
+                    include : [
+                        {
+                            model: Bidang,
+                            as : 'bidang'
+                        }
+                    ],
+                    order, 
+                    where
                 })
             } else {
                 kepegawaian = await Kepegawaian.findAll({
+                    include: [{
+                        model: Bidang,
+                        as : 'bidang'
+                    }],
                     offset: offset,
                     limit: limit,
                     order,
@@ -131,6 +142,10 @@ module.exports = {
                     type: "string",
                     optional: true
                 },
+                bidang_id: {
+                    type: "number",
+                    optional: false
+                }
             };
 
             const { 
@@ -151,7 +166,8 @@ module.exports = {
                 jenjang_pendidikan,
                 usia,
                 masa_kerja,
-                keterangan 
+                keterangan,
+                bidang_id 
             } = req.body;
 
             const validate = v.validate({ 
@@ -172,7 +188,8 @@ module.exports = {
                 jenjang_pendidikan,
                 usia,
                 masa_kerja,
-                keterangan 
+                keterangan,
+                bidang_id 
             }, schema);
 
             if (validate.length > 0) {
@@ -198,7 +215,8 @@ module.exports = {
                 jenjangPendidikan : jenjang_pendidikan,
                 usia,
                 masaKerja : masa_kerja,
-                keterangan
+                keterangan,
+                bidang_id
             });
             await transaction.commit();
 
@@ -219,6 +237,10 @@ module.exports = {
             const { id } = req.params;
 
             const pegawai = await Kepegawaian.findOne({
+                include: [{
+                    model: Bidang,
+                    as : 'bidang'
+                }],
                 where: { id },
             });
 
@@ -248,7 +270,6 @@ module.exports = {
                 where: { id }
             });
 
-            console.log('pegawaiXX', pegawai)
             let schema = {
                 nama: {
                     type: "string"
@@ -321,6 +342,10 @@ module.exports = {
                     type: "string",
                     optional: true
                 },
+                bidang_id: {
+                    type: "number",
+                    optional: true
+                }
             };
 
             let { 
@@ -341,7 +366,8 @@ module.exports = {
                 jenjang_pendidikan,
                 usia,
                 masa_kerja,
-                keterangan 
+                keterangan,
+                bidang_id 
             } = req.body;
 
             let validate = v.validate({ 
@@ -393,7 +419,8 @@ module.exports = {
                 jenjang_pendidikan : jenjang_pendidikan ?? pegawai.jenjangPendidikan,
                 usia : usia ?? pegawai.usia,
                 masa_kerja : masa_kerja ?? pegawai.masaKerja,
-                keterangan : keterangan ?? pegawai.keterangan
+                keterangan : keterangan ?? pegawai.keterangan,
+                bidang_id : bidang_id ?? pegawai.bidang_id
             }, {
                 where: { id }
             });
