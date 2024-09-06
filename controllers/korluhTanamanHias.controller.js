@@ -305,4 +305,112 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const korluhTanamanHiasList = await KorluhTanamanHiasList.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                nama_tanaman: {
+                    type: "string",
+                    optional: true,
+                    max: 255,
+                    min: 1,
+                },
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            if (!korluhTanamanHiasList) {
+                res.status(404).json(response(404, 'Korluh tanaman hias not found'));
+                return;
+            }
+
+            let {
+                nama_tanaman,
+                luas_panen_habis,
+                luas_panen_belum_habis,
+                luas_rusak,
+                luas_penanaman_baru,
+                produksi_habis,
+                produksi_belum_habis,
+                satuan_produksi,
+                rerata_harga,
+                keterangan,
+            } = req.body;
+
+            if (nama_tanaman) {
+                const namaTanamanExists = await KorluhTanamanHiasList.findOne({
+                    where: {
+                        korluhTanamanHiasId: korluhTanamanHiasList.korluhTanamanHiasId,
+                        namaTanaman: { [Op.like]: nama_tanaman },
+                        id: { [Op.not]: korluhTanamanHiasList.id },
+                    }
+                });
+
+                if (namaTanamanExists) {
+                    res.status(400).json(response(400, 'Bad Request', [
+                        {
+                            type: 'duplicate',
+                            message: "Cannot updated korluh tanaman hias, please use another name",
+                            field: 'nama_tanaman',
+                        },
+                    ]));
+                    return;
+                }
+            } else {
+                nama_tanaman = korluhTanamanHiasList.namaTanaman;
+            }
+
+            nama_tanaman = nama_tanaman ?? korluhTanamanHiasList.namaTanaman;
+            luas_panen_habis = luas_panen_habis ?? korluhTanamanHiasList.luasPanenHabis;
+            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhTanamanHiasList.luasPanenBelumHabis;
+            luas_rusak = luas_rusak ?? korluhTanamanHiasList.luasRusak;
+            luas_penanaman_baru = luas_penanaman_baru ?? korluhTanamanHiasList.luasPenanamanBaru;
+            produksi_habis = produksi_habis ?? korluhTanamanHiasList.produksiHabis;
+            produksi_belum_habis = produksi_belum_habis ?? korluhTanamanHiasList.produksiBelumHabis;
+            satuan_produksi = satuan_produksi ?? korluhTanamanHiasList.satuanProduksi;
+            rerata_harga = rerata_harga ?? korluhTanamanHiasList.rerataHarga;
+            keterangan = keterangan ?? korluhTanamanHiasList.keterangan;
+
+            await korluhTanamanHiasList.update({
+                namaTanaman: nama_tanaman,
+                luasPanenHabis: luas_panen_habis,
+                luasPanenBelumHabis: luas_panen_belum_habis,
+                luasRusak: luas_rusak,
+                luasPenanamanBaru: luas_penanaman_baru,
+                produksiHabis: produksi_habis,
+                produksiBelumHabis: produksi_belum_habis,
+                satuanProduksi: satuan_produksi,
+                rerataHarga: rerata_harga,
+                keterangan,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update korluh tanaman hias successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
