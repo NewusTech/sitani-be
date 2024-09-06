@@ -1,8 +1,8 @@
+const { Permission, Role, User } = require('../models');
 const { jwtGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const passwordHash = require('password-hash');
-const { User } = require('../models');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -24,15 +24,27 @@ module.exports = {
 			};
 
 			const validate = v.validate(req.body, schema);
-			
+
 			if (validate.length > 0) {
 				res.status(400).json(response(400, 'Bad Request', validate));
 				return;
 			}
-			
+
 			const { password, email_or_nip } = req.body;
 
-			let user = await User.findOne({
+			const user = await User.findOne({
+				include: [
+					{
+						model: Role,
+						as: 'roles',
+						include: [
+							{
+								model: Permission,
+								as: 'permissions'
+							}
+						]
+					}
+				],
 				where: {
 					[Op.or]: [
 						{ email: email_or_nip },
@@ -40,6 +52,24 @@ module.exports = {
 					]
 				},
 			});
+
+			let active = true;
+			if (!user?.roles?.length) {
+				active = false;
+			} else if (!user?.roles[0]?.permissions?.length) {
+				active = false;
+			}
+
+			if (!active) {
+				res.status(400).json(response(400, 'Bad Requests', [
+					{
+						type: 'unauthorized',
+						message: "Account doesn't complete",
+						field: 'email_or_nip',
+					},
+				]));
+				return;
+			}
 
 			if (user === null || !passwordHash.verify(password, user?.password)) {
 				res.status(400).json(response(400, 'Bad Requests', [
@@ -59,7 +89,22 @@ module.exports = {
 
 			let accessToken = jwtGenerate({ sub: user.id }, 60 * 60 * 24);
 
-			res.status(200).json(response(200, 'Login success', { access_token: accessToken }));
+			let permissions = [];
+			for (let permission of user.roles[0].permissions) {
+				permissions.push(permission.permissionName);
+			}
+
+			res.status(200).json(response(200, 'Login success', {
+				access_token: accessToken,
+				user: {
+					role: user.roles[0].roleName,
+					pangkat: user.pangkat,
+					email: user.email,
+					name: user.name,
+					nip: user.nip,
+				},
+				permissions
+			}));
 
 		} catch (err) {
 			console.log(err);
