@@ -374,7 +374,16 @@ module.exports = {
                 nama_tanaman = korluhSayurBuahList.namaTanaman;
             }
 
-
+            nama_tanaman = nama_tanaman ?? korluhSayurBuahList.namaTanaman;
+            hasil_produksi = hasil_produksi ?? korluhSayurBuahList.hasilProduksi;
+            luas_panen_habis = luas_panen_habis ?? korluhSayurBuahList.luasPanenHabis;
+            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhSayurBuahList.luasPanenBelumHabis;
+            luas_rusak = luas_rusak ?? korluhSayurBuahList.luasRusak;
+            luas_penanaman_baru = luas_penanaman_baru ?? korluhSayurBuahList.luasPenanamanBaru;
+            produksi_habis = produksi_habis ?? korluhSayurBuahList.produksiHabis;
+            produksi_belum_habis = produksi_belum_habis ?? korluhSayurBuahList.produksiBelumHabis;
+            rerata_harga = rerata_harga ?? korluhSayurBuahList.rerataHarga;
+            keterangan = keterangan ?? korluhSayurBuahList.keterangan;
 
             await korluhSayurBuahList.update({
                 namaTanaman: nama_tanaman,
