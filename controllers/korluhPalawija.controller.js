@@ -355,25 +355,6 @@ module.exports = {
             });
 
             const schema = {
-                kecamatan_id: {
-                    type: "number",
-                    optional: true,
-                    positive: true,
-                    integer: true,
-                    convert: true,
-                },
-                desa_id: {
-                    type: "number",
-                    optional: true,
-                    positive: true,
-                    integer: true,
-                    convert: true,
-                },
-                tanggal: {
-                    type: "date",
-                    optional: true,
-                    convert: true,
-                },
                 korluh_master_palawija_id: {
                     type: "number",
                     optional: true,
