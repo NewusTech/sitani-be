@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'desaId',
                 as: 'desa'
             });
+            KorluhTanamanBiofarmaka.hasMany(models.KorluhTanamanBiofarmakaList, {
+                foreignKey: 'korluhTanamanBiofarmakaId',
+                as: 'list'
+            });
         }
     }
 
