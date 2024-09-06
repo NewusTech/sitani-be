@@ -10,7 +10,7 @@ const v = new Validator();
 module.exports = {
     get: async (req, res) => {
         try {
-            let {withPagination, search, limit, page} = req.query
+            let {withPagination, search, limit, page, bidangId} = req.query
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
 			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
@@ -18,10 +18,18 @@ module.exports = {
 			const order = [['created_at', 'DESC']];
 
             let where = {}
-            if (search) {
+            if (search  || bidangId) {
                 where = {
                     nama: {
                         [Op.like]: `%${search}%`
+                    }
+                }
+            }
+
+            if (bidangId) {
+                where = {
+                    bidang_id: {
+                        [Op.eq]: bidangId
                     }
                 }
             }
