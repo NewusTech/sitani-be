@@ -9,9 +9,8 @@ const v = new Validator();
 
 const coreSchema = {
     hasil_produksi: {
-        type: "number",
+        type: "string",
         optional: true,
-        convert: true,
     },
     luas_panen_habis: {
         type: "number",
