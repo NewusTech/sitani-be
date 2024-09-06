@@ -265,4 +265,45 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getOne: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const korluhSayurBuahList = await KorluhSayurBuahList.findOne({
+                where: { id },
+                include: [
+                    {
+                        model: KorluhSayurBuah,
+                        as: 'korluhSayurBuah',
+                        include: [
+                            {
+                                model: Kecamatan,
+                                as: 'kecamatan',
+                            },
+                            {
+                                model: Desa,
+                                as: 'desa',
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (!korluhSayurBuahList) {
+                res.status(404).json(response(404, 'Korluh sayur dan buah not found'));
+                return;
+            }
+
+            res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', korluhSayurBuahList));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
