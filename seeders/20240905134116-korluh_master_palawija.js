@@ -15,163 +15,136 @@ module.exports = {
         const dataList = [
             {
                 id: 1,
-                nama: "Bawang Daun",
+                nama: "JUMLAH JAGUNG",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 2,
-                nama: "Bawang Merah",
+                nama: "KEDELAI",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 3,
-                nama: "Bawang Putih",
+                nama: "KACANG TANAH",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 4,
-                nama: "Kembang Kol",
+                nama: "JUMLAH UBI KAYU/SINGKONG",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 5,
-                nama: "Kentang",
+                nama: "UBI JALAR/KETELA RAMBAT",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 6,
-                nama: "Kubis",
+                nama: "KACANG HIJAU",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 7,
-                nama: "Petsai/Sawi",
+                nama: "SORGUM/CANTEL",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 8,
-                nama: "Wortel",
+                nama: "GANDUM",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 9,
-                nama: "Bayam",
+                nama: "TALAS",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 10,
-                nama: "Buncis",
+                nama: "GANYONG",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 11,
-                nama: "Cabai Besar/TW/Teropong",
+                nama: "UMBI LAINNYA",
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 12,
-                nama: "Cabai Keriting",
+                nama: "Hibrida",
+                korluh_master_palawija_id: 1,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 13,
-                nama: "Cabai Rawit",
+                nama: "Komposit",
+                korluh_master_palawija_id: 1,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 14,
-                nama: "Jamur Tiram",
+                nama: "Lokal",
+                korluh_master_palawija_id: 1,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 15,
-                nama: "Jamur Merang",
+                nama: "Bantuan Pemerintah",
+                korluh_master_palawija_id: 12,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 16,
-                nama: "Jamur Lainnya",
+                nama: "Non Bantuan Pemerintah",
+                korluh_master_palawija_id: 12,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 17,
-                nama: "Kacang Panjang",
+                nama: "Bantuan Pemerintah",
+                korluh_master_palawija_id: 2,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 18,
-                nama: "Kangkung",
+                nama: "Non Bantuan Pemerintah",
+                korluh_master_palawija_id: 2,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 19,
-                nama: "Mentimun",
+                nama: "Bantuan Pemerintah",
+                korluh_master_palawija_id: 4,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
             {
                 id: 20,
-                nama: "Labu Siam",
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-            {
-                id: 21,
-                nama: "Paprika",
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-            {
-                id: 22,
-                nama: "Terung",
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-            {
-                id: 23,
-                nama: "Tomat",
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-            {
-                id: 24,
-                nama: "Melon",
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-            {
-                id: 25,
-                nama: "Semangka",
-                created_at: new Date(),
-                updated_at: new Date(),
-            },
-            {
-                id: 26,
-                nama: "Stroberi",
+                nama: "Non Bantuan Pemerintah",
+                korluh_master_palawija_id: 4,
                 created_at: new Date(),
                 updated_at: new Date(),
             },
         ];
 
-        await queryInterface.bulkInsert({ tableName: "korluh_master_sayur_dan_buah" }, dataList, {});
+        await queryInterface.bulkInsert({ tableName: "korluh_master_palawija" }, dataList, {});
     },
 
     async down(queryInterface, Sequelize) {
@@ -181,6 +154,6 @@ module.exports = {
          * Example:
          * await queryInterface.bulkDelete('People', null, {});
          */
-        await queryInterface.bulkDelete({ tableName: "korluh_master_sayur_dan_buah" }, null, {});
+        await queryInterface.bulkDelete({ tableName: "korluh_master_palawija" }, null, {});
     }
 };

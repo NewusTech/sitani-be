@@ -1,8 +1,6 @@
-const korluhMasterHasilSayurBuahRoute = require('./korluhMasterHasilSayurBuah.route');
-const korluhMasterSayurBuahRoute = require('./korluhMasterSayurBuah.route');
+const korluhMasterPalawijaRoute = require('./korluhMasterPalawija.route');
 const penyuluhKabupatenRoute = require('./penyuluhKabupaten.route');
 const penyuluhKecamatanRoute = require('./penyuluhKecamatan.route');
-const korluhSayurBuahRoute = require('./korluhSayurBuah.route');
 const pspPenerimaUppoRoute = require('./pspPenerimaUppo.route');
 const korluhPalawijaRoute = require('./korluhPalawija.route');
 const kepegawaianRoute = require('./kepegawaian.route');
@@ -21,11 +19,9 @@ const userRoute = require('./user.route');
 const bidangRoute = require('./bidang.route');
 
 module.exports = function (app, urlApi) {
-    app.use(urlApi, korluhMasterHasilSayurBuahRoute);
-    app.use(urlApi, korluhMasterSayurBuahRoute);
+    app.use(urlApi, korluhMasterPalawijaRoute);
     app.use(urlApi, penyuluhKabupatenRoute);
     app.use(urlApi, penyuluhKecamatanRoute);
-    app.use(urlApi, korluhSayurBuahRoute);
     app.use(urlApi, pspPenerimaUppoRoute);
     app.use(urlApi, korluhPalawijaRoute);
     app.use(urlApi, kepegawaianRoute);
