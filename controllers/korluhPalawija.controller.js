@@ -313,36 +313,26 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const korluhPalawija = await KorluhPalawija.findOne({
+            const korluhPalawijaList = await KorluhPalawijaList.findOne({
                 where: { id },
                 include: [
                     {
-                        model: Kecamatan,
-                        as: 'kecamatan',
+                        model: KorluhPalawija,
+                        as: 'korluhPalawija',
                     },
                     {
-                        model: Desa,
-                        as: 'desa',
+                        model: KorluhMasterPalawija,
+                        as: 'master',
                     },
-                    {
-                        model: KorluhPalawijaList,
-                        as: 'list',
-                        include: [
-                            {
-                                model: KorluhMasterPalawija,
-                                as: 'master'
-                            }
-                        ]
-                    }
                 ],
             });
 
-            if (!korluhPalawija) {
+            if (!korluhPalawijaList) {
                 res.status(404).json(response(404, 'Korluh palawija not found'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get korluh palawija successfully', korluhPalawija));
+            res.status(200).json(response(200, 'Get korluh palawija successfully', korluhPalawijaList));
         } catch (err) {
             console.log(err);
 
