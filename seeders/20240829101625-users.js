@@ -17,6 +17,16 @@ module.exports = {
         const users = [
             {
                 id: 1,
+                email: "superadmin@superadmin.com",
+                password: passwordHash.generate('superadmin#sitani'),
+                name: "Super admin",
+                nip: 1,
+                pangkat: "Super admin",
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: 2,
                 email: "test@test.com",
                 password: passwordHash.generate('test111'),
                 name: "test 1",
@@ -26,7 +36,7 @@ module.exports = {
                 updated_at: new Date(),
             },
             {
-                id: 2,
+                id: 3,
                 email: "test1@test.com",
                 password: passwordHash.generate('test222'),
                 name: "test 2",

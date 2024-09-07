@@ -1,4 +1,4 @@
-const { KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, Desa, sequelize } = require('../models');
+const { KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -8,10 +8,6 @@ const { Op } = require('sequelize');
 const v = new Validator();
 
 const coreSchema = {
-    hasil_produksi: {
-        type: "string",
-        optional: true,
-    },
     luas_panen_habis: {
         type: "number",
         optional: true,
@@ -41,6 +37,10 @@ const coreSchema = {
         type: "number",
         optional: true,
         convert: true,
+    },
+    satuan_produksi: {
+        type: "string",
+        optional: true,
     },
     rerata_harga: {
         type: "number",
@@ -96,13 +96,13 @@ module.exports = {
                 desa_id,
                 tanggal,
                 nama_tanaman,
-                hasil_produksi,
                 luas_panen_habis,
                 luas_panen_belum_habis,
                 luas_rusak,
                 luas_penanaman_baru,
                 produksi_habis,
                 produksi_belum_habis,
+                satuan_produksi,
                 rerata_harga,
                 keterangan,
             } = req.body;
@@ -131,7 +131,7 @@ module.exports = {
                 return;
             }
 
-            const korluhSayurBuah = await KorluhSayurBuah.findOrCreate({
+            const korluhTanamanHias = await KorluhTanamanHias.findOrCreate({
                 where: {
                     tanggal: { [Op.eq]: tanggal },
                     desaId: desa_id,
@@ -143,18 +143,18 @@ module.exports = {
                 }
             });
 
-            const korluhSayurBuahListExists = await KorluhSayurBuahList.findOne({
+            const korluhTanamanHiasListExists = await KorluhTanamanHiasList.findOne({
                 where: {
-                    korluhSayurBuahId: korluhSayurBuah[0].id,
+                    korluhTanamanHiasId: korluhTanamanHias[0].id,
                     namaTanaman: { [Op.like]: nama_tanaman }
                 }
             });
 
-            if (korluhSayurBuahListExists) {
+            if (korluhTanamanHiasListExists) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh sayur dan buah, please use another name",
+                        message: "Cannot created korluh tanaman hias, please use another name",
                         field: 'nama_tanaman',
                     },
                 ]));
@@ -162,23 +162,23 @@ module.exports = {
                 return;
             }
 
-            await KorluhSayurBuahList.create({
-                korluhSayurBuahId: korluhSayurBuah[0].id,
+            await KorluhTanamanHiasList.create({
+                korluhTanamanHiasId: korluhTanamanHias[0].id,
                 namaTanaman: nama_tanaman,
-                hasilProduksi: hasil_produksi,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
                 luasRusak: luas_rusak,
                 luasPenanamanBaru: luas_penanaman_baru,
                 produksiHabis: produksi_habis,
                 produksiBelumHabis: produksi_belum_habis,
+                satuanProduksi: satuan_produksi,
                 rerataHarga: rerata_harga,
                 keterangan,
             });
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Korluh sayur dan buah created'));
+            res.status(201).json(response(201, 'Korluh tanaman hias created'));
         } catch (err) {
             console.log(err);
 
@@ -229,7 +229,7 @@ module.exports = {
                 }
             }
 
-            const korluhSayurBuah = await KorluhSayurBuah.findAll({
+            const korluhTanamanHias = await KorluhTanamanHias.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -240,7 +240,7 @@ module.exports = {
                         as: 'desa',
                     },
                     {
-                        model: KorluhSayurBuahList,
+                        model: KorluhTanamanHiasList,
                         as: 'list'
                     }
                 ],
@@ -249,11 +249,11 @@ module.exports = {
                 where,
             });
 
-            const count = await KorluhSayurBuah.count({ where });
+            const count = await KorluhTanamanHias.count({ where });
 
-            const pagination = generatePagination(count, page, limit, '/api/korluh/sayur-buah/get');
+            const pagination = generatePagination(count, page, limit, '/api/korluh/tanaman-hias/get');
 
-            res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', { data: korluhSayurBuah, pagination }));
+            res.status(200).json(response(200, 'Get korluh tanaman hias successfully', { data: korluhTanamanHias, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -269,12 +269,12 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const korluhSayurBuahList = await KorluhSayurBuahList.findOne({
+            const korluhTanamanHiasList = await KorluhTanamanHiasList.findOne({
                 where: { id },
                 include: [
                     {
-                        model: KorluhSayurBuah,
-                        as: 'korluhSayurBuah',
+                        model: KorluhTanamanHias,
+                        as: 'korluhTanamanHias',
                         include: [
                             {
                                 model: Kecamatan,
@@ -289,12 +289,12 @@ module.exports = {
                 ],
             });
 
-            if (!korluhSayurBuahList) {
-                res.status(404).json(response(404, 'Korluh sayur dan buah not found'));
+            if (!korluhTanamanHiasList) {
+                res.status(404).json(response(404, 'Korluh tanaman hias not found'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', korluhSayurBuahList));
+            res.status(200).json(response(200, 'Get korluh tanaman hias successfully', korluhTanamanHiasList));
         } catch (err) {
             console.log(err);
 
@@ -312,7 +312,7 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const korluhSayurBuahList = await KorluhSayurBuahList.findOne({
+            const korluhTanamanHiasList = await KorluhTanamanHiasList.findOne({
                 where: { id },
             });
 
@@ -333,30 +333,30 @@ module.exports = {
                 return;
             }
 
-            if (!korluhSayurBuahList) {
-                res.status(404).json(response(404, 'Korluh sayur dan buah not found'));
+            if (!korluhTanamanHiasList) {
+                res.status(404).json(response(404, 'Korluh tanaman hias not found'));
                 return;
             }
 
             let {
                 nama_tanaman,
-                hasil_produksi,
                 luas_panen_habis,
                 luas_panen_belum_habis,
                 luas_rusak,
                 luas_penanaman_baru,
                 produksi_habis,
                 produksi_belum_habis,
+                satuan_produksi,
                 rerata_harga,
                 keterangan,
             } = req.body;
 
             if (nama_tanaman) {
-                const namaTanamanExists = await KorluhSayurBuahList.findOne({
+                const namaTanamanExists = await KorluhTanamanHiasList.findOne({
                     where: {
-                        korluhSayurBuahId: korluhSayurBuahList.korluhSayurBuahId,
+                        korluhTanamanHiasId: korluhTanamanHiasList.korluhTanamanHiasId,
                         namaTanaman: { [Op.like]: nama_tanaman },
-                        id: { [Op.not]: korluhSayurBuahList.id },
+                        id: { [Op.not]: korluhTanamanHiasList.id },
                     }
                 });
 
@@ -364,43 +364,43 @@ module.exports = {
                     res.status(400).json(response(400, 'Bad Request', [
                         {
                             type: 'duplicate',
-                            message: "Cannot updated korluh sayur dan buah, please use another name",
+                            message: "Cannot updated korluh tanaman hias, please use another name",
                             field: 'nama_tanaman',
                         },
                     ]));
                     return;
                 }
             } else {
-                nama_tanaman = korluhSayurBuahList.namaTanaman;
+                nama_tanaman = korluhTanamanHiasList.namaTanaman;
             }
 
-            nama_tanaman = nama_tanaman ?? korluhSayurBuahList.namaTanaman;
-            hasil_produksi = hasil_produksi ?? korluhSayurBuahList.hasilProduksi;
-            luas_panen_habis = luas_panen_habis ?? korluhSayurBuahList.luasPanenHabis;
-            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhSayurBuahList.luasPanenBelumHabis;
-            luas_rusak = luas_rusak ?? korluhSayurBuahList.luasRusak;
-            luas_penanaman_baru = luas_penanaman_baru ?? korluhSayurBuahList.luasPenanamanBaru;
-            produksi_habis = produksi_habis ?? korluhSayurBuahList.produksiHabis;
-            produksi_belum_habis = produksi_belum_habis ?? korluhSayurBuahList.produksiBelumHabis;
-            rerata_harga = rerata_harga ?? korluhSayurBuahList.rerataHarga;
-            keterangan = keterangan ?? korluhSayurBuahList.keterangan;
+            nama_tanaman = nama_tanaman ?? korluhTanamanHiasList.namaTanaman;
+            luas_panen_habis = luas_panen_habis ?? korluhTanamanHiasList.luasPanenHabis;
+            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhTanamanHiasList.luasPanenBelumHabis;
+            luas_rusak = luas_rusak ?? korluhTanamanHiasList.luasRusak;
+            luas_penanaman_baru = luas_penanaman_baru ?? korluhTanamanHiasList.luasPenanamanBaru;
+            produksi_habis = produksi_habis ?? korluhTanamanHiasList.produksiHabis;
+            produksi_belum_habis = produksi_belum_habis ?? korluhTanamanHiasList.produksiBelumHabis;
+            satuan_produksi = satuan_produksi ?? korluhTanamanHiasList.satuanProduksi;
+            rerata_harga = rerata_harga ?? korluhTanamanHiasList.rerataHarga;
+            keterangan = keterangan ?? korluhTanamanHiasList.keterangan;
 
-            await korluhSayurBuahList.update({
+            await korluhTanamanHiasList.update({
                 namaTanaman: nama_tanaman,
-                hasilProduksi: hasil_produksi,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
                 luasRusak: luas_rusak,
                 luasPenanamanBaru: luas_penanaman_baru,
                 produksiHabis: produksi_habis,
                 produksiBelumHabis: produksi_belum_habis,
+                satuanProduksi: satuan_produksi,
                 rerataHarga: rerata_harga,
                 keterangan,
             });
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update korluh sayur dan buah successfully'));
+            res.status(200).json(response(200, 'Update korluh tanaman hias successfully'));
         } catch (err) {
             console.log(err);
 
@@ -420,32 +420,32 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const korluhSayurBuahList = await KorluhSayurBuahList.findOne({
+            const korluhTanamanHiasList = await KorluhTanamanHiasList.findOne({
                 where: { id },
             });
 
-            if (!korluhSayurBuahList) {
-                res.status(404).json(response(404, 'Korluh sayur dan buah not found'));
+            if (!korluhTanamanHiasList) {
+                res.status(404).json(response(404, 'Korluh tanaman hias not found'));
                 return;
             }
 
-            const korluhSayurBuahId = korluhSayurBuahList.korluhSayurBuahId;
+            const korluhTanamanHiasId = korluhTanamanHiasList.korluhTanamanHiasId;
 
-            await korluhSayurBuahList.destroy();
+            await korluhTanamanHiasList.destroy();
 
-            const korluhSayurBuahExits = await KorluhSayurBuahList.findOne({
-                where: { korluhSayurBuahId }
+            const korluhTanamanHiasListExists = await KorluhTanamanHiasList.findOne({
+                where: { korluhTanamanHiasId }
             });
 
-            if (!korluhSayurBuahExits) {
-                await KorluhSayurBuah.destroy({
-                    where: { id: korluhSayurBuahId }
+            if (!korluhTanamanHiasListExists) {
+                await KorluhTanamanHias.destroy({
+                    where: { id: korluhTanamanHiasId }
                 });
             }
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete korluh sayur dan buah successfully'));
+            res.status(200).json(response(200, 'Delete korluh tanaman hias successfully'));
         } catch (err) {
             console.log(err);
 

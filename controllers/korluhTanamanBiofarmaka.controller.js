@@ -1,4 +1,4 @@
-const { KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, Desa, sequelize } = require('../models');
+const { KorluhTanamanBiofarmakaList, KorluhTanamanBiofarmaka, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -8,10 +8,6 @@ const { Op } = require('sequelize');
 const v = new Validator();
 
 const coreSchema = {
-    hasil_produksi: {
-        type: "string",
-        optional: true,
-    },
     luas_panen_habis: {
         type: "number",
         optional: true,
@@ -96,7 +92,6 @@ module.exports = {
                 desa_id,
                 tanggal,
                 nama_tanaman,
-                hasil_produksi,
                 luas_panen_habis,
                 luas_panen_belum_habis,
                 luas_rusak,
@@ -131,7 +126,7 @@ module.exports = {
                 return;
             }
 
-            const korluhSayurBuah = await KorluhSayurBuah.findOrCreate({
+            const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findOrCreate({
                 where: {
                     tanggal: { [Op.eq]: tanggal },
                     desaId: desa_id,
@@ -143,18 +138,18 @@ module.exports = {
                 }
             });
 
-            const korluhSayurBuahListExists = await KorluhSayurBuahList.findOne({
+            const korluhTanamanBiofarmakaListExists = await KorluhTanamanBiofarmakaList.findOne({
                 where: {
-                    korluhSayurBuahId: korluhSayurBuah[0].id,
+                    korluhTanamanBiofarmakaId: korluhTanamanBiofarmaka[0].id,
                     namaTanaman: { [Op.like]: nama_tanaman }
                 }
             });
 
-            if (korluhSayurBuahListExists) {
+            if (korluhTanamanBiofarmakaListExists) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh sayur dan buah, please use another name",
+                        message: "Cannot created korluh tanaman biofarmaka, please use another name",
                         field: 'nama_tanaman',
                     },
                 ]));
@@ -162,10 +157,9 @@ module.exports = {
                 return;
             }
 
-            await KorluhSayurBuahList.create({
-                korluhSayurBuahId: korluhSayurBuah[0].id,
+            await KorluhTanamanBiofarmakaList.create({
+                korluhTanamanBiofarmakaId: korluhTanamanBiofarmaka[0].id,
                 namaTanaman: nama_tanaman,
-                hasilProduksi: hasil_produksi,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
                 luasRusak: luas_rusak,
@@ -178,7 +172,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Korluh sayur dan buah created'));
+            res.status(201).json(response(201, 'Korluh tanaman biofarmaka created'));
         } catch (err) {
             console.log(err);
 
@@ -229,7 +223,7 @@ module.exports = {
                 }
             }
 
-            const korluhSayurBuah = await KorluhSayurBuah.findAll({
+            const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -240,7 +234,7 @@ module.exports = {
                         as: 'desa',
                     },
                     {
-                        model: KorluhSayurBuahList,
+                        model: KorluhTanamanBiofarmakaList,
                         as: 'list'
                     }
                 ],
@@ -249,11 +243,11 @@ module.exports = {
                 where,
             });
 
-            const count = await KorluhSayurBuah.count({ where });
+            const count = await KorluhTanamanBiofarmaka.count({ where });
 
-            const pagination = generatePagination(count, page, limit, '/api/korluh/sayur-buah/get');
+            const pagination = generatePagination(count, page, limit, '/api/korluh/tanaman-biofarmaka/get');
 
-            res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', { data: korluhSayurBuah, pagination }));
+            res.status(200).json(response(200, 'Get korluh tanaman biofarmaka successfully', { data: korluhTanamanBiofarmaka, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -269,12 +263,12 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const korluhSayurBuahList = await KorluhSayurBuahList.findOne({
+            const korluhTanamanBiofarmakaList = await KorluhTanamanBiofarmakaList.findOne({
                 where: { id },
                 include: [
                     {
-                        model: KorluhSayurBuah,
-                        as: 'korluhSayurBuah',
+                        model: KorluhTanamanBiofarmaka,
+                        as: 'korluhTanamanBiofarmaka',
                         include: [
                             {
                                 model: Kecamatan,
@@ -289,12 +283,12 @@ module.exports = {
                 ],
             });
 
-            if (!korluhSayurBuahList) {
-                res.status(404).json(response(404, 'Korluh sayur dan buah not found'));
+            if (!korluhTanamanBiofarmakaList) {
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka not found'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', korluhSayurBuahList));
+            res.status(200).json(response(200, 'Get korluh tanaman biofarmaka successfully', korluhTanamanBiofarmakaList));
         } catch (err) {
             console.log(err);
 
@@ -312,7 +306,7 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const korluhSayurBuahList = await KorluhSayurBuahList.findOne({
+            const korluhTanamanBiofarmakaList = await KorluhTanamanBiofarmakaList.findOne({
                 where: { id },
             });
 
@@ -333,14 +327,13 @@ module.exports = {
                 return;
             }
 
-            if (!korluhSayurBuahList) {
-                res.status(404).json(response(404, 'Korluh sayur dan buah not found'));
+            if (!korluhTanamanBiofarmakaList) {
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka not found'));
                 return;
             }
 
             let {
                 nama_tanaman,
-                hasil_produksi,
                 luas_panen_habis,
                 luas_panen_belum_habis,
                 luas_rusak,
@@ -352,11 +345,11 @@ module.exports = {
             } = req.body;
 
             if (nama_tanaman) {
-                const namaTanamanExists = await KorluhSayurBuahList.findOne({
+                const namaTanamanExists = await KorluhTanamanBiofarmakaList.findOne({
                     where: {
-                        korluhSayurBuahId: korluhSayurBuahList.korluhSayurBuahId,
+                        korluhTanamanBiofarmakaId: korluhTanamanBiofarmakaList.korluhTanamanBiofarmakaId,
+                        id: { [Op.not]: korluhTanamanBiofarmakaList.id },
                         namaTanaman: { [Op.like]: nama_tanaman },
-                        id: { [Op.not]: korluhSayurBuahList.id },
                     }
                 });
 
@@ -364,30 +357,28 @@ module.exports = {
                     res.status(400).json(response(400, 'Bad Request', [
                         {
                             type: 'duplicate',
-                            message: "Cannot updated korluh sayur dan buah, please use another name",
+                            message: "Cannot updated korluh tanaman biofarmaka, please use another name",
                             field: 'nama_tanaman',
                         },
                     ]));
                     return;
                 }
             } else {
-                nama_tanaman = korluhSayurBuahList.namaTanaman;
+                nama_tanaman = korluhTanamanBiofarmakaList.namaTanaman;
             }
 
-            nama_tanaman = nama_tanaman ?? korluhSayurBuahList.namaTanaman;
-            hasil_produksi = hasil_produksi ?? korluhSayurBuahList.hasilProduksi;
-            luas_panen_habis = luas_panen_habis ?? korluhSayurBuahList.luasPanenHabis;
-            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhSayurBuahList.luasPanenBelumHabis;
-            luas_rusak = luas_rusak ?? korluhSayurBuahList.luasRusak;
-            luas_penanaman_baru = luas_penanaman_baru ?? korluhSayurBuahList.luasPenanamanBaru;
-            produksi_habis = produksi_habis ?? korluhSayurBuahList.produksiHabis;
-            produksi_belum_habis = produksi_belum_habis ?? korluhSayurBuahList.produksiBelumHabis;
-            rerata_harga = rerata_harga ?? korluhSayurBuahList.rerataHarga;
-            keterangan = keterangan ?? korluhSayurBuahList.keterangan;
+            nama_tanaman = nama_tanaman ?? korluhTanamanBiofarmakaList.namaTanaman;
+            luas_panen_habis = luas_panen_habis ?? korluhTanamanBiofarmakaList.luasPanenHabis;
+            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhTanamanBiofarmakaList.luasPanenBelumHabis;
+            luas_rusak = luas_rusak ?? korluhTanamanBiofarmakaList.luasRusak;
+            luas_penanaman_baru = luas_penanaman_baru ?? korluhTanamanBiofarmakaList.luasPenanamanBaru;
+            produksi_habis = produksi_habis ?? korluhTanamanBiofarmakaList.produksiHabis;
+            produksi_belum_habis = produksi_belum_habis ?? korluhTanamanBiofarmakaList.produksiBelumHabis;
+            rerata_harga = rerata_harga ?? korluhTanamanBiofarmakaList.rerataHarga;
+            keterangan = keterangan ?? korluhTanamanBiofarmakaList.keterangan;
 
-            await korluhSayurBuahList.update({
+            await korluhTanamanBiofarmakaList.update({
                 namaTanaman: nama_tanaman,
-                hasilProduksi: hasil_produksi,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
                 luasRusak: luas_rusak,
@@ -400,7 +391,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update korluh sayur dan buah successfully'));
+            res.status(200).json(response(200, 'Update korluh tanaman biofarmaka successfully'));
         } catch (err) {
             console.log(err);
 
@@ -420,32 +411,32 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const korluhSayurBuahList = await KorluhSayurBuahList.findOne({
+            const korluhTanamanBiofarmakaList = await KorluhTanamanBiofarmakaList.findOne({
                 where: { id },
             });
 
-            if (!korluhSayurBuahList) {
-                res.status(404).json(response(404, 'Korluh sayur dan buah not found'));
+            if (!korluhTanamanBiofarmakaList) {
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka not found'));
                 return;
             }
 
-            const korluhSayurBuahId = korluhSayurBuahList.korluhSayurBuahId;
+            const korluhTanamanBiofarmakaId = korluhTanamanBiofarmakaList.korluhTanamanBiofarmakaId;
 
-            await korluhSayurBuahList.destroy();
+            await korluhTanamanBiofarmakaList.destroy();
 
-            const korluhSayurBuahExits = await KorluhSayurBuahList.findOne({
-                where: { korluhSayurBuahId }
+            const korluhTanamanBiofarmakaListExists = await KorluhTanamanBiofarmakaList.findOne({
+                where: { korluhTanamanBiofarmakaId }
             });
 
-            if (!korluhSayurBuahExits) {
-                await KorluhSayurBuah.destroy({
-                    where: { id: korluhSayurBuahId }
+            if (!korluhTanamanBiofarmakaListExists) {
+                await KorluhTanamanBiofarmaka.destroy({
+                    where: { id: korluhTanamanBiofarmakaId }
                 });
             }
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete korluh sayur dan buah successfully'));
+            res.status(200).json(response(200, 'Delete korluh tanaman biofarmaka successfully'));
         } catch (err) {
             console.log(err);
 

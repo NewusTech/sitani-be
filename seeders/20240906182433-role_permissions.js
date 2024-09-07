@@ -12,15 +12,14 @@ module.exports = {
          *   isBetaMember: false
          * }], {});
         */
-        const roles = [
+        const dataList = [
             {
-                id: 1,
-                role_name: "SUPER_ADMIN",
-                description: "Super admin have all permissions",
+                role_id: 1,
+                permission_id: 1,
             },
         ];
 
-        await queryInterface.bulkInsert({ tableName: "roles" }, roles, {});
+        await queryInterface.bulkInsert({ tableName: "role_permissions" }, dataList, {});
     },
 
     async down(queryInterface, Sequelize) {
@@ -30,6 +29,6 @@ module.exports = {
          * Example:
          * await queryInterface.bulkDelete('People', null, {});
          */
-        await queryInterface.bulkDelete({ tableName: "roles" }, null, {});
+        await queryInterface.bulkDelete({ tableName: "role_permissions" }, null, {});
     }
 };

@@ -446,26 +446,10 @@ module.exports = {
 
     getOne: async (req, res) => {
         try {
-            let { equalDate, desa } = req.query;
-
-            let where = {};
-
-            if (!isNaN(parseInt(desa))) {
-                where.desaId = parseInt(desa);
-            }
-            if (equalDate) {
-                equalDate = new Date(equalDate);
-                if (equalDate instanceof Date && !isNaN(equalDate)) {
-                    where.tanggal = { [Op.eq]: equalDate };
-                }
-            }
-
-            if (!where?.desaId || !where?.tanggal) {
-                res.status(404).json(response(404, 'Korluh padi not found'));
-                return;
-            }
+            const { id } = req.params;
 
             const korluhPadi = await KorluhPadi.findOne({
+                where: { id },
                 include: [
                     {
                         model: Kecamatan,
@@ -476,7 +460,6 @@ module.exports = {
                         as: 'desa',
                     },
                 ],
-                where,
             });
 
             if (!korluhPadi) {
@@ -507,20 +490,6 @@ module.exports = {
             });
 
             const schema = {
-                kecamatan_id: {
-                    type: "number",
-                    optional: true,
-                    positive: true,
-                    integer: true,
-                    convert: true,
-                },
-                desa_id: {
-                    type: "number",
-                    optional: true,
-                    positive: true,
-                    integer: true,
-                    convert: true,
-                },
                 tanggal: {
                     type: "date",
                     optional: true,
@@ -542,8 +511,6 @@ module.exports = {
             }
 
             let {
-                kecamatan_id,
-                desa_id,
                 tanggal,
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
@@ -583,23 +550,9 @@ module.exports = {
                 sawah_rawa_lebak_lahan_sawah_puso,
             } = req.body;
 
-            if (kecamatan_id) {
-                const kecamatan = await Kecamatan.findByPk(kecamatan_id);
-
-                kecamatan_id = kecamatan?.id ?? korluhPadi.kecamatanId;
-            } else {
-                kecamatan_id = korluhPadi.kecamatanId;
-            }
-            if (desa_id) {
-                const desa = await Desa.findByPk(desa_id);
-
-                desa_id = desa?.id ?? korluhPadi.desaId;
-            } else {
-                desa_id = korluhPadi.desaId;
-            }
             if (tanggal) {
                 const tanggalExists = await KorluhPadi.findOne({
-                    where: { tanggal: { [Op.eq]: tanggal }, desaId: desa_id }
+                    where: { tanggal: { [Op.eq]: tanggal }, desaId: korluhPadi.desaId }
                 });
                 if (tanggalExists !== null && tanggalExists?.id !== korluhPadi.id) {
                     res.status(400).json(response(400, 'Bad Request', [
@@ -652,8 +605,6 @@ module.exports = {
 
             await korluhPadi.update({
                 tanggal: tanggal ?? korluhPadi.tanggal,
-                kecamatanId: kecamatan_id,
-                desaId: desa_id,
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
                 hibrida_bantuan_pemerintah_lahan_sawah_puso,

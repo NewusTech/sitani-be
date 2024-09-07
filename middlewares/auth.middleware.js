@@ -1,9 +1,9 @@
-const baseConfig = require('../config/base.config');
 const { response } = require('../helpers/response.formatter');
-const { Token } = require('../models');
+const baseConfig = require('../config/base.config');
+const { User } = require('../models');
 const jwt = require('jsonwebtoken');
 
-const checkRolesAndLogout = (allowedRoles) => async (req, res, next) => {
+const checkPermissionAndLogout = (allowPermission) => async (req, res, next) => {
     let token;
     try {
         token = req.headers.authorization.split(' ')[1];
@@ -23,16 +23,24 @@ const checkRolesAndLogout = (allowedRoles) => async (req, res, next) => {
             return;
         }
 
-        data = decoded;
+        const user = await User.findOne({ where: { id: decoded.sub } });
 
-        const tokenCheck = await Token.findOne({ where: { token } });
-
-        if (tokenCheck) {
-            res.status(403).json(response(403, 'Unauthorized: already logged out'));
+        if (!user) {
+            res.status(403).json(response(403, 'Unauthorized: user cannot found'));
             return;
         }
 
-        if (allowedRoles.includes(data.role)) {
+        let cek = false;
+        for (let permission of allowPermission) {
+            const temp = decoded.permissions.includes(permission);
+            if (temp) {
+                cek = true;
+                break;
+            }
+        }
+
+        if (cek) {
+            req.root = { userId: user.id };
             next();
         } else {
             res.status(403).json(response(403, 'Forbidden: insufficient access rights'));
@@ -54,5 +62,5 @@ const checkRoles = () => async (req, res, next) => {
 };
 
 module.exports = {
-    checkRolesAndLogout, checkRoles
+    checkPermissionAndLogout, checkRoles
 };
