@@ -8,6 +8,7 @@ let prefix = '/kepang/produsen-eceran';
 route.post(prefix + '/create', kepangProdusenEceranController.create);
 route.get(prefix + '/get', kepangProdusenEceranController.getAll);
 route.get(prefix + '/get/:id', kepangProdusenEceranController.getOne);
+route.put(prefix + '/update/:id', kepangProdusenEceranController.update);
 /* -- ROUTE -- */
 
 module.exports = route;
