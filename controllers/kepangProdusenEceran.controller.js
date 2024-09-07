@@ -124,4 +124,69 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getAll: async (req, res) => {
+        try {
+            let { equalDate, startDate, endDate, limit, page } = req.query;
+
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+            const offset = (page - 1) * limit;
+
+            let where = {};
+
+            if (equalDate) {
+                equalDate = new Date(equalDate);
+                if (equalDate instanceof Date && !isNaN(equalDate)) {
+                    where.tanggal = { [Op.eq]: equalDate };
+                }
+            } else {
+                if (startDate) {
+                    startDate = new Date(startDate);
+                    if (startDate instanceof Date && !isNaN(startDate)) {
+                        where.tanggal = { [Op.gte]: startDate };
+                    }
+                }
+                if (endDate) {
+                    endDate = new Date(endDate);
+                    if (endDate instanceof Date && !isNaN(endDate)) {
+                        where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
+                    }
+                }
+            }
+
+            const kepangProdusenEceran = await KepangProdusenEceran.findAll({
+                include: [
+                    {
+                        model: KepangProdusenEceranList,
+                        as: 'list',
+                        include: [
+                            {
+                                model: KepangMasterKomoditas,
+                                as: 'komoditas'
+                            }
+                        ]
+                    }
+                ],
+                offset,
+                limit,
+                where,
+            });
+
+            const count = await KepangProdusenEceran.count({ where });
+
+            const pagination = generatePagination(count, page, limit, '/api/kepang/produsen-eceran/get');
+
+            res.status(200).json(response(200, 'Get kepang produsen eceran successfully', { data: kepangProdusenEceran, pagination }));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
