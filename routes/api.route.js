@@ -1,5 +1,6 @@
 const korluhTanamanBiofarmakaRoute = require('./korluhTanamanBiofarmaka.route');
 const kepangMasterKomoditasRoute = require('./kepangMasterKomoditas.route');
+const kepangProdusenEceranRoute = require('./kepangProdusenEceran.route');
 const korluhMasterPalawijaRoute = require('./korluhMasterPalawija.route');
 const korluhTanamanHiasRoute = require('./korluhTanamanHias.route');
 const penyuluhKabupatenRoute = require('./penyuluhKabupaten.route');
@@ -25,6 +26,7 @@ const bidangRoute = require('./bidang.route');
 module.exports = function (app, urlApi) {
     app.use(urlApi, korluhTanamanBiofarmakaRoute);
     app.use(urlApi, kepangMasterKomoditasRoute);
+    app.use(urlApi, kepangProdusenEceranRoute);
     app.use(urlApi, korluhMasterPalawijaRoute);
     app.use(urlApi, korluhTanamanHiasRoute);
     app.use(urlApi, penyuluhKabupatenRoute);
