@@ -5,6 +5,10 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class KepangCvProdusen extends Model {
         static associate(models) {
+            KepangCvProdusen.hasMany(models.KepangCvProdusenList, {
+                foreignKey: 'kepangCvProdusenId',
+                as: 'list'
+            });
         }
     }
 
