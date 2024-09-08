@@ -8,7 +8,9 @@ const v = new Validator();
 module.exports = {
     getAll: async (req, res) => {
         try {
-            const kepangMasterKomoditas = await KepangMasterKomoditas.findAll();
+            const kepangMasterKomoditas = await KepangMasterKomoditas.findAll({
+                order: [['nama', 'ASC']]
+            });
 
             res.status(200).json(response(200, 'Get kepang master komoditas successfully', kepangMasterKomoditas));
         } catch (err) {

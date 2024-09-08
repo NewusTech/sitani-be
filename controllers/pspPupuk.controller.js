@@ -32,6 +32,7 @@ module.exports = {
                     type: "number",
                     max: 99999999999,
                     integer: true,
+                    convert: true,
                     min: 0,
                 },
             };
@@ -108,6 +109,7 @@ module.exports = {
                 offset,
                 limit,
                 where,
+                order: [['createdAt', 'DESC']]
             });
 
             const count = await PspPupuk.count({ where });
@@ -185,6 +187,7 @@ module.exports = {
                     max: 99999999999,
                     optional: true,
                     integer: true,
+                    convert: true,
                     min: 0,
                 },
             };

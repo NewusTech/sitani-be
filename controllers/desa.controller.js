@@ -8,7 +8,7 @@ const v = new Validator();
 module.exports = {
     getAll: async (req, res) => {
         try {
-			let { kecamatan } = req.query;
+            let { kecamatan } = req.query;
 
             let where = {};
 
@@ -16,7 +16,10 @@ module.exports = {
                 where.kecamatanId = parseInt(kecamatan);
             }
 
-            const desa = await Desa.findAll({ where });
+            const desa = await Desa.findAll({
+                where,
+                order: [['nama', 'ASC']]
+            });
 
             res.status(200).json(response(200, 'Get desa successfully', desa));
         } catch (err) {

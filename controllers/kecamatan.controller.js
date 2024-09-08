@@ -8,7 +8,9 @@ const v = new Validator();
 module.exports = {
     getAll: async (req, res) => {
         try {
-            const kecamatan = await Kecamatan.findAll();
+            const kecamatan = await Kecamatan.findAll({
+                order: [['nama', 'ASC']]
+            });
 
             res.status(200).json(response(200, 'Get kecamatan successfully', kecamatan));
         } catch (err) {

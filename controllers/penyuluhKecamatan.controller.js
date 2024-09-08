@@ -17,6 +17,7 @@ module.exports = {
                     type: "number",
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 nama: {
                     type: "string",
@@ -28,6 +29,7 @@ module.exports = {
                     max: 99999999999,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 pangkat: {
                     type: "string",
@@ -52,6 +54,7 @@ module.exports = {
                         type: "number",
                         positive: true,
                         integer: true,
+                        convert: true,
                     }
                 },
             };
@@ -217,6 +220,7 @@ module.exports = {
                     optional: true,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 nama: {
                     type: "string",
@@ -230,6 +234,7 @@ module.exports = {
                     optional: true,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 pangkat: {
                     type: "string",
@@ -258,6 +263,7 @@ module.exports = {
                         type: "number",
                         positive: true,
                         integer: true,
+                        convert: true,
                     }
                 },
             };

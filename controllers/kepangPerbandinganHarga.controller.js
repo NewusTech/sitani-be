@@ -1,6 +1,5 @@
 const { KepangPerbandinganHargaList, KepangMasterKomoditas, KepangPerbandinganHarga, sequelize } = require('../models');
-const { getFirstLastDate, dateGenerate, response } = require('../helpers');
-const { generatePagination } = require('../pagination/pagination');
+const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');

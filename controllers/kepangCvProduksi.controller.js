@@ -157,6 +157,7 @@ module.exports = {
                 where: {
                     bulan: sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), year)
                 },
+                order: [['bulan', 'ASC']]
             });
 
             res.status(200).json(response(200, 'Get kepang cv produksi successfully', kepangCvProduksi));
