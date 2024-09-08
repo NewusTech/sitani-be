@@ -7,6 +7,7 @@ let prefix = '/kepang/cv-produksi';
 /* -- ROUTE -- */
 route.post(prefix + '/create', kepangCvProduksiController.create);
 route.get(prefix + '/get', kepangCvProduksiController.getAll);
+route.get(prefix + '/get/:id', kepangCvProduksiController.getOne);
 /* -- ROUTE -- */
 
 module.exports = route;
