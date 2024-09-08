@@ -299,6 +299,8 @@ module.exports = {
                 return;
             }
 
+            tanggal = dateGenerate(tanggal);
+
             const korluhPadiExists = await KorluhPadi.findOne({
                 where: {
                     tanggal: { [Op.eq]: tanggal },
@@ -394,18 +396,21 @@ module.exports = {
             }
             if (equalDate) {
                 equalDate = new Date(equalDate);
+                equalDate = dateGenerate(equalDate);
                 if (equalDate instanceof Date && !isNaN(equalDate)) {
                     where.tanggal = { [Op.eq]: equalDate };
                 }
             } else {
                 if (startDate) {
                     startDate = new Date(startDate);
+                    startDate = dateGenerate(startDate);
                     if (startDate instanceof Date && !isNaN(startDate)) {
                         where.tanggal = { [Op.gte]: startDate };
                     }
                 }
                 if (endDate) {
                     endDate = new Date(endDate);
+                    endDate = dateGenerate(endDate);
                     if (endDate instanceof Date && !isNaN(endDate)) {
                         where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
                     }
@@ -551,6 +556,7 @@ module.exports = {
             } = req.body;
 
             if (tanggal) {
+                tanggal = dateGenerate(tanggal);
                 const tanggalExists = await KorluhPadi.findOne({
                     where: { tanggal: { [Op.eq]: tanggal }, desaId: korluhPadi.desaId }
                 });
@@ -565,43 +571,6 @@ module.exports = {
                     return;
                 }
             }
-
-            hibrida_bantuan_pemerintah_lahan_sawah_panen = hibrida_bantuan_pemerintah_lahan_sawah_panen ?? korluhPadi.hibrida_bantuan_pemerintah_lahan_sawah_panen;
-            hibrida_bantuan_pemerintah_lahan_sawah_tanam = hibrida_bantuan_pemerintah_lahan_sawah_tanam ?? korluhPadi.hibrida_bantuan_pemerintah_lahan_sawah_tanam;
-            hibrida_bantuan_pemerintah_lahan_sawah_puso = hibrida_bantuan_pemerintah_lahan_sawah_puso ?? korluhPadi.hibrida_bantuan_pemerintah_lahan_sawah_puso;
-            hibrida_non_bantuan_pemerintah_lahan_sawah_panen = hibrida_non_bantuan_pemerintah_lahan_sawah_panen ?? korluhPadi.hibrida_non_bantuan_pemerintah_lahan_sawah_panen;
-            hibrida_non_bantuan_pemerintah_lahan_sawah_tanam = hibrida_non_bantuan_pemerintah_lahan_sawah_tanam ?? korluhPadi.hibrida_non_bantuan_pemerintah_lahan_sawah_tanam;
-            hibrida_non_bantuan_pemerintah_lahan_sawah_puso = hibrida_non_bantuan_pemerintah_lahan_sawah_puso ?? korluhPadi.hibrida_non_bantuan_pemerintah_lahan_sawah_puso;
-            unggul_bantuan_pemerintah_lahan_sawah_panen = unggul_bantuan_pemerintah_lahan_sawah_panen ?? korluhPadi.unggul_bantuan_pemerintah_lahan_sawah_panen;
-            unggul_bantuan_pemerintah_lahan_sawah_tanam = unggul_bantuan_pemerintah_lahan_sawah_tanam ?? korluhPadi.unggul_bantuan_pemerintah_lahan_sawah_tanam;
-            unggul_bantuan_pemerintah_lahan_sawah_puso = unggul_bantuan_pemerintah_lahan_sawah_puso ?? korluhPadi.unggul_bantuan_pemerintah_lahan_sawah_puso;
-            unggul_bantuan_pemerintah_lahan_bukan_sawah_panen = unggul_bantuan_pemerintah_lahan_bukan_sawah_panen ?? korluhPadi.unggul_bantuan_pemerintah_lahan_bukan_sawah_panen;
-            unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam = unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam ?? korluhPadi.unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam;
-            unggul_bantuan_pemerintah_lahan_bukan_sawah_puso = unggul_bantuan_pemerintah_lahan_bukan_sawah_puso ?? korluhPadi.unggul_bantuan_pemerintah_lahan_bukan_sawah_puso;
-            unggul_non_bantuan_pemerintah_lahan_sawah_panen = unggul_non_bantuan_pemerintah_lahan_sawah_panen ?? korluhPadi.unggul_non_bantuan_pemerintah_lahan_sawah_panen;
-            unggul_non_bantuan_pemerintah_lahan_sawah_tanam = unggul_non_bantuan_pemerintah_lahan_sawah_tanam ?? korluhPadi.unggul_non_bantuan_pemerintah_lahan_sawah_tanam;
-            unggul_non_bantuan_pemerintah_lahan_sawah_puso = unggul_non_bantuan_pemerintah_lahan_sawah_puso ?? korluhPadi.unggul_non_bantuan_pemerintah_lahan_sawah_puso;
-            unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen = unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen ?? korluhPadi.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen;
-            unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam = unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam ?? korluhPadi.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam;
-            unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso = unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso ?? korluhPadi.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso;
-            lokal_lahan_sawah_panen = lokal_lahan_sawah_panen ?? korluhPadi.lokal_lahan_sawah_panen;
-            lokal_lahan_sawah_tanam = lokal_lahan_sawah_tanam ?? korluhPadi.lokal_lahan_sawah_tanam;
-            lokal_lahan_sawah_puso = lokal_lahan_sawah_puso ?? korluhPadi.lokal_lahan_sawah_puso;
-            lokal_lahan_bukan_sawah_panen = lokal_lahan_bukan_sawah_panen ?? korluhPadi.lokal_lahan_bukan_sawah_panen;
-            lokal_lahan_bukan_sawah_tanam = lokal_lahan_bukan_sawah_tanam ?? korluhPadi.lokal_lahan_bukan_sawah_tanam;
-            lokal_lahan_bukan_sawah_puso = lokal_lahan_bukan_sawah_puso ?? korluhPadi.lokal_lahan_bukan_sawah_puso;
-            sawah_irigasi_lahan_sawah_panen = sawah_irigasi_lahan_sawah_panen ?? korluhPadi.sawah_irigasi_lahan_sawah_panen;
-            sawah_irigasi_lahan_sawah_tanam = sawah_irigasi_lahan_sawah_tanam ?? korluhPadi.sawah_irigasi_lahan_sawah_tanam;
-            sawah_irigasi_lahan_sawah_puso = sawah_irigasi_lahan_sawah_puso ?? korluhPadi.sawah_irigasi_lahan_sawah_puso;
-            sawah_tadah_hujan_lahan_sawah_panen = sawah_tadah_hujan_lahan_sawah_panen ?? korluhPadi.sawah_tadah_hujan_lahan_sawah_panen;
-            sawah_tadah_hujan_lahan_sawah_tanam = sawah_tadah_hujan_lahan_sawah_tanam ?? korluhPadi.sawah_tadah_hujan_lahan_sawah_tanam;
-            sawah_tadah_hujan_lahan_sawah_puso = sawah_tadah_hujan_lahan_sawah_puso ?? korluhPadi.sawah_tadah_hujan_lahan_sawah_puso;
-            sawah_rawa_pasang_surut_lahan_sawah_panen = sawah_rawa_pasang_surut_lahan_sawah_panen ?? korluhPadi.sawah_rawa_pasang_surut_lahan_sawah_panen;
-            sawah_rawa_pasang_surut_lahan_sawah_tanam = sawah_rawa_pasang_surut_lahan_sawah_tanam ?? korluhPadi.sawah_rawa_pasang_surut_lahan_sawah_tanam;
-            sawah_rawa_pasang_surut_lahan_sawah_puso = sawah_rawa_pasang_surut_lahan_sawah_puso ?? korluhPadi.sawah_rawa_pasang_surut_lahan_sawah_puso;
-            sawah_rawa_lebak_lahan_sawah_panen = sawah_rawa_lebak_lahan_sawah_panen ?? korluhPadi.sawah_rawa_lebak_lahan_sawah_panen;
-            sawah_rawa_lebak_lahan_sawah_tanam = sawah_rawa_lebak_lahan_sawah_tanam ?? korluhPadi.sawah_rawa_lebak_lahan_sawah_tanam;
-            sawah_rawa_lebak_lahan_sawah_puso = sawah_rawa_lebak_lahan_sawah_puso ?? korluhPadi.sawah_rawa_lebak_lahan_sawah_puso;
 
             await korluhPadi.update({
                 tanggal: tanggal ?? korluhPadi.tanggal,

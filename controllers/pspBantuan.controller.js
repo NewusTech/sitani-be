@@ -73,6 +73,8 @@ module.exports = {
                 return;
             }
 
+            periode = dateGenerate(periode);
+
             await PspBantuan.create({
                 kecamatanId: kecamatan.id,
                 desaId: desa.id,
@@ -120,12 +122,14 @@ module.exports = {
             }
             if (startDate) {
                 startDate = new Date(startDate);
+                startDate = dateGenerate(startDate);
                 if (startDate instanceof Date && !isNaN(startDate)) {
                     where.periode = { [Op.gte]: startDate };
                 }
             }
             if (endDate) {
                 endDate = new Date(endDate);
+                endDate = dateGenerate(endDate);
                 if (endDate instanceof Date && !isNaN(endDate)) {
                     where.periode = { ...where.periode, [Op.lte]: endDate };
                 }
@@ -268,6 +272,10 @@ module.exports = {
                 desa_id = desa?.id ?? pspBantuan.desaId;
             } else {
                 desa_id = pspBantuan.desaId;
+            }
+
+            if (periode) {
+                periode = dateGenerate(periode);
             }
 
             jenis_bantuan = jenis_bantuan ?? pspBantuan.jenisBantuan;

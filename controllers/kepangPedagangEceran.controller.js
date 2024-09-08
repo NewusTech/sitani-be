@@ -160,18 +160,21 @@ module.exports = {
 
             if (equalDate) {
                 equalDate = new Date(equalDate);
+                equalDate = dateGenerate(equalDate);
                 if (equalDate instanceof Date && !isNaN(equalDate)) {
                     where.tanggal = { [Op.eq]: equalDate };
                 }
             } else {
                 if (startDate) {
                     startDate = new Date(startDate);
+                    startDate = dateGenerate(startDate);
                     if (startDate instanceof Date && !isNaN(startDate)) {
                         where.tanggal = { [Op.gte]: startDate };
                     }
                 }
                 if (endDate) {
                     endDate = new Date(endDate);
+                    endDate = dateGenerate(endDate);
                     if (endDate instanceof Date && !isNaN(endDate)) {
                         where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
                     }

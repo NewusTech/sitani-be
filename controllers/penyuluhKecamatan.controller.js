@@ -114,32 +114,36 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-			let { kecamatan, search, limit, page } = req.query;
+            let { kecamatan, search, limit, page } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
-			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
-			const offset = (page - 1) * limit;
+            const offset = (page - 1) * limit;
 
-			let where = {};
-			if (search) {
+            let where = {};
+            if (search) {
                 let nipSearchTemp = isNaN(parseInt(search)) ? 0 : parseInt(search);
-				where = {
-					[Op.or]: {
+                where = {
+                    [Op.or]: {
                         keterangan: { [Op.like]: `%${search}%` },
-						golongan: { [Op.like]: `%${search}%` },
-						pangkat: { [Op.like]: `%${search}%` },
-						nama: { [Op.like]: `%${search}%` },
-						nip: nipSearchTemp,
-					}
-				};
-			}
+                        golongan: { [Op.like]: `%${search}%` },
+                        pangkat: { [Op.like]: `%${search}%` },
+                        nama: { [Op.like]: `%${search}%` },
+                        nip: nipSearchTemp,
+                    }
+                };
+            }
             if (!isNaN(parseInt(kecamatan))) {
                 where.kecamatanId = parseInt(kecamatan);
             }
 
             const penyuluhKecamatan = await PenyuluhKecamatan.findAll({
                 include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatan',
+                    },
                     {
                         model: Desa,
                         as: 'desa',
@@ -151,7 +155,7 @@ module.exports = {
             });
 
             const count = await PenyuluhKecamatan.count({ where });
-            
+
             const pagination = generatePagination(count, page, limit, '/api/penyuluh-kecamatan/get');
 
             res.status(200).json(response(200, 'Get penyuluh kecamatan successfully', { data: penyuluhKecamatan, pagination }));

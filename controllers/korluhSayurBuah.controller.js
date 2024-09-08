@@ -131,6 +131,8 @@ module.exports = {
                 return;
             }
 
+            tanggal = dateGenerate(tanggal);
+
             const korluhSayurBuah = await KorluhSayurBuah.findOrCreate({
                 where: {
                     tanggal: { [Op.eq]: tanggal },
@@ -211,18 +213,21 @@ module.exports = {
             }
             if (equalDate) {
                 equalDate = new Date(equalDate);
+                equalDate = dateGenerate(equalDate);
                 if (equalDate instanceof Date && !isNaN(equalDate)) {
                     where.tanggal = { [Op.eq]: equalDate };
                 }
             } else {
                 if (startDate) {
                     startDate = new Date(startDate);
+                    startDate = dateGenerate(startDate);
                     if (startDate instanceof Date && !isNaN(startDate)) {
                         where.tanggal = { [Op.gte]: startDate };
                     }
                 }
                 if (endDate) {
                     endDate = new Date(endDate);
+                    endDate = dateGenerate(endDate);
                     if (endDate instanceof Date && !isNaN(endDate)) {
                         where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
                     }
@@ -373,17 +378,6 @@ module.exports = {
             } else {
                 nama_tanaman = korluhSayurBuahList.namaTanaman;
             }
-
-            nama_tanaman = nama_tanaman ?? korluhSayurBuahList.namaTanaman;
-            hasil_produksi = hasil_produksi ?? korluhSayurBuahList.hasilProduksi;
-            luas_panen_habis = luas_panen_habis ?? korluhSayurBuahList.luasPanenHabis;
-            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhSayurBuahList.luasPanenBelumHabis;
-            luas_rusak = luas_rusak ?? korluhSayurBuahList.luasRusak;
-            luas_penanaman_baru = luas_penanaman_baru ?? korluhSayurBuahList.luasPenanamanBaru;
-            produksi_habis = produksi_habis ?? korluhSayurBuahList.produksiHabis;
-            produksi_belum_habis = produksi_belum_habis ?? korluhSayurBuahList.produksiBelumHabis;
-            rerata_harga = rerata_harga ?? korluhSayurBuahList.rerataHarga;
-            keterangan = keterangan ?? korluhSayurBuahList.keterangan;
 
             await korluhSayurBuahList.update({
                 namaTanaman: nama_tanaman,

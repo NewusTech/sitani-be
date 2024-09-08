@@ -103,7 +103,7 @@ module.exports = {
 
 			const offset = (page - 1) * limit;
 
-			const order = [['created_at', 'ASC']];
+			const order = [['createdAt', 'ASC']];
 
 			let where = {};
 			if (search) {

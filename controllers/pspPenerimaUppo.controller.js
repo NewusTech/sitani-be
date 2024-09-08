@@ -121,12 +121,14 @@ module.exports = {
             }
             if (startDate) {
                 startDate = new Date(startDate);
+                startDate = dateGenerate(startDate);
                 if (startDate instanceof Date && !isNaN(startDate)) {
                     where.createdAt = { [Op.gte]: startDate };
                 }
             }
             if (endDate) {
                 endDate = new Date(endDate);
+                endDate = dateGenerate(endDate);
                 if (endDate instanceof Date && !isNaN(endDate)) {
                     where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
                 }
