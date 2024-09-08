@@ -67,7 +67,19 @@ module.exports = {
                     },
                     {
                         model: KorluhMasterPalawija,
-                        as: 'master'
+                        as: 'master',
+                        include: [
+                            {
+                                model: KorluhMasterPalawija,
+                                as: 'induk',
+                                include: [
+                                    {
+                                        model: KorluhMasterPalawija,
+                                        as: 'induk',
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ],
                 limit,
@@ -158,12 +170,27 @@ module.exports = {
                 padiPusoCount += item.sawah_rawa_lebak_lahan_sawah_puso;
             });
 
-            korluhPalawija = korluhPalawija.map((item) => ({
-                komoditas: item?.master?.nama ?? 'error',
-                panen: item.lahanSawahPanen + item.lahanBukanSawahPanen,
-                tanam: item.lahanSawahTanam + item.lahanBukanSawahTanam,
-                puso: item.lahanSawahPuso + item.lahanBukanSawahPuso,
-            }));
+            let master = [];
+            let temp = [];
+            korluhPalawija.map((item) => {
+                let nama = item?.master?.induk?.induk?.nama ?? (item?.master?.induk?.nama ?? (item?.master?.nama ?? 'error'));
+                if (master.includes(nama)) {
+                    const index = master.indexOf(nama);
+                    temp[index].panen += item.lahanSawahPanen + item.lahanBukanSawahPanen;
+                    temp[index].tanam += item.lahanSawahTanam + item.lahanBukanSawahTanam;
+                    temp[index].puso += item.lahanSawahPuso + item.lahanBukanSawahPuso;
+                } else {
+                    master.push(nama);
+                    temp.push(
+                        {
+                            panen: item.lahanSawahPanen + item.lahanBukanSawahPanen,
+                            tanam: item.lahanSawahTanam + item.lahanBukanSawahTanam,
+                            puso: item.lahanSawahPuso + item.lahanBukanSawahPuso,
+                            nama,
+                        }
+                    );
+                }
+            });
 
             korluhSayurBuah = korluhSayurBuah.map((item) => ({
                 luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru,
@@ -190,7 +217,7 @@ module.exports = {
                 korluhTanamanBiofarmaka,
                 korluhTanamanHias,
                 korluhSayurBuah,
-                korluhPalawija,
+                korluhPalawija: temp,
             }));
         } catch (err) {
             console.log(err);
