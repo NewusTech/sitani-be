@@ -129,7 +129,7 @@ module.exports = {
             });
 
             const count = await PenyuluhKabupaten.count({ where });
-            
+
             const pagination = generatePagination(count, page, limit, '/api/penyuluh-kabupaten/get');
 
             res.status(200).json(response(200, 'Get penyuluh kabupaten successfully', { data: penyuluhKabupaten, pagination }));
