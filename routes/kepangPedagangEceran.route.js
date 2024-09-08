@@ -9,6 +9,7 @@ route.post(prefix + '/create', kepangPedagangEceranController.create);
 route.get(prefix + '/get', kepangPedagangEceranController.getAll);
 route.get(prefix + '/get/:id', kepangPedagangEceranController.getOne);
 route.put(prefix + '/update/:id', kepangPedagangEceranController.update);
+route.delete(prefix + '/delete/:id', kepangPedagangEceranController.delete);
 /* -- ROUTE -- */
 
 module.exports = route;
