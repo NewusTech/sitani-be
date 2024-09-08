@@ -1,8 +1,8 @@
 const { KorluhTanamanBiofarmakaList, KorluhTanamanBiofarmaka, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
+const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -87,7 +87,7 @@ module.exports = {
                 return;
             }
 
-            const {
+            let {
                 kecamatan_id,
                 desa_id,
                 tanggal,
@@ -125,6 +125,8 @@ module.exports = {
                 ]));
                 return;
             }
+
+            tanggal = dateGenerate(tanggal);
 
             const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findOrCreate({
                 where: {
@@ -205,18 +207,21 @@ module.exports = {
             }
             if (equalDate) {
                 equalDate = new Date(equalDate);
+                equalDate = dateGenerate(equalDate);
                 if (equalDate instanceof Date && !isNaN(equalDate)) {
                     where.tanggal = { [Op.eq]: equalDate };
                 }
             } else {
                 if (startDate) {
                     startDate = new Date(startDate);
+                    startDate = dateGenerate(startDate);
                     if (startDate instanceof Date && !isNaN(startDate)) {
                         where.tanggal = { [Op.gte]: startDate };
                     }
                 }
                 if (endDate) {
                     endDate = new Date(endDate);
+                    endDate = dateGenerate(endDate);
                     if (endDate instanceof Date && !isNaN(endDate)) {
                         where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
                     }
@@ -366,16 +371,6 @@ module.exports = {
             } else {
                 nama_tanaman = korluhTanamanBiofarmakaList.namaTanaman;
             }
-
-            nama_tanaman = nama_tanaman ?? korluhTanamanBiofarmakaList.namaTanaman;
-            luas_panen_habis = luas_panen_habis ?? korluhTanamanBiofarmakaList.luasPanenHabis;
-            luas_panen_belum_habis = luas_panen_belum_habis ?? korluhTanamanBiofarmakaList.luasPanenBelumHabis;
-            luas_rusak = luas_rusak ?? korluhTanamanBiofarmakaList.luasRusak;
-            luas_penanaman_baru = luas_penanaman_baru ?? korluhTanamanBiofarmakaList.luasPenanamanBaru;
-            produksi_habis = produksi_habis ?? korluhTanamanBiofarmakaList.produksiHabis;
-            produksi_belum_habis = produksi_belum_habis ?? korluhTanamanBiofarmakaList.produksiBelumHabis;
-            rerata_harga = rerata_harga ?? korluhTanamanBiofarmakaList.rerataHarga;
-            keterangan = keterangan ?? korluhTanamanBiofarmakaList.keterangan;
 
             await korluhTanamanBiofarmakaList.update({
                 namaTanaman: nama_tanaman,

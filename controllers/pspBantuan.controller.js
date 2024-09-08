@@ -1,8 +1,8 @@
 const { PspBantuan, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
+const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -46,7 +46,7 @@ module.exports = {
                 return;
             }
 
-            const { kecamatan_id, jenis_bantuan, keterangan, periode, desa_id } = req.body;
+            let { kecamatan_id, jenis_bantuan, keterangan, periode, desa_id } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
@@ -72,6 +72,8 @@ module.exports = {
                 ]));
                 return;
             }
+
+            periode = dateGenerate(periode);
 
             await PspBantuan.create({
                 kecamatanId: kecamatan.id,
@@ -120,12 +122,14 @@ module.exports = {
             }
             if (startDate) {
                 startDate = new Date(startDate);
+                startDate = dateGenerate(startDate);
                 if (startDate instanceof Date && !isNaN(startDate)) {
                     where.periode = { [Op.gte]: startDate };
                 }
             }
             if (endDate) {
                 endDate = new Date(endDate);
+                endDate = dateGenerate(endDate);
                 if (endDate instanceof Date && !isNaN(endDate)) {
                     where.periode = { ...where.periode, [Op.lte]: endDate };
                 }
@@ -268,6 +272,10 @@ module.exports = {
                 desa_id = desa?.id ?? pspBantuan.desaId;
             } else {
                 desa_id = pspBantuan.desaId;
+            }
+
+            if (periode) {
+                periode = dateGenerate(periode);
             }
 
             jenis_bantuan = jenis_bantuan ?? pspBantuan.jenisBantuan;

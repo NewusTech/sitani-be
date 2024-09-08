@@ -1,6 +1,6 @@
-const { KepangProdusenEceranList, KepangMasterKomoditas, KepangProdusenEceran, sequelize } = require('../models');
+const { KepangPedagangEceranList, KepangMasterKomoditas, KepangPedagangEceran, sequelize } = require('../models');
+const { getFirstLastDate, dateGenerate, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -8,22 +8,36 @@ const { Op } = require('sequelize');
 const v = new Validator();
 
 const coreSchema = {
-    satuan: {
-        type: "string",
-        optional: true,
-        max: 255,
-    },
-    harga: {
+    minggu_1: {
         type: "number",
         optional: true,
         integer: true,
         convert: true,
     },
-    keterangan: {
-        type: "string",
+    minggu_2: {
+        type: "number",
         optional: true,
-        max: 255,
-    }
+        integer: true,
+        convert: true,
+    },
+    minggu_3: {
+        type: "number",
+        optional: true,
+        integer: true,
+        convert: true,
+    },
+    minggu_4: {
+        type: "number",
+        optional: true,
+        integer: true,
+        convert: true,
+    },
+    minggu_5: {
+        type: "number",
+        optional: true,
+        integer: true,
+        convert: true,
+    },
 }
 
 module.exports = {
@@ -55,9 +69,11 @@ module.exports = {
             let {
                 kepang_master_komoditas_id,
                 tanggal,
-                satuan,
-                harga,
-                keterangan,
+                minggu_1,
+                minggu_2,
+                minggu_3,
+                minggu_4,
+                minggu_5,
             } = req.body;
 
             const kepangMasterKomoditas = await KepangMasterKomoditas.findByPk(kepang_master_komoditas_id);
@@ -75,27 +91,29 @@ module.exports = {
 
             tanggal = dateGenerate(tanggal);
 
-            const kepangProdusenEceran = await KepangProdusenEceran.findOrCreate({
+            const { first, last } = getFirstLastDate(tanggal);
+
+            const kepangPedagangEceran = await KepangPedagangEceran.findOrCreate({
                 where: {
-                    tanggal: { [Op.eq]: tanggal },
+                    tanggal: { [Op.between]: [first, last] },
                 },
                 defaults: {
                     tanggal,
                 }
             });
 
-            const kepangProdusenEceranListExists = await KepangProdusenEceranList.findOne({
+            const kepangPedagangEceranListExists = await KepangPedagangEceranList.findOne({
                 where: {
-                    kepangProdusenEceranId: kepangProdusenEceran[0].id,
+                    kepangPedagangEceranId: kepangPedagangEceran[0].id,
                     kepangMasterKomoditasId: kepangMasterKomoditas.id,
                 }
             });
 
-            if (kepangProdusenEceranListExists) {
+            if (kepangPedagangEceranListExists) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created kepang produsen dan eceran, please use another master",
+                        message: "Cannot created kepang pedagang eceran, please use another master",
                         field: 'kepang_master_komoditas_id',
                     },
                 ]));
@@ -103,17 +121,19 @@ module.exports = {
                 return;
             }
 
-            await KepangProdusenEceranList.create({
-                kepangProdusenEceranId: kepangProdusenEceran[0].id,
+            await KepangPedagangEceranList.create({
+                kepangPedagangEceranId: kepangPedagangEceran[0].id,
                 kepangMasterKomoditasId: kepangMasterKomoditas.id,
-                keterangan,
-                satuan,
-                harga,
+                minggu1: minggu_1,
+                minggu2: minggu_2,
+                minggu3: minggu_3,
+                minggu4: minggu_4,
+                minggu5: minggu_5,
             });
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Kepang produsen dan eceran created'));
+            res.status(201).json(response(201, 'Kepang pedagang eceran created'));
         } catch (err) {
             console.log(err);
 
@@ -161,10 +181,10 @@ module.exports = {
                 }
             }
 
-            const kepangProdusenEceran = await KepangProdusenEceran.findAll({
+            const kepangPedagangEceran = await KepangPedagangEceran.findAll({
                 include: [
                     {
-                        model: KepangProdusenEceranList,
+                        model: KepangPedagangEceranList,
                         as: 'list',
                         include: [
                             {
@@ -179,11 +199,11 @@ module.exports = {
                 where,
             });
 
-            const count = await KepangProdusenEceran.count({ where });
+            const count = await KepangPedagangEceran.count({ where });
 
-            const pagination = generatePagination(count, page, limit, '/api/kepang/produsen-eceran/get');
+            const pagination = generatePagination(count, page, limit, '/api/kepang/pedagang-eceran/get');
 
-            res.status(200).json(response(200, 'Get kepang produsen eceran successfully', { data: kepangProdusenEceran, pagination }));
+            res.status(200).json(response(200, 'Get kepang pedagang eceran successfully', { data: kepangPedagangEceran, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -199,12 +219,12 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const kepangProdusenEceranList = await KepangProdusenEceranList.findOne({
+            const kepangPedagangEceranList = await KepangPedagangEceranList.findOne({
                 where: { id },
                 include: [
                     {
-                        model: KepangProdusenEceran,
-                        as: 'kepangProdusenEceran',
+                        model: KepangPedagangEceran,
+                        as: 'kepangPedagangEceran',
                     },
                     {
                         model: KepangMasterKomoditas,
@@ -213,12 +233,12 @@ module.exports = {
                 ],
             });
 
-            if (!kepangProdusenEceranList) {
-                res.status(404).json(response(404, 'Kepang produsen eceran not found'));
+            if (!kepangPedagangEceranList) {
+                res.status(404).json(response(404, 'Kepang pedagang eceran not found'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get kepang produsen eceran successfully', kepangProdusenEceranList));
+            res.status(200).json(response(200, 'Get kepang pedagang eceran successfully', kepangPedagangEceranList));
         } catch (err) {
             console.log(err);
 
@@ -236,7 +256,7 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const kepangProdusenEceranList = await KepangProdusenEceranList.findOne({
+            const kepangPedagangEceranList = await KepangPedagangEceranList.findOne({
                 where: { id },
             });
 
@@ -251,26 +271,30 @@ module.exports = {
                 return;
             }
 
-            if (!kepangProdusenEceranList) {
-                res.status(404).json(response(404, 'Kepang produsen eceran not found'));
+            if (!kepangPedagangEceranList) {
+                res.status(404).json(response(404, 'Kepang pedagang eceran not found'));
                 return;
             }
 
             let {
-                keterangan,
-                satuan,
-                harga,
+                minggu_1,
+                minggu_2,
+                minggu_3,
+                minggu_4,
+                minggu_5,
             } = req.body;
 
-            await kepangProdusenEceranList.update({
-                keterangan,
-                satuan,
-                harga,
+            await kepangPedagangEceranList.update({
+                minggu1: minggu_1,
+                minggu2: minggu_2,
+                minggu3: minggu_3,
+                minggu4: minggu_4,
+                minggu5: minggu_5,
             });
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update kepang produsen eceran successfully'));
+            res.status(200).json(response(200, 'Update kepang pedagang eceran successfully'));
         } catch (err) {
             console.log(err);
 
@@ -290,32 +314,32 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const kepangProdusenEceranList = await KepangProdusenEceranList.findOne({
+            const kepangPedagangEceranList = await KepangPedagangEceranList.findOne({
                 where: { id },
             });
 
-            if (!kepangProdusenEceranList) {
-                res.status(404).json(response(404, 'Kepang produsen eceran not found'));
+            if (!kepangPedagangEceranList) {
+                res.status(404).json(response(404, 'Kepang pedagang eceran not found'));
                 return;
             }
 
-            const kepangProdusenEceranId = kepangProdusenEceranList.kepangProdusenEceranId;
+            const kepangPedagangEceranId = kepangPedagangEceranList.kepangPedagangEceranId;
 
-            await kepangProdusenEceranList.destroy();
+            await kepangPedagangEceranList.destroy();
 
-            const kepangProdusenEceranExits = await KepangProdusenEceranList.findOne({
-                where: { kepangProdusenEceranId }
+            const kepangPedagangEceranExits = await KepangPedagangEceranList.findOne({
+                where: { kepangPedagangEceranId }
             });
 
-            if (!kepangProdusenEceranExits) {
-                await KepangProdusenEceran.destroy({
-                    where: { id: kepangProdusenEceranId }
+            if (!kepangPedagangEceranExits) {
+                await KepangPedagangEceran.destroy({
+                    where: { id: kepangPedagangEceranId }
                 });
             }
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete kepang produsen eceran successfully'));
+            res.status(200).json(response(200, 'Delete kepang pedagang eceran successfully'));
         } catch (err) {
             console.log(err);
 

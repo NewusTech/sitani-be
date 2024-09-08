@@ -1,8 +1,8 @@
 const { PspPenerimaUppo, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
+const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -121,12 +121,14 @@ module.exports = {
             }
             if (startDate) {
                 startDate = new Date(startDate);
+                startDate = dateGenerate(startDate);
                 if (startDate instanceof Date && !isNaN(startDate)) {
                     where.createdAt = { [Op.gte]: startDate };
                 }
             }
             if (endDate) {
                 endDate = new Date(endDate);
+                endDate = dateGenerate(endDate);
                 if (endDate instanceof Date && !isNaN(endDate)) {
                     where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
                 }

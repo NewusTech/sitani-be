@@ -1,13 +1,17 @@
 const korluhTanamanBiofarmakaRoute = require('./korluhTanamanBiofarmaka.route');
 const kepangMasterKomoditasRoute = require('./kepangMasterKomoditas.route');
+const kepangPedagangEceranRoute = require('./kepangPedagangEceran.route');
 const kepangProdusenEceranRoute = require('./kepangProdusenEceran.route');
 const korluhMasterPalawijaRoute = require('./korluhMasterPalawija.route');
 const korluhTanamanHiasRoute = require('./korluhTanamanHias.route');
 const penyuluhKabupatenRoute = require('./penyuluhKabupaten.route');
 const penyuluhKecamatanRoute = require('./penyuluhKecamatan.route');
+const penyuluhDashboardRoute = require('./penyuluhDashboard.route');
+const korluhDashboardRoute = require('./korluhDashboard.route');
 const korluhSayurBuahRoute = require('./korluhSayurBuah.route');
 const pspPenerimaUppoRoute = require('./pspPenerimaUppo.route');
 const korluhPalawijaRoute = require('./korluhPalawija.route');
+const pspDashboardRoute = require('./pspDashboard.route');
 const kepegawaianRoute = require('./kepegawaian.route');
 const korluhPadiRoute = require('./korluhPadi.route');
 const permissionRoute = require('./permission.route');
@@ -26,14 +30,18 @@ const bidangRoute = require('./bidang.route');
 module.exports = function (app, urlApi) {
     app.use(urlApi, korluhTanamanBiofarmakaRoute);
     app.use(urlApi, kepangMasterKomoditasRoute);
+    app.use(urlApi, kepangPedagangEceranRoute);
     app.use(urlApi, kepangProdusenEceranRoute);
     app.use(urlApi, korluhMasterPalawijaRoute);
     app.use(urlApi, korluhTanamanHiasRoute);
     app.use(urlApi, penyuluhKabupatenRoute);
     app.use(urlApi, penyuluhKecamatanRoute);
+    app.use(urlApi, penyuluhDashboardRoute);
+    app.use(urlApi, korluhDashboardRoute);
     app.use(urlApi, korluhSayurBuahRoute);
     app.use(urlApi, pspPenerimaUppoRoute);
     app.use(urlApi, korluhPalawijaRoute);
+    app.use(urlApi, pspDashboardRoute);
     app.use(urlApi, kepegawaianRoute);
     app.use(urlApi, korluhPadiRoute);
     app.use(urlApi, permissionRoute);
@@ -45,6 +53,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, authRoute);
     app.use(urlApi, desaRoute);
     app.use(urlApi, roleRoute);
-    app.use(urlApi, seedRoute);
+    // app.use(urlApi, seedRoute);
+    // app.use(urlApi, userRoute);
     app.use(urlApi, bidangRoute);
 }

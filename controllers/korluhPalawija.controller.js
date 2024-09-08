@@ -1,8 +1,8 @@
 const { KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
+const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -98,7 +98,7 @@ module.exports = {
                 return;
             }
 
-            const {
+            let {
                 kecamatan_id,
                 desa_id,
                 tanggal,
@@ -167,6 +167,8 @@ module.exports = {
                 ]));
                 return;
             }
+
+            tanggal = dateGenerate(tanggal);
 
             const korluhPalawija = await KorluhPalawija.findOrCreate({
                 where: {
@@ -249,18 +251,21 @@ module.exports = {
             }
             if (equalDate) {
                 equalDate = new Date(equalDate);
+                equalDate = dateGenerate(equalDate);
                 if (equalDate instanceof Date && !isNaN(equalDate)) {
                     where.tanggal = { [Op.eq]: equalDate };
                 }
             } else {
                 if (startDate) {
                     startDate = new Date(startDate);
+                    startDate = dateGenerate(startDate);
                     if (startDate instanceof Date && !isNaN(startDate)) {
                         where.tanggal = { [Op.gte]: startDate };
                     }
                 }
                 if (endDate) {
                     endDate = new Date(endDate);
+                    endDate = dateGenerate(endDate);
                     if (endDate instanceof Date && !isNaN(endDate)) {
                         where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
                     }
@@ -435,7 +440,6 @@ module.exports = {
                 ]));
                 return;
             }
-
 
             await korluhPalawijaList.update({
                 korluhMasterPalawijaId: korluh_master_palawija_id,
