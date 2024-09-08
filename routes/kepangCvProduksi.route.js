@@ -9,6 +9,7 @@ route.post(prefix + '/create', kepangCvProduksiController.create);
 route.get(prefix + '/get', kepangCvProduksiController.getAll);
 route.get(prefix + '/get/:id', kepangCvProduksiController.getOne);
 route.put(prefix + '/update/:id', kepangCvProduksiController.update);
+route.delete(prefix + '/delete/:id', kepangCvProduksiController.delete);
 /* -- ROUTE -- */
 
 module.exports = route;
