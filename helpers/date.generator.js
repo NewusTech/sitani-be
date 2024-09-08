@@ -3,7 +3,7 @@ module.exports = {
 		const newDate = new Date();
 
 		newDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-		newDate.setHours(0,0,0,0);
+		newDate.setHours(7,0,0,1);
 
 		return newDate;
 	},
@@ -12,12 +12,12 @@ module.exports = {
         const first = new Date(date);
         const last = new Date(date);
 
-        first.setHours(0, 0, 0, 0);
         first.setDate(1);
+        first.setHours(7, 0, 0, 0);
 
-        last.setHours(23, 59, 59, 59);
         last.setMonth(last.getMonth() + 1);
         last.setDate(0);
+        last.setHours(30, 59, 59, 999);
 
         return { first, last };
     },
