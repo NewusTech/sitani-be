@@ -246,4 +246,62 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const kepangPedagangEceranList = await KepangPedagangEceranList.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            if (!kepangPedagangEceranList) {
+                res.status(404).json(response(404, 'Kepang pedagang eceran not found'));
+                return;
+            }
+
+            let {
+                minggu_1,
+                minggu_2,
+                minggu_3,
+                minggu_4,
+                minggu_5,
+            } = req.body;
+
+            await kepangPedagangEceranList.update({
+                minggu1: minggu_1,
+                minggu2: minggu_2,
+                minggu3: minggu_3,
+                minggu4: minggu_4,
+                minggu5: minggu_5,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update kepang pedagang eceran successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
