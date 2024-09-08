@@ -111,4 +111,40 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getAll: async (req, res) => {
+        try {
+            let { year } = req.query;
+
+            year = isNaN(parseInt(year)) ? new Date().getFullYear() : parseInt(year);
+
+            const kepangCvProdusen = await KepangCvProdusen.findAll({
+                where: {
+                    bulan: sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), year)
+                },
+                include: [
+                    {
+                        model: KepangCvProdusenList,
+                        as: 'list',
+                        include: [
+                            {
+                                model: KepangMasterKomoditas,
+                                as: 'komoditas'
+                            }
+                        ]
+                    }
+                ]
+            });
+
+            res.status(200).json(response(200, 'Get kepang cv produsen successfully', kepangCvProdusen));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
