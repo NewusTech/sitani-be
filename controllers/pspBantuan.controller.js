@@ -46,7 +46,7 @@ module.exports = {
                 return;
             }
 
-            const { kecamatan_id, jenis_bantuan, keterangan, periode, desa_id } = req.body;
+            let { kecamatan_id, jenis_bantuan, keterangan, periode, desa_id } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);

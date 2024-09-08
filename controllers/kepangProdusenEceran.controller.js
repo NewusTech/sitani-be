@@ -52,7 +52,7 @@ module.exports = {
                 return;
             }
 
-            const {
+            let {
                 kepang_master_komoditas_id,
                 tanggal,
                 satuan,
