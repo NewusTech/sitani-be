@@ -237,4 +237,49 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    delete: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const kepangCvProdusenList = await KepangCvProdusenList.findOne({
+                where: { id },
+            });
+
+            if (!kepangCvProdusenList) {
+                res.status(404).json(response(404, 'Kepang cv produsen not found'));
+                return;
+            }
+
+            const kepangCvProdusenId = kepangCvProdusenList.kepangCvProdusenId;
+
+            await kepangCvProdusenList.destroy();
+
+            const kepangCvProdusenExits = await KepangCvProdusenList.findOne({
+                where: { kepangCvProdusenId }
+            });
+
+            if (!kepangCvProdusenExits) {
+                await KepangCvProdusen.destroy({
+                    where: { id: kepangCvProdusenId }
+                });
+            }
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Delete kepang cv produsen successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
