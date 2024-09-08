@@ -18,7 +18,7 @@ module.exports = {
 			const order = [['created_at', 'DESC']];
 
             let where = {}
-            if (search  || bidangId) {
+            if (search) {
                 where = {
                     nama: {
                         [Op.like]: `%${search}%`
@@ -479,4 +479,202 @@ module.exports = {
             res.status(500).json(response(500, `${err.message}`));
         }
     },
+
+    pensiunGet: async (req, res) => {
+        try {
+            // #batas pensiun
+            // Pejabat Administrasi
+            // Pejabat Fungsional Ahli Muda
+            // Pejabat Fungsional Ahli Pertama
+            // Pejabat Fungsional Keterampilan
+            // sama dengan = 58
+
+            // Pejabat Pimpinan Tinggi
+            // Pejabat Fungsional Madya
+            // sama dengan = 60
+
+            // Pejabat Fungsional Ahli Utama
+            // sama dengan = 65
+
+            let {withPagination, limit, page} = req.query
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+            const offset = (page - 1) * limit
+
+            let pagination = null
+            let count = 0
+            let pegawaiAkanPensiun = []
+            let pegawaiSudahPensiun = 0
+            let totalPegawai = 0
+
+            if (withPagination === 'false') {
+                pegawaiAkanPensiun = await Kepegawaian.findAll({
+                    include : [
+                        {
+                            model: Bidang,
+                            as : 'bidang'
+                        }
+                    ],
+                    offset: offset,
+                    limit: limit,
+                    where: sequelize.literal(`
+                        (
+                            (LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' AND usia >= 58)
+                            OR (LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' AND usia >= 60)
+                            OR (LOWER(jabatan) LIKE '%ahli utama%' AND usia >= 65)
+                        )
+                    `),
+                    attributes: [
+                        'nama',
+                        'nip',
+                        'jabatan',
+                        'usia',
+                        'pangkat',
+                        'masa_kerja',
+                        [sequelize.literal(`
+                            CASE 
+                                WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN 58
+                                WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN 60
+                                WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN 65
+                            END
+                        `), 'batas_usia_pensiun'],
+                        
+                        [sequelize.literal(`
+                            CONCAT(
+                                CASE 
+                                    WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN (58 - usia)
+                                    WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN (60 - usia)
+                                    WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN (65 - usia)
+                                END,
+                                ' tahun ',
+                                ROUND(
+                                    (
+                                        CASE 
+                                            WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN (58 * 12) - (usia * 12)
+                                            WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN (60 * 12) - (usia * 12)
+                                            WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN (65 * 12) - (usia * 12)
+                                        END
+                                    ), 0) % 12,
+                                ' bulan'
+                            )
+                        `), 'sisa_tahun_bulan_pensiun'],
+                        [sequelize.literal(`
+                            (
+                                CASE 
+                                    WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN (58 * 12) - (usia * 12)
+                                    WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN (60 * 12) - (usia * 12)
+                                    WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN (65 * 12) - (usia * 12)
+                                END
+                            )
+                        `), 'total_bulan_sisa'],
+                    ],
+                    order: [
+                        [sequelize.literal('total_bulan_sisa'), 'ASC']
+                    ]
+                });
+    
+                pegawaiSudahPensiun = await Kepegawaian.count({
+                    where: sequelize.literal(`
+                        (
+                            (LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' AND usia >= 58)
+                            OR (LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' AND usia >= 60)
+                            OR (LOWER(jabatan) LIKE '%ahli utama%' AND usia >= 65)
+                        )
+                    `),
+                });
+    
+                totalPegawai = await Kepegawaian.count();
+            } else {
+                pegawaiAkanPensiun = await Kepegawaian.findAll({
+                    include : [
+                        {
+                            model: Bidang,
+                            as : 'bidang'
+                        }
+                    ],
+                    offset: offset,
+                    limit: limit,
+                    where: sequelize.literal(`
+                        (
+                            (LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' AND usia >= 58)
+                            OR (LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' AND usia >= 60)
+                            OR (LOWER(jabatan) LIKE '%ahli utama%' AND usia >= 65)
+                        )
+                    `),
+                    attributes: [
+                        'nama',
+                        'nip',
+                        'jabatan',
+                        'usia',
+                        'pangkat',
+                        'masa_kerja',
+                        [sequelize.literal(`
+                            CASE 
+                                WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN 58
+                                WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN 60
+                                WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN 65
+                            END
+                        `), 'batas_usia_pensiun'],
+                        
+                        [sequelize.literal(`
+                            CONCAT(
+                                CASE 
+                                    WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN (58 - usia)
+                                    WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN (60 - usia)
+                                    WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN (65 - usia)
+                                END,
+                                ' tahun ',
+                                ROUND(
+                                    (
+                                        CASE 
+                                            WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN (58 * 12) - (usia * 12)
+                                            WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN (60 * 12) - (usia * 12)
+                                            WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN (65 * 12) - (usia * 12)
+                                        END
+                                    ), 0) % 12,
+                                ' bulan'
+                            )
+                        `), 'sisa_tahun_bulan_pensiun'],
+                        [sequelize.literal(`
+                            (
+                                CASE 
+                                    WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN (58 * 12) - (usia * 12)
+                                    WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN (60 * 12) - (usia * 12)
+                                    WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN (65 * 12) - (usia * 12)
+                                END
+                            )
+                        `), 'total_bulan_sisa'],
+                    ],
+                    order: [
+                        [sequelize.literal('total_bulan_sisa'), 'ASC']
+                    ]
+                });
+    
+                pegawaiSudahPensiun = await Kepegawaian.count({
+                    where: sequelize.literal(`
+                        (
+                            (LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' AND usia >= 58)
+                            OR (LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' AND usia >= 60)
+                            OR (LOWER(jabatan) LIKE '%ahli utama%' AND usia >= 65)
+                        )
+                    `),
+                });
+    
+                totalPegawai = await Kepegawaian.count();      
+                count = await Kepegawaian.count();      
+                pagination = generatePagination(count, page, limit, '/api/kepegawaian/dashboard')
+            }
+
+            res.status(200).json(response(200, 'Get successfully', { totalPegawai, pegawaiSudahPensiun, pegawaiAkanPensiun, pagination }));
+
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, `${err.message}`));
+        }
+    }
 }

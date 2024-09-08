@@ -10,6 +10,7 @@ route.post(prefix + '/create', kepegawaianController.create);
 route.get(prefix + '/get/:id', kepegawaianController.getOneById);
 route.put(prefix + '/update/:id', kepegawaianController.update);
 route.delete(prefix + '/delete/:id', kepegawaianController.delete);
+route.get(prefix + '/dashboard', kepegawaianController.pensiunGet);
 /* -- ROUTE -- */
 
 module.exports = route;
