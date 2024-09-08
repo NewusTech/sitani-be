@@ -195,4 +195,70 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const kepangCvProduksi = await KepangCvProduksi.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            if (!kepangCvProduksi) {
+                res.status(404).json(response(404, 'Kepang cv produksi not found'));
+                return;
+            }
+
+            let {
+                panen,
+                jpk,
+                cabai_merah_keriting,
+                gkp_tk_penggilingan,
+                beras_premium,
+                gkp_tk_petani,
+                beras_medium,
+                stok_beras,
+                stok_gkg,
+            } = req.body;
+
+            await kepangCvProduksi.update({
+                panen,
+                jpk,
+                cabaiMerahKeriting: cabai_merah_keriting,
+                gkpTkPenggilingan: gkp_tk_penggilingan,
+                berasPremium: beras_premium,
+                gkpTkPetani: gkp_tk_petani,
+                berasMedium: beras_medium,
+                stokBeras: stok_beras,
+                stokGkg: stok_gkg,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update kepang cv produksi successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
