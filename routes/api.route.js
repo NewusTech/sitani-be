@@ -1,3 +1,4 @@
+const kepangPerbandinganHargaRoute = require('./kepangPerbandinganHarga.route');
 const korluhTanamanBiofarmakaRoute = require('./korluhTanamanBiofarmaka.route');
 const kepangMasterKomoditasRoute = require('./kepangMasterKomoditas.route');
 const kepangPedagangEceranRoute = require('./kepangPedagangEceran.route');
@@ -7,6 +8,8 @@ const korluhTanamanHiasRoute = require('./korluhTanamanHias.route');
 const penyuluhKabupatenRoute = require('./penyuluhKabupaten.route');
 const penyuluhKecamatanRoute = require('./penyuluhKecamatan.route');
 const penyuluhDashboardRoute = require('./penyuluhDashboard.route');
+const kepangCvProdusenRoute = require('./kepangCvProdusen.route');
+const kepangCvProduksiRoute = require('./kepangCvProduksi.route');
 const korluhDashboardRoute = require('./korluhDashboard.route');
 const korluhSayurBuahRoute = require('./korluhSayurBuah.route');
 const pspPenerimaUppoRoute = require('./pspPenerimaUppo.route');
@@ -28,6 +31,7 @@ const userRoute = require('./user.route');
 const bidangRoute = require('./bidang.route');
 
 module.exports = function (app, urlApi) {
+    app.use(urlApi, kepangPerbandinganHargaRoute);
     app.use(urlApi, korluhTanamanBiofarmakaRoute);
     app.use(urlApi, kepangMasterKomoditasRoute);
     app.use(urlApi, kepangPedagangEceranRoute);
@@ -37,6 +41,8 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, penyuluhKabupatenRoute);
     app.use(urlApi, penyuluhKecamatanRoute);
     app.use(urlApi, penyuluhDashboardRoute);
+    app.use(urlApi, kepangCvProdusenRoute);
+    app.use(urlApi, kepangCvProduksiRoute);
     app.use(urlApi, korluhDashboardRoute);
     app.use(urlApi, korluhSayurBuahRoute);
     app.use(urlApi, pspPenerimaUppoRoute);

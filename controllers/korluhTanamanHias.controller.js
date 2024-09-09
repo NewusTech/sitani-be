@@ -252,6 +252,7 @@ module.exports = {
                 offset,
                 limit,
                 where,
+                order: [['tanggal', 'DESC']]
             });
 
             const count = await KorluhTanamanHias.count({ where });

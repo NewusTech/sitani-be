@@ -17,11 +17,13 @@ module.exports = {
                     type: "number",
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 desa_id: {
                     type: "number",
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 jenis_bantuan: {
                     type: "string",
@@ -149,6 +151,7 @@ module.exports = {
                 offset,
                 limit,
                 where,
+                order: [['periode', 'DESC']]
             });
 
             const count = await PspBantuan.count({ where });
@@ -218,12 +221,14 @@ module.exports = {
                     optional: true,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 desa_id: {
                     type: "number",
                     optional: true,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 jenis_bantuan: {
                     type: "string",

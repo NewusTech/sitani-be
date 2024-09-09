@@ -1,6 +1,6 @@
 const { KepangPedagangEceranList, KepangMasterKomoditas, KepangPedagangEceran, sequelize } = require('../models');
-const { getFirstLastDate, dateGenerate, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
+const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -91,12 +91,10 @@ module.exports = {
 
             tanggal = dateGenerate(tanggal);
 
-            const { first, last } = getFirstLastDate(tanggal);
-
             const kepangPedagangEceran = await KepangPedagangEceran.findOrCreate({
-                where: {
-                    tanggal: { [Op.between]: [first, last] },
-                },
+                where: [
+                    sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), tanggal.getMonth() + 1),
+                ],
                 defaults: {
                     tanggal,
                 }

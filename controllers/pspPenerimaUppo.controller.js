@@ -17,11 +17,13 @@ module.exports = {
                     type: "number",
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 desa_id: {
                     type: "number",
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 nama_poktan: {
                     type: "string",
@@ -148,6 +150,7 @@ module.exports = {
                 offset,
                 limit,
                 where,
+                order: [['createdAt', 'DESC']]
             });
 
             const count = await PspPenerimaUppo.count({ where });
@@ -217,12 +220,14 @@ module.exports = {
                     optional: true,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 desa_id: {
                     type: "number",
                     optional: true,
                     positive: true,
                     integer: true,
+                    convert: true,
                 },
                 nama_poktan: {
                     type: "string",
