@@ -3,7 +3,7 @@ const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { Op } = require('sequelize');
+const { Op, or } = require('sequelize');
 
 const v = new Validator();
 
@@ -20,14 +20,35 @@ module.exports = {
             let where = {}
             if (search) {
                 where = {
-                    nama: {
-                        [Op.like]: `%${search}%`
-                    }
+                    ...where,
+                    [Op.or] : [
+                        {
+                            nama: {
+                                [Op.like]: `%${search}%`
+                            }
+                        },
+                        {
+                            nip: {
+                                [Op.like]: `%${search}%`
+                            }
+                        },
+                        {
+                            jabatan: {
+                                [Op.like]: `%${search}%`
+                            }
+                        },
+                        {
+                            pangkat: {
+                                [Op.like]: `%${search}%`
+                            }
+                        }
+                    ]
                 }
             }
 
             if (bidangId) {
                 where = {
+                    ...where,
                     bidang_id: {
                         [Op.eq]: bidangId
                     }
@@ -667,6 +688,159 @@ module.exports = {
             }
 
             res.status(200).json(response(200, 'Get successfully', { totalPegawai, pegawaiSudahPensiun, pegawaiAkanPensiun, pagination }));
+
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            res.status(500).json(response(500, `${err.message}`));
+        }
+    },
+
+    dataPensiun: async (req, res) => {
+        try{
+            let {withPagination, limit, page, search, bidangId} = req.query
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+            const offset = (page - 1) * limit
+
+            let where = {}
+            if (search) {
+                where = {
+                    ...where,
+                    [Op.or] : [
+                        {
+                            nama: {
+                                [Op.like]: `%${search}%`
+                            }
+                        },
+                        {
+                            nip: {
+                                [Op.like]: `%${search}%`
+                            }
+                        },
+                        {
+                            jabatan: {
+                                [Op.like]: `%${search}%`
+                            }
+                        },
+                        {
+                            pangkat: {
+                                [Op.like]: `%${search}%`
+                            }
+                        }
+                    ]
+                }
+            }
+
+            if (bidangId) {
+                where = {
+                    ...where,
+                    bidang_id: {
+                        [Op.eq]: bidangId
+                    }
+                }
+            }
+
+            where = {
+                ...where,
+                [Op.and] : [
+                    sequelize.literal(`
+                        (
+                            (LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' AND usia >= 58)
+                            OR (LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' AND usia >= 60)
+                            OR (LOWER(jabatan) LIKE '%ahli utama%' AND usia >= 65)
+                        )
+                    `)
+                ]
+            }
+
+            let pagination = null
+            let count = 0
+            let pegawaiSudahPensiun = []
+            if (withPagination === 'false') {
+                pegawaiSudahPensiun = await Kepegawaian.findAll({
+                    include: [{
+                        model: Bidang,
+                        as : 'bidang'
+                    }],
+                    where,
+                    attributes: [
+                        'nama',
+                        'nip',
+                        'tempat_lahir',
+                        'tgl_lahir',
+                        'pangkat',
+                        'golongan',
+                        'tmt_pangkat',
+                        'jabatan',
+                        'tmt_jabatan',
+                        'nama_diklat',
+                        'tgl_diklat',
+                        'total_jam',
+                        'nama_pendidikan',
+                        'tahun_lulus',
+                        'usia',
+                        'masa_kerja',
+                        // Kolom tambahan untuk usia pensiun yang sudah tercapai
+                        [sequelize.literal(`
+                            CASE 
+                                WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN 58
+                                WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN 60
+                                WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN 65
+                            END
+                        `), 'usia_pensiun_tercapai']
+                    ],
+                    order: [
+                        ['usia', 'DESC']
+                    ]
+                })
+            }else{
+                pegawaiSudahPensiun = await Kepegawaian.findAll({
+                    include: [{
+                        model: Bidang,
+                        as : 'bidang'
+                    }],
+                    where,
+                    attributes: [
+                        'nama',
+                        'nip',
+                        'tempat_lahir',
+                        'tgl_lahir',
+                        'pangkat',
+                        'golongan',
+                        'tmt_pangkat',
+                        'jabatan',
+                        'tmt_jabatan',
+                        'nama_diklat',
+                        'tgl_diklat',
+                        'total_jam',
+                        'nama_pendidikan',
+                        'tahun_lulus',
+                        'usia',
+                        'masa_kerja',
+                        // Kolom tambahan untuk usia pensiun yang sudah tercapai
+                        [sequelize.literal(`
+                            CASE 
+                                WHEN LOWER(jabatan) LIKE '%ahli muda%' OR LOWER(jabatan) LIKE '%ahli pertama%' OR LOWER(jabatan) LIKE '%keterampilan%' THEN 58
+                                WHEN LOWER(jabatan) LIKE '%pimpinan tinggi%' OR LOWER(jabatan) LIKE '%fungsional madya%' THEN 60
+                                WHEN LOWER(jabatan) LIKE '%ahli utama%' THEN 65
+                            END
+                        `), 'usia_pensiun_tercapai']
+                    ],
+
+                    order: [
+                        ['usia', 'DESC']
+                    ]
+                })
+                count = await Kepegawaian.count();      
+                pagination = generatePagination(count, page, limit, '/api/kepegawaian/data-pensiun')
+            }
+
+            res.status(200).json(response(200, 'Get successfully', { pegawaiSudahPensiun, pagination }));
 
         } catch (err) {
             console.log(err);
