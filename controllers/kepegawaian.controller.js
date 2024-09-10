@@ -46,13 +46,8 @@ module.exports = {
                 }
             }
 
-            if (bidangId) {
-                where = {
-                    ...where,
-                    bidang_id: {
-                        [Op.eq]: bidangId
-                    }
-                }
+            if (!isNaN(parseInt(bidangId))) {
+                where.bidang_id = parseInt(bidangId)
             }
 
             let pagination = null
