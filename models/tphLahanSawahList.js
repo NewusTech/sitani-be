@@ -6,10 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     class TphLahanSawahList extends Model {
         static associate(models) {
             TphLahanSawahList.belongsTo(models.TphLahanSawah, {
-                foreignKey: 'tphLahanSawahId'
+                foreignKey: 'tphLahanSawahId',
+                as: 'tphLahanSawah'
             });
             TphLahanSawahList.belongsTo(models.Kecamatan, {
-                foreignKey: 'kecamatanId'
+                foreignKey: 'kecamatanId',
+                as: 'kecamatan'
             });
         }
     }
