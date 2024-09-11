@@ -94,6 +94,7 @@ module.exports = {
             const kepangPedagangEceran = await KepangPedagangEceran.findOrCreate({
                 where: [
                     sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), tanggal.getMonth() + 1),
+                    sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tanggal.getFullYear()),
                 ],
                 defaults: {
                     tanggal,
