@@ -136,10 +136,26 @@ module.exports = {
                 return;
             }
 
+            let sum = 0;
+            for (let temp of [
+                irigasi_teknis,
+                irigasi_setengah_teknis,
+                irigasi_sederhana,
+                irigasi_desa,
+                tadah_hujan,
+                pasang_surut,
+                lebak,
+                lainnya,
+            ]) {
+                if (temp) {
+                    sum += temp;
+                }
+            }
+
             await TphLahanSawahList.create({
                 tphLahanSawahId: tphLahanSawah[0].id,
                 kecamatanId: kecamatan.id,
-                jumlah: irigasi_teknis + irigasi_setengah_teknis + irigasi_sederhana + irigasi_desa + tadah_hujan + pasang_surut + lebak + lainnya,
+                jumlah: sum,
                 irigasiSetengahTeknis: irigasi_setengah_teknis,
                 irigasiSederhana: irigasi_sederhana,
                 irigasiTeknis: irigasi_teknis,
@@ -287,8 +303,24 @@ module.exports = {
                 keterangan,
             } = req.body;
 
+            let sum = 0;
+            for (let temp of [
+                irigasi_teknis,
+                irigasi_setengah_teknis,
+                irigasi_sederhana,
+                irigasi_desa,
+                tadah_hujan,
+                pasang_surut,
+                lebak,
+                lainnya,
+            ]) {
+                if (temp) {
+                    sum += temp;
+                }
+            }
+
             await tphLahanSawahList.update({
-                jumlah: irigasi_teknis + irigasi_setengah_teknis + irigasi_sederhana + irigasi_desa + tadah_hujan + pasang_surut + lebak + lainnya,
+                jumlah: sum,
                 irigasiSetengahTeknis: irigasi_setengah_teknis,
                 irigasiSederhana: irigasi_sederhana,
                 irigasiTeknis: irigasi_teknis,
