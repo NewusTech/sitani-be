@@ -29,7 +29,6 @@ module.exports = {
                 },
                 nip: {
                     type: "number",
-                    max: 99999999999,
                     positive: true,
                     integer: true,
                 },
@@ -51,10 +50,10 @@ module.exports = {
 
             await User.create({
                 password: passwordHash.generate(password),
+                nip: String(nip),
                 pangkat,
                 email,
                 name,
-                nip,
             });
 
             await transaction.commit();
@@ -192,7 +191,7 @@ module.exports = {
             pangkat = pangkat ?? user.pangkat;
             email = email ?? user.email;
             name = name ?? user.name;
-            nip = nip ?? user.nip;
+            nip = nip ? String(nip) : user.nip;
 
             await user.update({ password, pangkat, email, name, nip });
 
