@@ -22,7 +22,7 @@ module.exports = {
                 unique: true
             },
             nip: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.STRING(20),
                 allowNull: false,
                 unique: true
             },

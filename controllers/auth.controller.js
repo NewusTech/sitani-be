@@ -48,7 +48,7 @@ module.exports = {
 				where: {
 					[Op.or]: [
 						{ email: email_or_nip },
-						{ nip: isNaN(parseInt(email_or_nip)) ? 0 : parseInt(email_or_nip) }
+						{ nip: email_or_nip }
 					]
 				},
 			});
@@ -86,7 +86,7 @@ module.exports = {
 				]));
 				return;
 			}
-			
+
 			let permissions = user.roles[0].permissions.map(permission => permission.permissionName);
 
 			let accessToken = jwtGenerate({ sub: user.id, permissions }, 60 * 60 * 24);
