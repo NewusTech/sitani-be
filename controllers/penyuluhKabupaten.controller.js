@@ -19,11 +19,10 @@ module.exports = {
                     min: 1,
                 },
                 nip: {
-                    type: "number",
-                    max: 99999999999,
-                    positive: true,
-                    integer: true,
+                    type: "string",
                     convert: true,
+                    max: 20,
+                    min: 1,
                 },
                 pangkat: {
                     type: "string",
@@ -106,14 +105,13 @@ module.exports = {
 
             let where = {};
             if (search) {
-                let nipSearchTemp = isNaN(parseInt(search)) ? 0 : parseInt(search);
                 where = {
                     [Op.or]: {
                         keterangan: { [Op.like]: `%${search}%` },
                         golongan: { [Op.like]: `%${search}%` },
                         pangkat: { [Op.like]: `%${search}%` },
                         nama: { [Op.like]: `%${search}%` },
-                        nip: nipSearchTemp,
+                        nip: { [Op.like]: `%${search}%` },
                     }
                 };
             }
@@ -195,12 +193,11 @@ module.exports = {
                     min: 1,
                 },
                 nip: {
-                    type: "number",
-                    max: 99999999999,
+                    type: "string",
                     optional: true,
-                    positive: true,
-                    integer: true,
                     convert: true,
+                    max: 20,
+                    min: 1,
                 },
                 pangkat: {
                     type: "string",

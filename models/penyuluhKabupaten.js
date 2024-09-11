@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         nip: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING(20),
             allowNull: false,
         },
         pangkat: {

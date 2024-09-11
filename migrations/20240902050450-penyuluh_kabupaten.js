@@ -21,7 +21,7 @@ module.exports = {
                 allowNull: false,
             },
             nip: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.STRING(20),
                 allowNull: false,
             },
             pangkat: {
