@@ -185,13 +185,19 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { year } = req.query;
+            let { kecamatan, year } = req.query;
 
             year = isNaN(parseInt(year)) ? new Date().getFullYear() : parseInt(year);
 
             let where = {};
             if (year) {
                 where.tahun = year;
+            }
+            if (kecamatan && !isNaN(parseInt(kecamatan))) {
+                where = {
+                    ...where,
+                    '$list.kecamatan.id$': parseInt(kecamatan)
+                };
             }
 
             const tphLahanSawah = await TphLahanSawah.findOne({
@@ -249,6 +255,7 @@ module.exports = {
             }
 
             res.status(200).json(response(200, 'Get lahan sawah successfully', {
+                detail: tphLahanSawah,
                 jumlahIrigasiSetengahTeknis,
                 jumlahIrigasiSederhana,
                 jumlahIrigasiTeknis,
@@ -258,7 +265,6 @@ module.exports = {
                 jumlahLainnya,
                 jumlahLebak,
                 jumlah,
-                ...tphLahanSawah,
             }));
         } catch (err) {
             console.log(err);
