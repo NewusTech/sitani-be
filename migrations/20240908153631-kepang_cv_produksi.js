@@ -31,6 +31,9 @@ module.exports = {
             gkp_tk_penggilingan: {
                 type: Sequelize.INTEGER,
             },
+            gkg_tk_penggilingan: {
+                type: Sequelize.INTEGER,
+            },
             jpk: {
                 type: Sequelize.INTEGER,
             },
