@@ -9,12 +9,19 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('lahan_sawah', {
+        await queryInterface.createTable('tph_lahan_bukan_sawah_list', {
             id: {
                 type: Sequelize.BIGINT,
                 autoIncrement: true,
                 primaryKey: true,
                 allowNull: false,
+            },
+            tph_lahan_bukan_sawah_id: {
+                type: Sequelize.BIGINT,
+                references: {
+                    model: 'tph_lahan_bukan_sawah',
+                    key: 'id'
+                }
             },
             kecamatan_id: {
                 type: Sequelize.BIGINT,
@@ -23,44 +30,41 @@ module.exports = {
                     key: 'id'
                 }
             },
-            desa_id: {
-                type: Sequelize.BIGINT,
-                references: {
-                    model: 'master_desa',
-                    key: 'id'
-                }
-            },
-            irigasi_teknis: {
+
+            tegal: {
                 type: Sequelize.DOUBLE,
             },
-            irigasi_setengah_teknis: {
+            ladang: {
                 type: Sequelize.DOUBLE,
             },
-            irigasi_sederhana: {
+            perkebunan: {
                 type: Sequelize.DOUBLE,
             },
-            irigasi_desa: {
+            hutan_rakyat: {
                 type: Sequelize.DOUBLE,
             },
-            tadah_hujan: {
+            padang_pengembalaan_rumput: {
                 type: Sequelize.DOUBLE,
             },
-            pasang_surut: {
+            hutan_negara: {
                 type: Sequelize.DOUBLE,
             },
-            lebak: {
+            smt_tidak_diusahakan: {
                 type: Sequelize.DOUBLE,
             },
             lainnya: {
                 type: Sequelize.DOUBLE,
             },
-            jumlah: {
+            jumlah_lahan_bukan_sawah: {
                 type: Sequelize.DOUBLE,
             },
-            keterangan: {
-                type: Sequelize.STRING,
-                allowNull: false,
+            lahan_bukan_pertanian: {
+                type: Sequelize.DOUBLE,
             },
+            total: {
+                type: Sequelize.DOUBLE,
+            },
+
             created_at: {
                 type: Sequelize.DATE,
                 allowNull: false,
@@ -79,6 +83,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        await queryInterface.dropTable('lahan_sawah');
+        await queryInterface.dropTable('tph_lahan_bukan_sawah_list');
     }
 };

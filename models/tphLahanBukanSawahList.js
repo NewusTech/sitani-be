@@ -3,26 +3,29 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class LahanBukanSawah extends Model {
+    class TphLahanBukanSawahList extends Model {
         static associate(models) {
-            LahanBukanSawah.belongsTo(models.Kecamatan, {
-                foreignKey: 'kecamatanId'
+            TphLahanBukanSawahList.belongsTo(models.TphLahanBukanSawah, {
+                foreignKey: 'tphLahanBukanSawahId',
+                as: 'tphLahanBukanSawah'
             });
-            LahanBukanSawah.belongsTo(models.Desa, {
-                foreignKey: 'desaId'
+            TphLahanBukanSawahList.belongsTo(models.Kecamatan, {
+                foreignKey: 'kecamatanId',
+                as: 'kecamatan'
             });
         }
     }
 
-    LahanBukanSawah.init({
+    TphLahanBukanSawahList.init({
+        tphLahanBukanSawahId: {
+            type: DataTypes.BIGINT,
+            field: 'tph_lahan_bukan_sawah_id',
+        },
         kecamatanId: {
             type: DataTypes.BIGINT,
             field: 'kecamatan_id',
         },
-        desaId: {
-            type: DataTypes.BIGINT,
-            field: 'desa_id',
-        },
+
         tegal: {
             type: DataTypes.DOUBLE,
         },
@@ -36,32 +39,33 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             field: 'hutan_rakyat',
         },
-        padangRumput: {
+        padangPengembalaanRumput: {
             type: DataTypes.DOUBLE,
-            field: 'padang_rumput',
+            field: 'padang_pengembalaan_rumput',
         },
         hutanNegara: {
             type: DataTypes.DOUBLE,
             field: 'hutan_negara',
         },
-        smtTidakdiusahakan: {
+        smtTidakDiusahakan: {
             type: DataTypes.DOUBLE,
-            field: 'smt_tidakdiusahakan',
+            field: 'smt_tidak_diusahakan',
         },
         lainnya: {
             type: DataTypes.DOUBLE,
         },
-        jmlLahanBukanSawah: {
+        jumlahLahanBukanSawah: {
             type: DataTypes.DOUBLE,
-            field: 'jml_lahan_bukan_sawah',
+            field: 'jumlah_lahan_bukan_sawah',
         },
-        jalanPermukimanPerkantoran: {
+        lahanBukanPertanian: {
             type: DataTypes.DOUBLE,
-            field: 'jalan_permukiman_perkantoran',
+            field: 'lahan_bukan_pertanian',
         },
         total: {
             type: DataTypes.DOUBLE,
         },
+
         createdAt: {
             type: DataTypes.DATE,
             field: 'created_at',
@@ -73,10 +77,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
     }, {
-        tableName: 'lahan_bukan_sawah',
-        modelName: 'LahanBukanSawah',
+        tableName: 'tph_lahan_bukan_sawah_list',
+        modelName: 'TphLahanBukanSawahList',
         sequelize,
     });
 
-    return LahanBukanSawah;
+    return TphLahanBukanSawahList;
 };

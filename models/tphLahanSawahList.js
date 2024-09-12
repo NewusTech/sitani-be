@@ -3,26 +3,29 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class LahanSawah extends Model {
+    class TphLahanSawahList extends Model {
         static associate(models) {
-            LahanSawah.belongsTo(models.Kecamatan, {
-                foreignKey: 'kecamatanId'
+            TphLahanSawahList.belongsTo(models.TphLahanSawah, {
+                foreignKey: 'tphLahanSawahId',
+                as: 'tphLahanSawah'
             });
-            LahanSawah.belongsTo(models.Desa, {
-                foreignKey: 'desaId'
+            TphLahanSawahList.belongsTo(models.Kecamatan, {
+                foreignKey: 'kecamatanId',
+                as: 'kecamatan'
             });
         }
     }
 
-    LahanSawah.init({
+    TphLahanSawahList.init({
+        tphLahanSawahId: {
+            type: DataTypes.BIGINT,
+            field: 'tph_lahan_sawah_id',
+        },
         kecamatanId: {
             type: DataTypes.BIGINT,
             field: 'kecamatan_id',
         },
-        desaId: {
-            type: DataTypes.BIGINT,
-            field: 'desa_id',
-        },
+
         irigasiTeknis: {
             type: DataTypes.DOUBLE,
             field: 'irigasi_teknis',
@@ -58,7 +61,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         keterangan: {
             type: DataTypes.STRING,
-            allowNull: false,
         },
         createdAt: {
             type: DataTypes.DATE,
@@ -71,10 +73,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
     }, {
-        tableName: 'lahan_sawah',
-        modelName: 'LahanSawah',
+        tableName: 'tph_lahan_sawah_list',
+        modelName: 'TphLahanSawahList',
         sequelize,
     });
 
-    return LahanSawah;
+    return TphLahanSawahList;
 };
