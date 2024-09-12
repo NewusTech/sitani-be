@@ -13,10 +13,9 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     TphRealisasiPadi.init({
-        tahun: {
-            type: DataTypes.INTEGER,
+        bulan: {
+            type: DataTypes.DATE,
             allowNull: false,
-            unique: true,
         },
         createdAt: {
             type: DataTypes.DATE,

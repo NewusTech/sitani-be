@@ -1,7 +1,7 @@
 const { TphRealisasiPadiList, TphRealisasiPadi, Kecamatan, sequelize } = require('../models');
+const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -51,11 +51,9 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
-                tahun: {
-                    type: "number",
+                bulan: {
+                    type: "date",
                     convert: true,
-                    max: 9999,
-                    min: 1111,
                 },
                 ...coreSchema,
             };
@@ -69,7 +67,7 @@ module.exports = {
 
             let {
                 kecamatan_id,
-                tahun,
+                bulan,
                 panen_lahan_sawah,
                 produktivitas_lahan_sawah,
                 produksi_lahan_sawah,
@@ -91,12 +89,17 @@ module.exports = {
                 return;
             }
 
+            bulan = dateGenerate(bulan);
+
             const tphRealisasiPadi = await TphRealisasiPadi.findOrCreate({
                 where: {
-                    tahun,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
+                    ]
                 },
                 defaults: {
-                    tahun
+                    bulan
                 }
             });
 
@@ -180,18 +183,23 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { kecamatan, year } = req.query;
+            let { kecamatan, bulan } = req.query;
 
-            year = isNaN(parseInt(year)) ? new Date().getFullYear() : parseInt(year);
+            bulan = !isNaN(new Date(bulan)) ? new Date(bulan) : new Date();
 
             let where = {};
-            if (year) {
-                where.tahun = year;
+            let listWhere = {};
+            if (bulan) {
+                where = {
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
+                    ]
+                };
             }
             if (kecamatan && !isNaN(parseInt(kecamatan))) {
-                where = {
-                    ...where,
-                    '$list.kecamatan.id$': parseInt(kecamatan)
+                listWhere = {
+                    'kecamatanId': parseInt(kecamatan)
                 };
             }
 
@@ -200,6 +208,7 @@ module.exports = {
                     {
                         model: TphRealisasiPadiList,
                         as: 'list',
+                        where: listWhere,
                         include: [
                             {
                                 model: Kecamatan,
@@ -210,9 +219,9 @@ module.exports = {
                         attributes: { exclude: ['createdAt', 'updatedAt'] },
                     }
                 ],
-                attributes: ['tahun'],
+                attributes: ['bulan'],
                 where,
-                order: [['tahun', 'DESC']],
+                order: [['bulan', 'DESC']],
             });
 
             let produktivitasLahanKering = produktivitasLahanSawah = produksiLahanKering = produksiLahanSawah = panenLahanKering = panenLahanSawah = produktivitasTotal = produksiTotal = panenTotal = 0;
