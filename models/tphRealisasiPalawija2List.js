@@ -26,41 +26,41 @@ module.exports = (sequelize, DataTypes) => {
             field: 'kecamatan_id',
         },
 
-        jagungPanen: {
+        kacangHijauPanen: {
             type: DataTypes.DOUBLE,
-            field: 'jagung_panen'
+            field: 'kacang_hijau_panen'
         },
-        jagungProduktivitas: {
+        kacangHijauProduktivitas: {
             type: DataTypes.DOUBLE,
-            field: 'jagung_produktivitas',
+            field: 'kacang_hijau_produktivitas'
         },
-        jagungProduksi: {
+        kacangHijauProduksi: {
             type: DataTypes.DOUBLE,
-            field: 'jagung_produksi'
+            field: 'kacang_hijau_produksi'
         },
-        kedelaiPanen: {
+        ubiKayuPanen: {
             type: DataTypes.DOUBLE,
-            field: 'kedelai_panen'
+            field: 'ubi_kayu_panen'
         },
-        kedelaiProduktivitas: {
+        ubiKayuProduktivitas: {
             type: DataTypes.DOUBLE,
-            field: 'kedelai_produktivitas'
+            field: 'ubi_kayu_produktivitas'
         },
-        kedelaiProduksi: {
+        ubiKayuProduksi: {
             type: DataTypes.DOUBLE,
-            field: 'kedelai_produksi'
+            field: 'ubi_kayu_produksi'
         },
-        kacangTanahPanen: {
+        ubiJalarPanen: {
             type: DataTypes.DOUBLE,
-            field: 'kacang_tanah_panen'
+            field: 'ubi_jalar_panen'
         },
-        kacangTanahProduktivitas: {
+        ubiJalarProduktivitas: {
             type: DataTypes.DOUBLE,
-            field: 'kacang_tanah_produktivitas'
+            field: 'ubi_jalar_produktivitas'
         },
-        kacangTanahProduksi: {
+        ubiJalarProduksi: {
             type: DataTypes.DOUBLE,
-            field: 'kacang_tanah_produksi'
+            field: 'ubi_jalar_produksi'
         },
 
         createdAt: {
