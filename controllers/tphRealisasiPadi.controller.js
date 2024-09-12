@@ -180,13 +180,19 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { year } = req.query;
+            let { kecamatan, year } = req.query;
 
             year = isNaN(parseInt(year)) ? new Date().getFullYear() : parseInt(year);
 
             let where = {};
             if (year) {
                 where.tahun = year;
+            }
+            if (kecamatan && !isNaN(parseInt(kecamatan))) {
+                where = {
+                    ...where,
+                    '$list.kecamatan.id$': parseInt(kecamatan)
+                };
             }
 
             const tphRealisasiPadi = await TphRealisasiPadi.findOne({
@@ -209,7 +215,52 @@ module.exports = {
                 order: [['tahun', 'DESC']],
             });
 
-            res.status(200).json(response(200, 'Get realisasi padi successfully', tphRealisasiPadi));
+            let produktivitasLahanKering = produktivitasLahanSawah = produksiLahanKering = produksiLahanSawah = panenLahanKering = panenLahanSawah = produktivitasTotal = produksiTotal = panenTotal = 0;
+
+            if (tphRealisasiPadi?.list) {
+                for (let temp of tphRealisasiPadi.list) {
+                    if (temp?.produktivitasLahanKering) {
+                        produktivitasLahanKering += temp.produktivitasLahanKering;
+                    }
+                    if (temp?.produktivitasLahanSawah) {
+                        produktivitasLahanSawah += temp.produktivitasLahanSawah;
+                    }
+                    if (temp?.produksiLahanKering) {
+                        produksiLahanKering += temp.produksiLahanKering;
+                    }
+                    if (temp?.produksiLahanSawah) {
+                        produksiLahanSawah += temp.produksiLahanSawah;
+                    }
+                    if (temp?.panenLahanKering) {
+                        panenLahanKering += temp.panenLahanKering;
+                    }
+                    if (temp?.panenLahanSawah) {
+                        panenLahanSawah += temp.panenLahanSawah;
+                    }
+                    if (temp?.produktivitasTotal) {
+                        produktivitasTotal += temp.produktivitasTotal;
+                    }
+                    if (temp?.produksiTotal) {
+                        produksiTotal += temp.produksiTotal;
+                    }
+                    if (temp?.panenTotal) {
+                        panenTotal += temp.panenTotal;
+                    }
+                }
+            }
+
+            res.status(200).json(response(200, 'Get realisasi padi successfully', {
+                detail: tphRealisasiPadi,
+                produktivitasLahanKering,
+                produktivitasLahanSawah,
+                produksiLahanKering,
+                produksiLahanSawah,
+                panenLahanKering,
+                panenLahanSawah,
+                produktivitasTotal,
+                produksiTotal,
+                panenTotal,
+            }));
         } catch (err) {
             console.log(err);
 
