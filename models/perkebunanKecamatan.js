@@ -24,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
         tahun: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            unique: true,
         },
         createdAt: {
             type: DataTypes.DATE,

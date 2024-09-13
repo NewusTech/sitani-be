@@ -7,6 +7,7 @@ const tphRealisasiPalawija2Route = require('./tphRealisasiPalawija2.route');
 const kepangPedagangEceranRoute = require('./kepangPedagangEceran.route');
 const kepangProdusenEceranRoute = require('./kepangProdusenEceran.route');
 const korluhMasterPalawijaRoute = require('./korluhMasterPalawija.route');
+const perkebunanKecamatanRoute = require('./perkebunanKecamatan.route');
 const tphLahanBukanSawahRoute = require('./tphLahanBukanSawah.route');
 const korluhTanamanHiasRoute = require('./korluhTanamanHias.route');
 const penyuluhKabupatenRoute = require('./penyuluhKabupaten.route');
@@ -46,6 +47,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, kepangPedagangEceranRoute);
     app.use(urlApi, kepangProdusenEceranRoute);
     app.use(urlApi, korluhMasterPalawijaRoute);
+    app.use(urlApi, perkebunanKecamatanRoute);
     app.use(urlApi, tphLahanBukanSawahRoute);
     app.use(urlApi, korluhTanamanHiasRoute);
     app.use(urlApi, penyuluhKabupatenRoute);
