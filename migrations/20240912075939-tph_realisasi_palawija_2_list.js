@@ -9,12 +9,19 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('realisasi_palawija2', {
+        await queryInterface.createTable('tph_realisasi_palawija_2_list', {
             id: {
                 type: Sequelize.BIGINT,
                 autoIncrement: true,
                 primaryKey: true,
                 allowNull: false,
+            },
+            tph_realisasi_palawija_2_id: {
+                type: Sequelize.BIGINT,
+                references: {
+                    model: 'tph_realisasi_palawija_2',
+                    key: 'id'
+                }
             },
             kecamatan_id: {
                 type: Sequelize.BIGINT,
@@ -23,40 +30,35 @@ module.exports = {
                     key: 'id'
                 }
             },
-            desa_id: {
-                type: Sequelize.BIGINT,
-                references: {
-                    model: 'master_desa',
-                    key: 'id'
-                }
-            },
-            panen_jagung: {
+
+            kacang_hijau_panen: {
                 type: Sequelize.DOUBLE,
             },
-            produktivitas_jagung: {
+            kacang_hijau_produktivitas: {
                 type: Sequelize.DOUBLE,
             },
-            produksi_jagung: {
+            kacang_hijau_produksi: {
                 type: Sequelize.DOUBLE,
             },
-            panen_kedelai: {
+            ubi_kayu_panen: {
                 type: Sequelize.DOUBLE,
             },
-            produktivitas_kedelai: {
+            ubi_kayu_produktivitas: {
                 type: Sequelize.DOUBLE,
             },
-            produksi_kedelai: {
+            ubi_kayu_produksi: {
                 type: Sequelize.DOUBLE,
             },
-            panen_kacang_tanah: {
+            ubi_jalar_panen: {
                 type: Sequelize.DOUBLE,
             },
-            produktivitas_kacang_tanah: {
+            ubi_jalar_produktivitas: {
                 type: Sequelize.DOUBLE,
             },
-            produksi_kacang_tanah: {
+            ubi_jalar_produksi: {
                 type: Sequelize.DOUBLE,
             },
+
             created_at: {
                 type: Sequelize.DATE,
                 allowNull: false,
@@ -75,6 +77,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        await queryInterface.dropTable('realisasi_palawija2');
+        await queryInterface.dropTable('tph_realisasi_palawija_2_list');
     }
 };

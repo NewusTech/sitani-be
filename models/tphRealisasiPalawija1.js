@@ -3,16 +3,16 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class TphRealisasiPadi extends Model {
+    class TphRealisasiPalawija1 extends Model {
         static associate(models) {
-            TphRealisasiPadi.hasMany(models.TphRealisasiPadiList, {
-                foreignKey: 'tphRealisasiPadiId',
+            TphRealisasiPalawija1.hasMany(models.TphRealisasiPalawija1List, {
+                foreignKey: 'tphRealisasiPalawija1Id',
                 as: 'list'
             });
         }
     }
 
-    TphRealisasiPadi.init({
+    TphRealisasiPalawija1.init({
         bulan: {
             type: DataTypes.DATE,
             allowNull: false,
@@ -28,10 +28,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
     }, {
-        tableName: 'tph_realisasi_padi',
-        modelName: 'TphRealisasiPadi',
+        tableName: 'tph_realisasi_palawija_1',
+        modelName: 'TphRealisasiPalawija1',
         sequelize,
     });
 
-    return TphRealisasiPadi;
+    return TphRealisasiPalawija1;
 };

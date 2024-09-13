@@ -185,13 +185,19 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { year } = req.query;
+            let { kecamatan, year } = req.query;
 
             year = isNaN(parseInt(year)) ? new Date().getFullYear() : parseInt(year);
 
             let where = {};
             if (year) {
                 where.tahun = year;
+            }
+            if (kecamatan && !isNaN(parseInt(kecamatan))) {
+                where = {
+                    ...where,
+                    '$list.kecamatan.id$': parseInt(kecamatan)
+                };
             }
 
             const tphLahanSawah = await TphLahanSawah.findOne({
@@ -214,11 +220,52 @@ module.exports = {
                 order: [['tahun', 'DESC']],
             });
 
-            if (!year) {
+            let jumlahIrigasiSetengahTeknis = jumlahIrigasiSederhana = jumlahIrigasiTeknis = jumlahIrigasiDesa = jumlahPasangSurut = jumlahTadahHujan = jumlahLainnya = jumlahLebak = jumlah = 0;
 
+            if (tphLahanSawah?.list) {
+                for (let temp of tphLahanSawah.list) {
+                    if (temp?.irigasiSetengahTeknis) {
+                        jumlahIrigasiSetengahTeknis += temp.irigasiSetengahTeknis;
+                    }
+                    if (temp?.irigasiSederhana) {
+                        jumlahIrigasiSederhana += temp.irigasiSederhana;
+                    }
+                    if (temp?.irigasiTeknis) {
+                        jumlahIrigasiTeknis += temp.irigasiTeknis;
+                    }
+                    if (temp?.irigasiDesa) {
+                        jumlahIrigasiDesa += temp.irigasiDesa;
+                    }
+                    if (temp?.pasangSurut) {
+                        jumlahPasangSurut += temp.pasangSurut;
+                    }
+                    if (temp?.tadahHujan) {
+                        jumlahTadahHujan += temp.tadahHujan;
+                    }
+                    if (temp?.lainnya) {
+                        jumlahLainnya += temp.lainnya;
+                    }
+                    if (temp?.lebak) {
+                        jumlahLebak += temp.lebak;
+                    }
+                    if (temp?.jumlah) {
+                        jumlah += temp.jumlah;
+                    }
+                }
             }
 
-            res.status(200).json(response(200, 'Get lahan sawah successfully', tphLahanSawah));
+            res.status(200).json(response(200, 'Get lahan sawah successfully', {
+                detail: tphLahanSawah,
+                jumlahIrigasiSetengahTeknis,
+                jumlahIrigasiSederhana,
+                jumlahIrigasiTeknis,
+                jumlahIrigasiDesa,
+                jumlahPasangSurut,
+                jumlahTadahHujan,
+                jumlahLainnya,
+                jumlahLebak,
+                jumlah,
+            }));
         } catch (err) {
             console.log(err);
 

@@ -1,4 +1,4 @@
-const { TphRealisasiPadiList, TphRealisasiPadi, Kecamatan, sequelize } = require('../models');
+const { TphRealisasiPalawija1List, TphRealisasiPalawija1, Kecamatan, sequelize } = require('../models');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -7,32 +7,47 @@ const { Op } = require('sequelize');
 const v = new Validator();
 
 const coreSchema = {
-    panen_lahan_sawah: {
+    jagung_panen: {
         type: "number",
         optional: true,
         convert: true,
     },
-    produktivitas_lahan_sawah: {
+    jagung_produktivitas: {
         type: "number",
         optional: true,
         convert: true,
     },
-    produksi_lahan_sawah: {
+    jagung_produksi: {
         type: "number",
         optional: true,
         convert: true,
     },
-    panen_lahan_kering: {
+    kedelai_panen: {
         type: "number",
         optional: true,
         convert: true,
     },
-    produktivitas_lahan_kering: {
+    kedelai_produktivitas: {
         type: "number",
         optional: true,
         convert: true,
     },
-    produksi_lahan_kering: {
+    kedelai_produksi: {
+        type: "number",
+        optional: true,
+        convert: true,
+    },
+    kacang_tanah_panen: {
+        type: "number",
+        optional: true,
+        convert: true,
+    },
+    kacang_tanah_produktivitas: {
+        type: "number",
+        optional: true,
+        convert: true,
+    },
+    kacang_tanah_produksi: {
         type: "number",
         optional: true,
         convert: true,
@@ -68,12 +83,15 @@ module.exports = {
             let {
                 kecamatan_id,
                 bulan,
-                panen_lahan_sawah,
-                produktivitas_lahan_sawah,
-                produksi_lahan_sawah,
-                panen_lahan_kering,
-                produktivitas_lahan_kering,
-                produksi_lahan_kering,
+                jagung_panen,
+                jagung_produktivitas,
+                jagung_produksi,
+                kedelai_panen,
+                kedelai_produktivitas,
+                kedelai_produksi,
+                kacang_tanah_panen,
+                kacang_tanah_produktivitas,
+                kacang_tanah_produksi,
             } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
@@ -91,7 +109,7 @@ module.exports = {
 
             bulan = dateGenerate(bulan);
 
-            const tphRealisasiPadi = await TphRealisasiPadi.findOrCreate({
+            const tphRealisasiPalawija1 = await TphRealisasiPalawija1.findOrCreate({
                 where: {
                     [Op.and]: [
                         sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
@@ -103,18 +121,18 @@ module.exports = {
                 }
             });
 
-            const tphRealisasiPadiListExists = await TphRealisasiPadiList.findOne({
+            const tphRealisasiPalawija1ListExists = await TphRealisasiPalawija1List.findOne({
                 where: {
-                    tphRealisasiPadiId: tphRealisasiPadi[0].id,
+                    tphRealisasiPalawija1Id: tphRealisasiPalawija1[0].id,
                     kecamatanId: kecamatan.id
                 }
             });
 
-            if (tphRealisasiPadiListExists) {
+            if (tphRealisasiPalawija1ListExists) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created realisasi padi, please use another kecamatan",
+                        message: "Cannot created realisasi palawija 1, please use another kecamatan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -122,52 +140,23 @@ module.exports = {
                 return;
             }
 
-            let panenTotal = 0, produktivitasTotal = 0, produksiTotal = 0;
-
-            for (let temp of [
-                panen_lahan_sawah,
-                panen_lahan_kering,
-            ]) {
-                if (temp) {
-                    panenTotal += temp;
-                }
-            }
-
-            for (let temp of [
-                produktivitas_lahan_sawah,
-                produktivitas_lahan_kering,
-            ]) {
-                if (temp) {
-                    produktivitasTotal += temp;
-                }
-            }
-
-            for (let temp of [
-                produksi_lahan_sawah,
-                produksi_lahan_kering,
-            ]) {
-                if (temp) {
-                    produksiTotal += temp;
-                }
-            }
-
-            await TphRealisasiPadiList.create({
-                tphRealisasiPadiId: tphRealisasiPadi[0].id,
+            await TphRealisasiPalawija1List.create({
+                tphRealisasiPalawija1Id: tphRealisasiPalawija1[0].id,
                 kecamatanId: kecamatan.id,
-                produktivitasLahanKering: produktivitas_lahan_kering,
-                produktivitasLahanSawah: produktivitas_lahan_sawah,
-                produksiLahanKering: produksi_lahan_kering,
-                produksiLahanSawah: produksi_lahan_sawah,
-                panenLahanKering: panen_lahan_kering,
-                panenLahanSawah: panen_lahan_sawah,
-                produktivitasTotal,
-                produksiTotal,
-                panenTotal,
+                jagungPanen: jagung_panen,
+                jagungProduktivitas: jagung_produktivitas,
+                jagungProduksi: jagung_produksi,
+                kedelaiPanen: kedelai_panen,
+                kedelaiProduktivitas: kedelai_produktivitas,
+                kedelaiProduksi: kedelai_produksi,
+                kacangTanahPanen: kacang_tanah_panen,
+                kacangTanahProduktivitas: kacang_tanah_produktivitas,
+                kacangTanahProduksi: kacang_tanah_produksi,
             });
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Realisasi padi created'));
+            res.status(201).json(response(201, 'Realisasi palawija 1 created'));
         } catch (err) {
             console.log(err);
 
@@ -203,10 +192,10 @@ module.exports = {
                 };
             }
 
-            const tphRealisasiPadi = await TphRealisasiPadi.findOne({
+            const tphRealisasiPalawija1 = await TphRealisasiPalawija1.findOne({
                 include: [
                     {
-                        model: TphRealisasiPadiList,
+                        model: TphRealisasiPalawija1List,
                         as: 'list',
                         where: listWhere,
                         include: [
@@ -224,51 +213,51 @@ module.exports = {
                 order: [['bulan', 'DESC']],
             });
 
-            let produktivitasLahanKering = produktivitasLahanSawah = produksiLahanKering = produksiLahanSawah = panenLahanKering = panenLahanSawah = produktivitasTotal = produksiTotal = panenTotal = 0;
+            let jagungPanen = jagungProduktivitas = jagungProduksi = kedelaiPanen = kedelaiProduktivitas = kedelaiProduksi = kacangTanahPanen = kacangTanahProduktivitas = kacangTanahProduksi = 0;
 
-            if (tphRealisasiPadi?.list) {
-                for (let temp of tphRealisasiPadi.list) {
-                    if (temp?.produktivitasLahanKering) {
-                        produktivitasLahanKering += temp.produktivitasLahanKering;
+            if (tphRealisasiPalawija1?.list) {
+                for (let temp of tphRealisasiPalawija1.list) {
+                    if (temp?.jagungPanen) {
+                        jagungPanen += temp.jagungPanen;
                     }
-                    if (temp?.produktivitasLahanSawah) {
-                        produktivitasLahanSawah += temp.produktivitasLahanSawah;
+                    if (temp?.jagungProduktivitas) {
+                        jagungProduktivitas += temp.jagungProduktivitas;
                     }
-                    if (temp?.produksiLahanKering) {
-                        produksiLahanKering += temp.produksiLahanKering;
+                    if (temp?.jagungProduksi) {
+                        jagungProduksi += temp.jagungProduksi;
                     }
-                    if (temp?.produksiLahanSawah) {
-                        produksiLahanSawah += temp.produksiLahanSawah;
+                    if (temp?.kedelaiPanen) {
+                        kedelaiPanen += temp.kedelaiPanen;
                     }
-                    if (temp?.panenLahanKering) {
-                        panenLahanKering += temp.panenLahanKering;
+                    if (temp?.kedelaiProduktivitas) {
+                        kedelaiProduktivitas += temp.kedelaiProduktivitas;
                     }
-                    if (temp?.panenLahanSawah) {
-                        panenLahanSawah += temp.panenLahanSawah;
+                    if (temp?.kedelaiProduksi) {
+                        kedelaiProduksi += temp.kedelaiProduksi;
                     }
-                    if (temp?.produktivitasTotal) {
-                        produktivitasTotal += temp.produktivitasTotal;
+                    if (temp?.kacangTanahPanen) {
+                        kacangTanahPanen += temp.kacangTanahPanen;
                     }
-                    if (temp?.produksiTotal) {
-                        produksiTotal += temp.produksiTotal;
+                    if (temp?.kacangTanahProduktivitas) {
+                        kacangTanahProduktivitas += temp.kacangTanahProduktivitas;
                     }
-                    if (temp?.panenTotal) {
-                        panenTotal += temp.panenTotal;
+                    if (temp?.kacangTanahProduksi) {
+                        kacangTanahProduksi += temp.kacangTanahProduksi;
                     }
                 }
             }
 
-            res.status(200).json(response(200, 'Get realisasi padi successfully', {
-                detail: tphRealisasiPadi,
-                produktivitasLahanKering,
-                produktivitasLahanSawah,
-                produksiLahanKering,
-                produksiLahanSawah,
-                panenLahanKering,
-                panenLahanSawah,
-                produktivitasTotal,
-                produksiTotal,
-                panenTotal,
+            res.status(200).json(response(200, 'Get realisasi palawija 1 successfully', {
+                detail: tphRealisasiPalawija1,
+                jagungPanen,
+                jagungProduktivitas,
+                jagungProduksi,
+                kedelaiPanen,
+                kedelaiProduktivitas,
+                kedelaiProduksi,
+                kacangTanahPanen,
+                kacangTanahProduktivitas,
+                kacangTanahProduksi,
             }));
         } catch (err) {
             console.log(err);
@@ -285,12 +274,12 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const tphRealisasiPadiList = await TphRealisasiPadiList.findOne({
+            const tphRealisasiPalawija1List = await TphRealisasiPalawija1List.findOne({
                 where: { id },
                 include: [
                     {
-                        model: TphRealisasiPadi,
-                        as: 'tphRealisasiPadi',
+                        model: TphRealisasiPalawija1,
+                        as: 'tphRealisasiPalawija1',
                     },
                     {
                         model: Kecamatan,
@@ -299,12 +288,12 @@ module.exports = {
                 ],
             });
 
-            if (!tphRealisasiPadiList) {
-                res.status(404).json(response(404, 'Realisasi padi not found'));
+            if (!tphRealisasiPalawija1List) {
+                res.status(404).json(response(404, 'Realisasi palawija 1 not found'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get realisasi padi successfully', tphRealisasiPadiList));
+            res.status(200).json(response(200, 'Get realisasi palawija 1 successfully', tphRealisasiPalawija1List));
         } catch (err) {
             console.log(err);
 
@@ -322,7 +311,7 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const tphRealisasiPadiList = await TphRealisasiPadiList.findOne({
+            const tphRealisasiPalawija1List = await TphRealisasiPalawija1List.findOne({
                 where: { id },
             });
 
@@ -337,64 +326,38 @@ module.exports = {
                 return;
             }
 
-            if (!tphRealisasiPadiList) {
-                res.status(404).json(response(404, 'Realisasi padi not found'));
+            if (!tphRealisasiPalawija1List) {
+                res.status(404).json(response(404, 'Realisasi palawija 1 not found'));
                 return;
             }
 
             let {
-                panen_lahan_sawah,
-                produktivitas_lahan_sawah,
-                produksi_lahan_sawah,
-                panen_lahan_kering,
-                produktivitas_lahan_kering,
-                produksi_lahan_kering,
+                jagung_panen,
+                jagung_produktivitas,
+                jagung_produksi,
+                kedelai_panen,
+                kedelai_produktivitas,
+                kedelai_produksi,
+                kacang_tanah_panen,
+                kacang_tanah_produktivitas,
+                kacang_tanah_produksi,
             } = req.body;
 
-            let panenTotal = 0, produktivitasTotal = 0, produksiTotal = 0;
-
-            for (let temp of [
-                panen_lahan_sawah,
-                panen_lahan_kering,
-            ]) {
-                if (temp) {
-                    panenTotal += temp;
-                }
-            }
-
-            for (let temp of [
-                produktivitas_lahan_sawah,
-                produktivitas_lahan_kering,
-            ]) {
-                if (temp) {
-                    produktivitasTotal += temp;
-                }
-            }
-
-            for (let temp of [
-                produksi_lahan_sawah,
-                produksi_lahan_kering,
-            ]) {
-                if (temp) {
-                    produksiTotal += temp;
-                }
-            }
-
-            await tphRealisasiPadiList.update({
-                produktivitasLahanKering: produktivitas_lahan_kering,
-                produktivitasLahanSawah: produktivitas_lahan_sawah,
-                produksiLahanKering: produksi_lahan_kering,
-                produksiLahanSawah: produksi_lahan_sawah,
-                panenLahanKering: panen_lahan_kering,
-                panenLahanSawah: panen_lahan_sawah,
-                produktivitasTotal,
-                produksiTotal,
-                panenTotal,
+            await tphRealisasiPalawija1List.update({
+                jagungPanen: jagung_panen,
+                jagungProduktivitas: jagung_produktivitas,
+                jagungProduksi: jagung_produksi,
+                kedelaiPanen: kedelai_panen,
+                kedelaiProduktivitas: kedelai_produktivitas,
+                kedelaiProduksi: kedelai_produksi,
+                kacangTanahPanen: kacang_tanah_panen,
+                kacangTanahProduktivitas: kacang_tanah_produktivitas,
+                kacangTanahProduksi: kacang_tanah_produksi,
             });
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update realisasi padi successfully'));
+            res.status(200).json(response(200, 'Update realisasi palawija 1 successfully'));
         } catch (err) {
             console.log(err);
 
@@ -414,32 +377,32 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const tphRealisasiPadiList = await TphRealisasiPadiList.findOne({
+            const tphRealisasiPalawija1List = await TphRealisasiPalawija1List.findOne({
                 where: { id },
             });
 
-            if (!tphRealisasiPadiList) {
-                res.status(404).json(response(404, 'Realisasi padi not found'));
+            if (!tphRealisasiPalawija1List) {
+                res.status(404).json(response(404, 'Realisasi palawija 1 not found'));
                 return;
             }
 
-            const tphRealisasiPadiId = tphRealisasiPadiList.tphRealisasiPadiId;
+            const tphRealisasiPalawija1Id = tphRealisasiPalawija1List.tphRealisasiPalawija1Id;
 
-            await tphRealisasiPadiList.destroy();
+            await tphRealisasiPalawija1List.destroy();
 
-            const tphRealisasiPadiListExists = await TphRealisasiPadiList.findOne({
-                where: { tphRealisasiPadiId }
+            const tphRealisasiPalawija1ListExists = await TphRealisasiPalawija1List.findOne({
+                where: { tphRealisasiPalawija1Id }
             });
 
-            if (!tphRealisasiPadiListExists) {
-                await TphRealisasiPadi.destroy({
-                    where: { id: tphRealisasiPadiId }
+            if (!tphRealisasiPalawija1ListExists) {
+                await TphRealisasiPalawija1.destroy({
+                    where: { id: tphRealisasiPalawija1Id }
                 });
             }
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete realisasi padi successfully'));
+            res.status(200).json(response(200, 'Delete realisasi palawija 1 successfully'));
         } catch (err) {
             console.log(err);
 

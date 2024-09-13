@@ -16,10 +16,9 @@ module.exports = {
                 primaryKey: true,
                 allowNull: false,
             },
-            tahun: {
-                type: Sequelize.INTEGER,
+            bulan: {
+                type: Sequelize.DATE,
                 allowNull: false,
-                unique: true,
             },
             created_at: {
                 type: Sequelize.DATE,

@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             field: 'gkp_tk_penggilingan'
         },
+        gkgTkPenggilingan: {
+            type: DataTypes.INTEGER,
+            field: 'gkg_tk_penggilingan'
+        },
         jpk: {
             type: DataTypes.INTEGER,
         },

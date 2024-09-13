@@ -187,13 +187,20 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { year } = req.query;
+            let { kecamatan, year } = req.query;
 
             year = isNaN(parseInt(year)) ? new Date().getFullYear() : parseInt(year);
 
             let where = {};
             if (year) {
                 where.tahun = year;
+            }
+
+            if (kecamatan && !isNaN(parseInt(kecamatan))) {
+                where = {
+                    ...where,
+                    '$list.kecamatan.id$': parseInt(kecamatan)
+                };
             }
 
             const tphLahanBukanSawah = await TphLahanBukanSawah.findOne({
@@ -216,11 +223,60 @@ module.exports = {
                 order: [['tahun', 'DESC']],
             });
 
-            if (!year) {
+            let total = jumlahLahanBukanSawah = padangPengembalaanRumput = smtTidakDiusahakan = hutanNegara = hutanRakyat = lainnya = perkebunan = ladang = tegal = lahanBukanPertanian = 0;
 
+            if (tphLahanBukanSawah?.list) {
+                for (let temp of tphLahanBukanSawah.list) {
+                    if (temp?.total) {
+                        total += temp.total;
+                    }
+                    if (temp?.jumlahLahanBukanSawah) {
+                        jumlahLahanBukanSawah += temp.jumlahLahanBukanSawah;
+                    }
+                    if (temp?.padangPengembalaanRumput) {
+                        padangPengembalaanRumput += temp.padangPengembalaanRumput;
+                    }
+                    if (temp?.smtTidakDiusahakan) {
+                        smtTidakDiusahakan += temp.smtTidakDiusahakan;
+                    }
+                    if (temp?.hutanNegara) {
+                        hutanNegara += temp.hutanNegara;
+                    }
+                    if (temp?.hutanRakyat) {
+                        hutanRakyat += temp.hutanRakyat;
+                    }
+                    if (temp?.lainnya) {
+                        lainnya += temp.lainnya;
+                    }
+                    if (temp?.perkebunan) {
+                        perkebunan += temp.perkebunan;
+                    }
+                    if (temp?.ladang) {
+                        ladang += temp.ladang;
+                    }
+                    if (temp?.tegal) {
+                        tegal += temp.tegal;
+                    }
+                    if (temp?.lahanBukanPertanian) {
+                        lahanBukanPertanian += temp.lahanBukanPertanian;
+                    }
+                }
             }
 
-            res.status(200).json(response(200, 'Get lahan bukan sawah successfully', tphLahanBukanSawah));
+            res.status(200).json(response(200, 'Get lahan bukan sawah successfully', {
+                detail: tphLahanBukanSawah,
+                total,
+                jumlahLahanBukanSawah,
+                padangPengembalaanRumput,
+                smtTidakDiusahakan,
+                hutanNegara,
+                hutanRakyat,
+                lainnya,
+                perkebunan,
+                ladang,
+                tegal,
+                lahanBukanPertanian,
+            }));
         } catch (err) {
             console.log(err);
 

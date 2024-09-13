@@ -9,50 +9,17 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('kepang_cv_produksi', {
+        await queryInterface.createTable('tph_realisasi_palawija_1', {
             id: {
                 type: Sequelize.BIGINT,
                 autoIncrement: true,
                 primaryKey: true,
                 allowNull: false,
             },
-
             bulan: {
                 type: Sequelize.DATE,
                 allowNull: false,
             },
-
-            panen: {
-                type: Sequelize.DOUBLE,
-            },
-            gkp_tk_petani: {
-                type: Sequelize.INTEGER,
-            },
-            gkp_tk_penggilingan: {
-                type: Sequelize.INTEGER,
-            },
-            gkg_tk_penggilingan: {
-                type: Sequelize.INTEGER,
-            },
-            jpk: {
-                type: Sequelize.INTEGER,
-            },
-            cabai_merah_keriting: {
-                type: Sequelize.INTEGER,
-            },
-            beras_medium: {
-                type: Sequelize.INTEGER,
-            },
-            beras_premium: {
-                type: Sequelize.INTEGER,
-            },
-            stok_gkg: {
-                type: Sequelize.INTEGER,
-            },
-            stok_beras: {
-                type: Sequelize.INTEGER,
-            },
-
             created_at: {
                 type: Sequelize.DATE,
                 allowNull: false,
@@ -71,6 +38,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        await queryInterface.dropTable('kepang_cv_produksi');
+        await queryInterface.dropTable('tph_realisasi_palawija_1');
     }
 };
