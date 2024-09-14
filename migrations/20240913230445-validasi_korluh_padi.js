@@ -37,6 +37,9 @@ module.exports = {
                 defaultValue: 'proses',
                 allowNull: false,
             },
+            keterangan: {
+                type: Sequelize.STRING,
+            },
             created_at: {
                 type: Sequelize.DATE,
                 allowNull: false,

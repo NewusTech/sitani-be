@@ -33,6 +33,9 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'proses',
             allowNull: false,
         },
+        keterangan: {
+            type: DataTypes.STRING,
+        },
         createdAt: {
             type: DataTypes.DATE,
             field: 'created_at',
