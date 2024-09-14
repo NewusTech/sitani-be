@@ -6,6 +6,7 @@ const route = express.Router();
 let prefix = '/validasi/korluh-padi';
 /* -- ROUTE -- */
 route.post(prefix + '/kec', validasiKorluhPadiController.kecVal);
+route.post(prefix + '/kab', validasiKorluhPadiController.kabVal);
 /* -- ROUTE -- */
 
 module.exports = route;
