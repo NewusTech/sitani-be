@@ -1,4 +1,4 @@
-const { KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, Desa, sequelize } = require('../models');
+const { ValidasiKorluhPalawija, KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
@@ -169,6 +169,28 @@ module.exports = {
             }
 
             tanggal = dateGenerate(tanggal);
+
+            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: kecamatan.id,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPalawija) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh palawija because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
 
             const korluhPalawija = await KorluhPalawija.findOrCreate({
                 where: {
@@ -382,6 +404,37 @@ module.exports = {
                 return;
             }
 
+            const korluhPalawija = await KorluhPalawija.findByPk(korluhPalawijaList.korluhPalawijaId);
+
+            if (!korluhPalawija) {
+                res.status(404).json(response(404, 'Korluh palawija error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhPalawija.tanggal);
+
+            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhPalawija.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPalawija) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh palawija because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
             let {
                 korluh_master_palawija_id,
                 lahan_sawah_panen,
@@ -487,6 +540,31 @@ module.exports = {
             }
 
             const korluhPalawijaId = korluhPalawijaList.korluhPalawijaId;
+
+            const korluhPalawija = await KorluhPalawija.findByPk(korluhPalawijaId);
+
+            if (!korluhPalawija) {
+                res.status(404).json(response(404, 'Korluh palawija error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhPalawija.tanggal);
+
+            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhPalawija.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPalawija) {
+                res.status(403).json(response(403, 'Korluh palawija deleted failed because kacamatan has validated'));
+                return;
+            }
 
             await korluhPalawijaList.destroy();
 
