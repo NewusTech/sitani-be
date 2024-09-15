@@ -33,6 +33,7 @@ const korluhPadiRoute = require('./korluhPadi.route');
 const permissionRoute = require('./permission.route');
 const pspBantuanRoute = require('./pspBantuan.route');
 const kecamatanRoute = require('./kecamatan.route');
+const downloadRoute = require('./download.route');
 const pspPupukRoute = require('./pspPupuk.route');
 const articleRoute = require('./article.route');
 const galeriRoute = require('./galeri.route');
@@ -79,6 +80,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, permissionRoute);
     app.use(urlApi, pspBantuanRoute);
     app.use(urlApi, kecamatanRoute);
+    app.use(urlApi, downloadRoute);
     app.use(urlApi, pspPupukRoute);
     app.use(urlApi, articleRoute);
     app.use(urlApi, galeriRoute);
