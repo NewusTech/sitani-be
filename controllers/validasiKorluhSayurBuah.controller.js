@@ -1,4 +1,4 @@
-const { ValidasiKorluhPalawija, KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, sequelize } = require('../models');
+const { ValidasiKorluhSayurBuah, KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, sequelize } = require('../models');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -12,31 +12,34 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
     data.forEach(i => {
         i.list.forEach(item => {
             for (let index of [
-                "lahanSawahPanen",
-                "lahanSawahPanenMuda",
-                "lahanSawahPanenHijauanPakanTernak",
-                "lahanSawahTanam",
-                "lahanSawahPuso",
-                "lahanBukanSawahPanen",
-                "lahanBukanSawahPanenMuda",
-                "lahanBukanSawahPanenHijauanPakanTernak",
-                "lahanBukanSawahTanam",
-                "lahanBukanSawahPuso",
+                "luasPanenHabis",
+                "luasPanenBelumHabis",
+                "luasRusak",
+                "luasPenanamanBaru",
+                "produksiHabis",
+                "produksiBelumHabis",
+                "rerataHarga",
             ]) {
-                sum['masterIds'] = sum['masterIds'] || [];
+                sum['namaTanaman'] = sum['namaTanaman'] || [];
                 if (item[index]) {
-                    if (!sum['masterIds'].includes(item.master.id)) {
-                        sum['masterIds'].push(item.master.id);
+                    const nt = item.namaTanaman.toLowerCase();
+                    if (!sum['namaTanaman'].includes(nt)) {
+                        sum['namaTanaman'].push(nt);
                     }
-                    if (!sum[item.master.id]) {
-                        sum[item.master.id] = {
-                            nama: item.master.nama,
+                    if (!sum[nt]) {
+                        sum[nt] = {
+                            namaTanaman: nt,
+                            keterangan: item.keterangan,
+                            hasilProduksi: item.hasilProduksi,
                         };
                     }
-                    if (sum[item.master.id][index] === undefined) {
-                        sum[item.master.id][index] = 0;
+                    if (sum[nt][index] === undefined) {
+                        sum[nt][index] = 0;
                     }
-                    sum[item.master.id][index] = sum[item.master.id][index] ? sum[item.master.id][index] + item[index] : item[index];
+                    sum[nt][index] = sum[nt][index] ? sum[nt][index] + item[index] : item[index];
+                    if (index === 'rerataHarga') {
+                        sum[nt]['count'] = sum[nt]['count'] ? sum[nt]['count'] + 1 : 1;
+                    }
                 }
             }
         });
@@ -56,21 +59,17 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
 const combineData = (current, before) => {
     if (before === 0) {
-        current['masterIds']?.forEach(id => {
-            current[id]['bulanLaluLahanSawah'] = 0;
-            current[id]['bulanLaluLahanBukanSawah'] = 0;
+        current['namaTanaman']?.forEach(nt => {
+            current[nt]['bulanLalu'] = 0;
 
-            current[id]['akhirLahanSawah'] = current[id]["lahanSawahTanam"] - current[id]["lahanSawahPanen"] - current[id]["lahanSawahPanenMuda"] - current[id]["lahanSawahPanenHijauanPakanTernak"] - current[id]["lahanSawahPuso"];
-            current[id]['akhirLahanBukanSawah'] = current[id]["lahanBukanSawahTanam"] - current[id]["lahanBukanSawahPanen"] - current[id]["lahanBukanSawahPanenMuda"] - current[id]["lahanBukanSawahPanenHijauanPakanTernak"] - current[id]["lahanBukanSawahPuso"];
+            current[nt]['akhir'] = current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
         });
         return current;
     }
-    current['masterIds']?.forEach(id => {
-        current[id]['bulanLaluLahanSawah'] = before[id] ? before[id]['akhirLahanSawah'] || 0 : 0;
-        current[id]['bulanLaluLahanBukanSawah'] = before[id] ? before[id]['akhirLahanBukanSawah'] || 0 : 0;
+    current['namaTanaman']?.forEach(nt => {
+        current[nt]['bulanLalu'] = before[nt] ? before[nt]['akhir'] || 0 : 0;
 
-        current[id]['akhirLahanSawah'] = current[id]['bulanLaluLahanSawah'] + current[id]["lahanSawahTanam"] - current[id]["lahanSawahPanen"] - current[id]["lahanSawahPanenMuda"] - current[id]["lahanSawahPanenHijauanPakanTernak"] - current[id]["lahanSawahPuso"];
-        current[id]['akhirLahanBukanSawah'] = current[id]['bulanLaluLahanBukanSawah'] + current[id]["lahanBukanSawahTanam"] - current[id]["lahanBukanSawahPanen"] - current[id]["lahanBukanSawahPanenMuda"] - current[id]["lahanBukanSawahPanenHijauanPakanTernak"] - current[id]["lahanBukanSawahPuso"];
+        current[nt]['akhir'] = current[nt]['bulanLalu'] + current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
     });
     return current;
 }
@@ -82,17 +81,11 @@ const getSum = async (bulan, kecamatan = undefined) => {
         where.kecamatanId = kecamatan;
     }
 
-    let data = await KorluhPalawija.findAll({
+    let data = await KorluhSayurBuah.findAll({
         include: [
             {
-                model: KorluhPalawijaList,
-                as: 'list',
-                include: [
-                    {
-                        model: KorluhMasterPalawija,
-                        as: 'master'
-                    }
-                ]
+                model: KorluhSayurBuahList,
+                as: 'list'
             }
         ],
         where: {
@@ -172,7 +165,7 @@ module.exports = {
             bulan = dateGenerate(bulan);
             currentDate = new Date();
 
-            const korluhPalawijaCount = await KorluhPalawija.count({
+            const korluhSayurBuahCount = await KorluhSayurBuah.count({
                 where: {
                     kecamatanId: kecamatan.id,
                     [Op.and]: [
@@ -182,7 +175,7 @@ module.exports = {
                 }
             });
 
-            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOrCreate({
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOrCreate({
                 where: {
                     kecamatanId: kecamatan.id,
                     [Op.and]: [
@@ -201,9 +194,9 @@ module.exports = {
                 ||
                 bulan.getFullYear() > currentDate.getFullYear()
                 ||
-                validasiKorluhPalawija[0]?.statusTkKabupaten === 'terima'
+                validasiKorluhSayurBuah[0]?.statusTkKabupaten === 'terima'
                 ||
-                korluhPalawijaCount === 0
+                korluhSayurBuahCount === 0
             ) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
@@ -215,9 +208,9 @@ module.exports = {
                 return;
             }
 
-            keterangan = keterangan || validasiKorluhPalawija[0].keterangan;
+            keterangan = keterangan || validasiKorluhSayurBuah[0].keterangan;
 
-            await validasiKorluhPalawija[0].update({
+            await validasiKorluhSayurBuah[0].update({
                 statusTkKecamatan: status,
                 keterangan,
             });
@@ -275,7 +268,7 @@ module.exports = {
             bulan = dateGenerate(bulan);
             currentDate = new Date();
 
-            const korluhPalawija = await KorluhPalawija.findAll({
+            const korluhSayurBuah = await KorluhSayurBuah.findAll({
                 where: {
                     [Op.and]: [
                         sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
@@ -284,7 +277,7 @@ module.exports = {
                 }
             });
 
-            const validasiKorluhPalawijaCount = await ValidasiKorluhPalawija.count({
+            const validasiKorluhSayurBuahCount = await ValidasiKorluhSayurBuah.count({
                 where: {
                     statusTkKecamatan: 'terima',
                     [Op.and]: [
@@ -299,7 +292,7 @@ module.exports = {
                 ||
                 bulan.getFullYear() > currentDate.getFullYear()
                 ||
-                count(korluhPalawija) === 0
+                count(korluhSayurBuah) === 0
             ) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
@@ -312,17 +305,17 @@ module.exports = {
             }
 
             let kecamatanIds = [];
-            korluhPalawija.forEach(item => {
+            korluhSayurBuah.forEach(item => {
                 if (!kecamatanIds.includes(item.kecamatanId)) {
                     kecamatanIds.push(item.kecamatanId);
                 }
             });
 
-            if (validasiKorluhPalawijaCount < count(kecamatanIds)) {
+            if (validasiKorluhSayurBuahCount < count(kecamatanIds)) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'invalid',
-                        message: `Action failed because ${count(kecamatanIds) - validasiKorluhPalawijaCount} kecamatan had not validated`,
+                        message: `Action failed because ${count(kecamatanIds) - validasiKorluhSayurBuahCount} kecamatan had not validated`,
                         field: 'bulan',
                     },
                 ]));
@@ -331,7 +324,7 @@ module.exports = {
 
             keterangan = keterangan || '';
 
-            await ValidasiKorluhPalawija.update({
+            await ValidasiKorluhSayurBuah.update({
                 statusTkKabupaten: status,
                 keterangan,
             }, {
@@ -372,7 +365,7 @@ module.exports = {
             bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
 
 
-            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOne({
                 where: {
                     kecamatanId: kecamatan,
                     [Op.and]: [
@@ -382,19 +375,13 @@ module.exports = {
                 },
             });
 
-            validasi = validasiKorluhPalawija?.statusTkKecamatan || 'belum';
+            validasi = validasiKorluhSayurBuah?.statusTkKecamatan || 'belum';
 
-            let current = await KorluhPalawija.findAll({
+            let current = await KorluhSayurBuah.findAll({
                 include: [
                     {
-                        model: KorluhPalawijaList,
-                        as: 'list',
-                        include: [
-                            {
-                                model: KorluhMasterPalawija,
-                                as: 'master'
-                            }
-                        ]
+                        model: KorluhSayurBuahList,
+                        as: 'list'
                     }
                 ],
                 where: {
@@ -414,7 +401,7 @@ module.exports = {
 
             current = combineData(current, before);
 
-            res.status(200).json(response(200, 'Get korluh palawija successfully', current));
+            res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', current));
         } catch (err) {
             console.log(err);
 
@@ -435,7 +422,7 @@ module.exports = {
 
             bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
 
-            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOne({
                 where: {
                     [Op.and]: [
                         sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
@@ -444,19 +431,13 @@ module.exports = {
                 },
             });
 
-            validasi = validasiKorluhPalawija?.statusTkKabupaten || 'belum';
+            validasi = validasiKorluhSayurBuah?.statusTkKabupaten || 'belum';
 
-            let current = await KorluhPalawija.findAll({
+            let current = await KorluhSayurBuah.findAll({
                 include: [
                     {
-                        model: KorluhPalawijaList,
-                        as: 'list',
-                        include: [
-                            {
-                                model: KorluhMasterPalawija,
-                                as: 'master'
-                            }
-                        ]
+                        model: KorluhSayurBuahList,
+                        as: 'list'
                     }
                 ],
                 where: {
@@ -475,7 +456,7 @@ module.exports = {
 
             current = combineData(current, before);
 
-            res.status(200).json(response(200, 'Get korluh palawija successfully', current));
+            res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', current));
         } catch (err) {
             console.log(err);
 

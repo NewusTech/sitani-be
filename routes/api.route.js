@@ -1,6 +1,7 @@
 const perkebunanMasterKategoriKomoditasRoute = require('./perkebunanMasterKategoriKomoditas.route');
 const kepangPerbandinganHargaRoute = require('./kepangPerbandinganHarga.route');
 const korluhTanamanBiofarmakaRoute = require('./korluhTanamanBiofarmaka.route');
+const validasiKorluhSayurBuahRoute = require('./validasiKorluhSayurBuah.route');
 const validasiKorluhPalawijaRoute = require('./validasiKorluhPalawija.route');
 const kepangMasterKomoditasRoute = require('./kepangMasterKomoditas.route');
 const tphRealisasiPalawija1Route = require('./tphRealisasiPalawija1.route');
@@ -44,6 +45,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, perkebunanMasterKategoriKomoditasRoute);
     app.use(urlApi, kepangPerbandinganHargaRoute);
     app.use(urlApi, korluhTanamanBiofarmakaRoute);
+    app.use(urlApi, validasiKorluhSayurBuahRoute);
     app.use(urlApi, validasiKorluhPalawijaRoute);
     app.use(urlApi, kepangMasterKomoditasRoute);
     app.use(urlApi, tphRealisasiPalawija1Route);
