@@ -6,6 +6,152 @@ const { Op } = require('sequelize');
 
 const v = new Validator();
 
+const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undefined) => {
+    let sum = {};
+
+    data.forEach(item => {
+        for (let index of [
+            "hibrida_bantuan_pemerintah_lahan_sawah_panen",
+            "hibrida_bantuan_pemerintah_lahan_sawah_tanam",
+            "hibrida_bantuan_pemerintah_lahan_sawah_puso",
+            "hibrida_non_bantuan_pemerintah_lahan_sawah_panen",
+            "hibrida_non_bantuan_pemerintah_lahan_sawah_tanam",
+            "hibrida_non_bantuan_pemerintah_lahan_sawah_puso",
+            "unggul_bantuan_pemerintah_lahan_sawah_panen",
+            "unggul_bantuan_pemerintah_lahan_sawah_tanam",
+            "unggul_bantuan_pemerintah_lahan_sawah_puso",
+            "unggul_bantuan_pemerintah_lahan_bukan_sawah_panen",
+            "unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam",
+            "unggul_bantuan_pemerintah_lahan_bukan_sawah_puso",
+            "unggul_non_bantuan_pemerintah_lahan_sawah_panen",
+            "unggul_non_bantuan_pemerintah_lahan_sawah_tanam",
+            "unggul_non_bantuan_pemerintah_lahan_sawah_puso",
+            "unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen",
+            "unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam",
+            "unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso",
+            "lokal_lahan_sawah_panen",
+            "lokal_lahan_sawah_tanam",
+            "lokal_lahan_sawah_puso",
+            "lokal_lahan_bukan_sawah_panen",
+            "lokal_lahan_bukan_sawah_tanam",
+            "lokal_lahan_bukan_sawah_puso",
+            "sawah_irigasi_lahan_sawah_panen",
+            "sawah_irigasi_lahan_sawah_tanam",
+            "sawah_irigasi_lahan_sawah_puso",
+            "sawah_tadah_hujan_lahan_sawah_panen",
+            "sawah_tadah_hujan_lahan_sawah_tanam",
+            "sawah_tadah_hujan_lahan_sawah_puso",
+            "sawah_rawa_pasang_surut_lahan_sawah_panen",
+            "sawah_rawa_pasang_surut_lahan_sawah_tanam",
+            "sawah_rawa_pasang_surut_lahan_sawah_puso",
+            "sawah_rawa_lebak_lahan_sawah_panen",
+            "sawah_rawa_lebak_lahan_sawah_tanam",
+            "sawah_rawa_lebak_lahan_sawah_puso",
+        ]) {
+            if (item[index]) {
+                sum[index] = sum[index] ? sum[index] + item[index] : item[index];
+            } else if (sum[index] === undefined) {
+                sum[index] = 0;
+            }
+        }
+    });
+
+    if (date !== undefined && kecamatan !== undefined) {
+        return {
+            bulan: date.getMonth() + 1,
+            tahun: date.getFullYear(),
+            kecamatan,
+            validasi,
+            ...sum,
+        }
+    }
+    return sum;
+}
+
+const combineData = (current, before) => {
+    if (before === 0) {
+        return {
+            bulan_lalu_hibrida_bantuan_pemerintah_lahan_sawah: 0,
+            bulan_lalu_hibrida_non_bantuan_pemerintah_lahan_sawah: 0,
+            bulan_lalu_unggul_bantuan_pemerintah_lahan_sawah: 0,
+            bulan_lalu_unggul_bantuan_pemerintah_lahan_bukan_sawah: 0,
+            bulan_lalu_unggul_non_bantuan_pemerintah_lahan_sawah: 0,
+            bulan_lalu_unggul_non_bantuan_pemerintah_lahan_bukan_sawah: 0,
+            bulan_lalu_lokal_lahan_sawah: 0,
+            bulan_lalu_lokal_lahan_bukan_sawah: 0,
+            bulan_lalu_sawah_irigasi_lahan_sawah: 0,
+            bulan_lalu_sawah_tadah_hujan_lahan_sawah: 0,
+            bulan_lalu_sawah_rawa_pasang_surut_lahan_sawah: 0,
+            bulan_lalu_sawah_rawa_lebak_lahan_sawah: 0,
+
+            akhir_hibrida_bantuan_pemerintah_lahan_sawah: current.hibrida_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_bantuan_pemerintah_lahan_sawah_puso,
+            akhir_hibrida_non_bantuan_pemerintah_lahan_sawah: current.hibrida_non_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_non_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_non_bantuan_pemerintah_lahan_sawah_puso,
+            akhir_unggul_bantuan_pemerintah_lahan_sawah: current.unggul_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_sawah_puso,
+            akhir_unggul_bantuan_pemerintah_lahan_bukan_sawah: current.unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_bukan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_bukan_sawah_puso,
+            akhir_unggul_non_bantuan_pemerintah_lahan_sawah: current.unggul_non_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_non_bantuan_pemerintah_lahan_sawah_panen - current.unggul_non_bantuan_pemerintah_lahan_sawah_puso,
+            akhir_unggul_non_bantuan_pemerintah_lahan_bukan_sawah: current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam - current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen - current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso,
+            akhir_lokal_lahan_sawah: current.lokal_lahan_sawah_tanam - current.lokal_lahan_sawah_panen - current.lokal_lahan_sawah_puso,
+            akhir_lokal_lahan_bukan_sawah: current.lokal_lahan_bukan_sawah_tanam - current.lokal_lahan_bukan_sawah_panen - current.lokal_lahan_bukan_sawah_puso,
+            akhir_sawah_irigasi_lahan_sawah: current.sawah_irigasi_lahan_sawah_tanam - current.sawah_irigasi_lahan_sawah_panen - current.sawah_irigasi_lahan_sawah_puso,
+            akhir_sawah_tadah_hujan_lahan_sawah: current.sawah_tadah_hujan_lahan_sawah_tanam - current.sawah_tadah_hujan_lahan_sawah_panen - current.sawah_tadah_hujan_lahan_sawah_puso,
+            akhir_sawah_rawa_pasang_surut_lahan_sawah: current.sawah_rawa_pasang_surut_lahan_sawah_tanam - current.sawah_rawa_pasang_surut_lahan_sawah_panen - current.sawah_rawa_pasang_surut_lahan_sawah_puso,
+            akhir_sawah_rawa_lebak_lahan_sawah: current.sawah_rawa_lebak_lahan_sawah_tanam - current.sawah_rawa_lebak_lahan_sawah_panen - current.sawah_rawa_lebak_lahan_sawah_puso,
+            ...current,
+        };
+    }
+    return {
+        bulan_lalu_hibrida_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_bantuan_pemerintah_lahan_sawah,
+        bulan_lalu_hibrida_non_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_non_bantuan_pemerintah_lahan_sawah,
+        bulan_lalu_unggul_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_sawah,
+        bulan_lalu_unggul_bantuan_pemerintah_lahan_bukan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_bukan_sawah,
+        bulan_lalu_unggul_non_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_non_bantuan_pemerintah_lahan_sawah,
+        bulan_lalu_unggul_non_bantuan_pemerintah_lahan_bukan_sawah: before.akhir_unggul_non_bantuan_pemerintah_lahan_bukan_sawah,
+        bulan_lalu_lokal_lahan_sawah: before.akhir_lokal_lahan_sawah,
+        bulan_lalu_lokal_lahan_bukan_sawah: before.akhir_lokal_lahan_bukan_sawah,
+        bulan_lalu_sawah_irigasi_lahan_sawah: before.akhir_sawah_irigasi_lahan_sawah,
+        bulan_lalu_sawah_tadah_hujan_lahan_sawah: before.akhir_sawah_tadah_hujan_lahan_sawah,
+        bulan_lalu_sawah_rawa_pasang_surut_lahan_sawah: before.akhir_sawah_rawa_pasang_surut_lahan_sawah,
+        bulan_lalu_sawah_rawa_lebak_lahan_sawah: before.akhir_sawah_rawa_lebak_lahan_sawah,
+
+        akhir_hibrida_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_bantuan_pemerintah_lahan_sawah + current.hibrida_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_bantuan_pemerintah_lahan_sawah_puso,
+        akhir_hibrida_non_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_non_bantuan_pemerintah_lahan_sawah + current.hibrida_non_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_non_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_non_bantuan_pemerintah_lahan_sawah_puso,
+        akhir_unggul_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_sawah + current.unggul_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_sawah_puso,
+        akhir_unggul_bantuan_pemerintah_lahan_bukan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_bukan_sawah + current.unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_bukan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_bukan_sawah_puso,
+        akhir_unggul_non_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_non_bantuan_pemerintah_lahan_sawah + current.unggul_non_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_non_bantuan_pemerintah_lahan_sawah_panen - current.unggul_non_bantuan_pemerintah_lahan_sawah_puso,
+        akhir_unggul_non_bantuan_pemerintah_lahan_bukan_sawah: before.akhir_unggul_non_bantuan_pemerintah_lahan_bukan_sawah + current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam - current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen - current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso,
+        akhir_lokal_lahan_sawah: before.akhir_lokal_lahan_sawah + current.lokal_lahan_sawah_tanam - current.lokal_lahan_sawah_panen - current.lokal_lahan_sawah_puso,
+        akhir_lokal_lahan_bukan_sawah: before.akhir_lokal_lahan_bukan_sawah + current.lokal_lahan_bukan_sawah_tanam - current.lokal_lahan_bukan_sawah_panen - current.lokal_lahan_bukan_sawah_puso,
+        akhir_sawah_irigasi_lahan_sawah: before.akhir_sawah_irigasi_lahan_sawah + current.sawah_irigasi_lahan_sawah_tanam - current.sawah_irigasi_lahan_sawah_panen - current.sawah_irigasi_lahan_sawah_puso,
+        akhir_sawah_tadah_hujan_lahan_sawah: before.akhir_sawah_tadah_hujan_lahan_sawah + current.sawah_tadah_hujan_lahan_sawah_tanam - current.sawah_tadah_hujan_lahan_sawah_panen - current.sawah_tadah_hujan_lahan_sawah_puso,
+        akhir_sawah_rawa_pasang_surut_lahan_sawah: before.akhir_sawah_rawa_pasang_surut_lahan_sawah + current.sawah_rawa_pasang_surut_lahan_sawah_tanam - current.sawah_rawa_pasang_surut_lahan_sawah_panen - current.sawah_rawa_pasang_surut_lahan_sawah_puso,
+        akhir_sawah_rawa_lebak_lahan_sawah: before.akhir_sawah_rawa_lebak_lahan_sawah + current.sawah_rawa_lebak_lahan_sawah_tanam - current.sawah_rawa_lebak_lahan_sawah_panen - current.sawah_rawa_lebak_lahan_sawah_puso,
+        ...current,
+    };
+}
+
+const getSum = async (bulan, kecamatan) => {
+    let data = await KorluhPadi.findAll({
+        where: {
+            kecamatanId: kecamatan,
+            [Op.and]: [
+                sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
+                sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
+            ]
+        }
+    });
+
+    if (data.length > 0) {
+        bulan.setMonth(bulan.getMonth() - 1);
+
+        before = await getSum(kecamatan, bulan);
+        data = dataMap(data);
+
+        return combineData(data, before);
+    }
+
+    return 0;
+}
+
 module.exports = {
     kecVal: async (req, res) => {
         const transaction = await sequelize.transaction();
@@ -245,6 +391,59 @@ module.exports = {
             logger.error(`Error message: ${err.message}`);
 
             await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    kecData: async (req, res) => {
+        try {
+            let { kecamatan, bulan } = req.query;
+
+            monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+            kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
+            bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
+
+
+            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
+                where: {
+                    kecamatanId: kecamatan,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
+                    ]
+                },
+            });
+
+            validasi = validasiKorluhPadi?.statusTkKecamatan || 'belum';
+
+            let current = await KorluhPadi.findAll({
+                where: {
+                    kecamatanId: kecamatan,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
+                    ]
+                }
+            });
+
+            current = dataMap(current, bulan, kecamatan, validasi);
+
+            bulan.setMonth(bulan.getMonth() - 1);
+
+            before = await getSum(bulan, kecamatan);
+
+            current = combineData(current, before);
+
+            res.status(200).json(response(200, 'Get korluh padi successfully', current));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
 
             // res.status(500).json(response(500, 'Internal server error'));
             res.status(500).json(response(500, err.message));
