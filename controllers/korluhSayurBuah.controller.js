@@ -1,4 +1,4 @@
-const { KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, Desa, sequelize } = require('../models');
+const { ValidasiKorluhSayurBuah, KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
@@ -132,6 +132,28 @@ module.exports = {
             }
 
             tanggal = dateGenerate(tanggal);
+
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: kecamatan.id,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhSayurBuah) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh sayur dan buah because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
 
             const korluhSayurBuah = await KorluhSayurBuah.findOrCreate({
                 where: {
@@ -344,6 +366,37 @@ module.exports = {
                 return;
             }
 
+            const korluhSayurBuah = await KorluhSayurBuah.findByPk(korluhSayurBuahList.korluhSayurBuahId);
+
+            if (!korluhSayurBuah) {
+                res.status(404).json(response(404, 'Korluh sayur dan buah error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhSayurBuah.tanggal);
+
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhSayurBuah.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhSayurBuah) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh sayur dan buah because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
             let {
                 nama_tanaman,
                 hasil_produksi,
@@ -425,6 +478,31 @@ module.exports = {
             }
 
             const korluhSayurBuahId = korluhSayurBuahList.korluhSayurBuahId;
+
+            const korluhSayurBuah = await KorluhSayurBuah.findByPk(korluhSayurBuahId);
+
+            if (!korluhSayurBuah) {
+                res.status(404).json(response(404, 'Korluh sayur dan buah error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhSayurBuah.tanggal);
+
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhSayurBuah.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhSayurBuah) {
+                res.status(403).json(response(403, 'Korluh sayur dan buah deleted failed because kacamatan has validated'));
+                return;
+            }
 
             await korluhSayurBuahList.destroy();
 
