@@ -1,4 +1,4 @@
-const { KorluhTanamanBiofarmakaList, KorluhTanamanBiofarmaka, Kecamatan, Desa, sequelize } = require('../models');
+const { ValidasiKorluhTanamanBiofarmaka, KorluhTanamanBiofarmakaList, KorluhTanamanBiofarmaka, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
@@ -127,6 +127,28 @@ module.exports = {
             }
 
             tanggal = dateGenerate(tanggal);
+
+            const validasiKorluhTanamanBiofarmaka = await ValidasiKorluhTanamanBiofarmaka.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: kecamatan.id,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhTanamanBiofarmaka) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh tanaman biofarmaka because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
 
             const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findOrCreate({
                 where: {
@@ -338,6 +360,37 @@ module.exports = {
                 return;
             }
 
+            const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findByPk(korluhTanamanBiofarmakaList.korluhTanamanBiofarmakaId);
+
+            if (!korluhTanamanBiofarmaka) {
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhTanamanBiofarmaka.tanggal);
+
+            const validasiKorluhTanamanBiofarmaka = await ValidasiKorluhTanamanBiofarmaka.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhTanamanBiofarmaka.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhTanamanBiofarmaka) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh tanaman biofarmaka because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
             let {
                 nama_tanaman,
                 luas_panen_habis,
@@ -417,6 +470,31 @@ module.exports = {
             }
 
             const korluhTanamanBiofarmakaId = korluhTanamanBiofarmakaList.korluhTanamanBiofarmakaId;
+
+            const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findByPk(korluhTanamanBiofarmakaId);
+
+            if (!korluhTanamanBiofarmaka) {
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhTanamanBiofarmaka.tanggal);
+
+            const validasiKorluhTanamanBiofarmaka = await ValidasiKorluhTanamanBiofarmaka.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhTanamanBiofarmaka.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhTanamanBiofarmaka) {
+                res.status(403).json(response(403, 'Korluh tanaman biofarmaka deleted failed because kacamatan has validated'));
+                return;
+            }
 
             await korluhTanamanBiofarmakaList.destroy();
 
