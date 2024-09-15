@@ -243,7 +243,7 @@ module.exports = {
                 ||
                 bulan.getFullYear() > currentDate.getFullYear()
                 ||
-                validasiKorluhPadi[0]?.statusTkKecamatan === 'terima'
+                validasiKorluhPadi[0]?.statusTkKabupaten === 'terima'
                 ||
                 korluhPadiCount === 0
             ) {

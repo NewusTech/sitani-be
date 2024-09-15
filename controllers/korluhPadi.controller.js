@@ -1,4 +1,4 @@
-const { KorluhPadi, Kecamatan, Desa, sequelize } = require('../models');
+const { ValidasiKorluhPadi, KorluhPadi, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
@@ -301,6 +301,28 @@ module.exports = {
 
             tanggal = dateGenerate(tanggal);
 
+            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: kecamatan.id,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPadi) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh padi because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
             const korluhPadiExists = await KorluhPadi.findOne({
                 where: {
                     tanggal: { [Op.eq]: tanggal },
@@ -571,10 +593,35 @@ module.exports = {
                     ]));
                     return;
                 }
+            } else {
+                tanggal = new Date(korluhPadi.tanggal);
+                tanggal = dateGenerate(tanggal);
+            }
+
+            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhPadi.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPadi) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot updated korluh padi because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
             }
 
             await korluhPadi.update({
-                tanggal: tanggal ?? korluhPadi.tanggal,
+                tanggal,
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
                 hibrida_bantuan_pemerintah_lahan_sawah_puso,
@@ -641,6 +688,24 @@ module.exports = {
 
             if (!korluhPadi) {
                 res.status(404).json(response(404, 'Korluh padi not found'));
+                return;
+            }
+
+            const temp = new Date(korluhPadi.tanggal);
+
+            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhPadi.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), temp.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), temp.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPadi) {
+                res.status(403).json(response(403, 'Korluh padi deleted failed because kacamatan has validated'));
                 return;
             }
 
