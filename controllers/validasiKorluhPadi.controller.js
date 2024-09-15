@@ -56,7 +56,7 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
         }
     });
 
-    if (date !== undefined && kecamatan !== undefined) {
+    if (date !== undefined) {
         return {
             bulan: date.getMonth() + 1,
             tahun: date.getFullYear(),
@@ -129,10 +129,16 @@ const combineData = (current, before) => {
     };
 }
 
-const getSum = async (bulan, kecamatan) => {
+const getSum = async (bulan, kecamatan = undefined) => {
+    let where = {};
+
+    if (kecamatan !== undefined) {
+        where.kecamatanId = kecamatan;
+    }
+
     let data = await KorluhPadi.findAll({
         where: {
-            kecamatanId: kecamatan,
+            ...where,
             [Op.and]: [
                 sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
                 sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
@@ -143,7 +149,7 @@ const getSum = async (bulan, kecamatan) => {
     if (data.length > 0) {
         bulan.setMonth(bulan.getMonth() - 1);
 
-        before = await getSum(kecamatan, bulan);
+        before = await getSum(bulan, kecamatan);
         data = dataMap(data);
 
         return combineData(data, before);
@@ -435,6 +441,56 @@ module.exports = {
             bulan.setMonth(bulan.getMonth() - 1);
 
             before = await getSum(bulan, kecamatan);
+
+            current = combineData(current, before);
+
+            res.status(200).json(response(200, 'Get korluh padi successfully', current));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    kabData: async (req, res) => {
+        try {
+            let { bulan } = req.query;
+
+            monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+            bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
+
+
+            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
+                where: {
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
+                    ]
+                },
+            });
+
+            validasi = validasiKorluhPadi?.statusTkKabupaten || 'belum';
+
+            let current = await KorluhPadi.findAll({
+                where: {
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
+                    ]
+                }
+            });
+
+            current = dataMap(current, bulan, undefined, validasi);
+
+            bulan.setMonth(bulan.getMonth() - 1);
+
+            before = await getSum(bulan);
 
             current = combineData(current, before);
 

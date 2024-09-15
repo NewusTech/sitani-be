@@ -8,6 +8,7 @@ let prefix = '/validasi/korluh-padi';
 route.post(prefix + '/kec', validasiKorluhPadiController.kecVal);
 route.post(prefix + '/kab', validasiKorluhPadiController.kabVal);
 route.get(prefix + '/kec', validasiKorluhPadiController.kecData);
+route.get(prefix + '/kab', validasiKorluhPadiController.kabData);
 /* -- ROUTE -- */
 
 module.exports = route;
