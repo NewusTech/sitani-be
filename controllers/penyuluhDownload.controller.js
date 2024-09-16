@@ -99,101 +99,114 @@ module.exports = {
 
     kecamatan: async (req, res) => {
         try {
-            let { kecamatan } = req.params;
+            let { kecamatan } = req.query;
 
-            kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
-
-            const kec = await Kecamatan.findByPk(kecamatan);
-
-            if (!kec) {
-                res.status(404).json(response(404, 'Kecamatan not found'));
-                return;
-            }
-
-            const workbook = new exceljs.Workbook();
-
-            const penyuluhKecamatan = await PenyuluhKecamatan.findAll({
-                include: [
-                    {
-                        model: Kecamatan,
-                        as: 'kecamatan',
-                    },
-                    {
-                        model: Desa,
-                        as: 'desa',
-                    },
-                ],
-                where: {
-                    kecamatanId: kecamatan
-                },
-            });
-
-            const worksheet = workbook.addWorksheet("Kecamatan " + kec.nama);
-
-            worksheet.columns = [
-                { width: 5 },
-                { width: 40 },
-                { width: 25 },
-                { width: 25 },
-                { width: 40 },
-                { width: 25 },
-            ];
-
-            worksheet.mergeCells('A5:F5');
-
-            worksheet.getCell('E1').value = 'Lampiran :';
-            worksheet.getCell('E2').value = 'Nomor :';
-            worksheet.getCell('E3').value = 'Tanggal :';
-            worksheet.getCell('A5').value = `DAFTAR PENEMPATAN PENYULUH PERTANIAN KABUPATEN LAMPUNG TIMUR TAHUN ${new Date().getFullYear()}`;
-            worksheet.getCell('A6').value = `KECAMATAN : ${kec.nama}`;
-
-            worksheet.getRow(7).values = ['NO', 'NAMA', 'NIP', 'PANGKAT/GOL', 'Wilayah Desa Binaan', 'KETERANGAN'];
-            worksheet.getRow(8).values = ['1', '2', '3', '4', '5', '6'];
-
-            penyuluhKecamatan.forEach((item, index) => {
-                let temp = '';
-                item.desa.forEach((kec, i) => {
-                    temp += kec.nama;
-                    if (i !== item.desa.length) {
-                        temp += ', ';
-                    }
-                });
-                worksheet.getRow(index + 9).values = [index + 1, item.nama, item.nip, `${item.pangkat}/${item.golongan}`, temp, item.keterangan];
-            });
-
-
-            ['E1', 'E2', 'E3'].forEach(cell => {
-                worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'right' };
-            });
-            ['A5'].forEach(cell => {
-                worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
-                worksheet.getCell(cell).font = {
-                    bold: true,
+            let where = {};
+            if (!isNaN(parseInt(kecamatan))) {
+                where = {
+                    id: parseInt(kecamatan)
                 };
-            });
-
-            for (let i = 7; i <= 8 + penyuluhKecamatan.length; i++) {
-                ['A', 'B', 'C', 'D', 'E', 'F'].forEach(j => {
-                    let cell = `${j}${i}`;
-                    worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
-                    worksheet.getCell(cell).border = {
-                        bottom: { style: 'thin', color: { argb: '00000000' } },
-                        right: { style: 'thin', color: { argb: '00000000' } },
-                        left: { style: 'thin', color: { argb: '00000000' } },
-                        top: { style: 'thin', color: { argb: '00000000' } },
-                    };
-                    if (i === 7 || i === 8) {
-                        worksheet.getCell(cell).font = {
-                            bold: true,
-                        };
-                    }
-                })
             }
 
-            res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            res.setHeader("Content-Disposition", "attachment; filename=" + "penyuluh-kecamatan.xlsx");
+            let kecamatans = await Kecamatan.findAll({ where });
 
-            workbook.xlsx.write(res).then(() => res.end());
+            if (kecamatans.length) {
+                const workbook = new exceljs.Workbook();
+
+                let cek = false;
+                for (let kec of kecamatans) {
+                    const penyuluhKecamatan = await PenyuluhKecamatan.findAll({
+                        include: [
+                            {
+                                model: Kecamatan,
+                                as: 'kecamatan',
+                            },
+                            {
+                                model: Desa,
+                                as: 'desa',
+                            },
+                        ],
+                        where: {
+                            kecamatanId: kec.id
+                        }
+                    });
+
+                    if (penyuluhKecamatan.length) {
+                        cek = true;
+                        const worksheet = workbook.addWorksheet("Kecamatan " + kec.nama);
+
+                        worksheet.columns = [
+                            { width: 5 },
+                            { width: 40 },
+                            { width: 25 },
+                            { width: 25 },
+                            { width: 40 },
+                            { width: 25 },
+                        ];
+
+                        worksheet.mergeCells('A5:F5');
+
+                        worksheet.getCell('E1').value = 'Lampiran :';
+                        worksheet.getCell('E2').value = 'Nomor :';
+                        worksheet.getCell('E3').value = 'Tanggal :';
+                        worksheet.getCell('A5').value = `DAFTAR PENEMPATAN PENYULUH PERTANIAN KABUPATEN LAMPUNG TIMUR TAHUN ${new Date().getFullYear()}`;
+                        worksheet.getCell('A6').value = `KECAMATAN : ${kec.nama}`;
+
+                        worksheet.getRow(7).values = ['NO', 'NAMA', 'NIP', 'PANGKAT/GOL', 'Wilayah Desa Binaan', 'KETERANGAN'];
+                        worksheet.getRow(8).values = ['1', '2', '3', '4', '5', '6'];
+
+                        penyuluhKecamatan.forEach((item, index) => {
+                            let temp = '';
+                            item.desa.forEach((kec, i) => {
+                                temp += kec.nama;
+                                if (i !== item.desa.length) {
+                                    temp += ', ';
+                                }
+                            });
+                            worksheet.getRow(index + 9).values = [index + 1, item.nama, item.nip, `${item.pangkat}/${item.golongan}`, temp, item.keterangan];
+                        });
+
+
+                        ['E1', 'E2', 'E3'].forEach(cell => {
+                            worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'right' };
+                        });
+                        ['A5'].forEach(cell => {
+                            worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
+                            worksheet.getCell(cell).font = {
+                                bold: true,
+                            };
+                        });
+
+                        for (let i = 7; i <= 8 + penyuluhKecamatan.length; i++) {
+                            ['A', 'B', 'C', 'D', 'E', 'F'].forEach(j => {
+                                let cell = `${j}${i}`;
+                                worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
+                                worksheet.getCell(cell).border = {
+                                    bottom: { style: 'thin', color: { argb: '00000000' } },
+                                    right: { style: 'thin', color: { argb: '00000000' } },
+                                    left: { style: 'thin', color: { argb: '00000000' } },
+                                    top: { style: 'thin', color: { argb: '00000000' } },
+                                };
+                                if (i === 7 || i === 8) {
+                                    worksheet.getCell(cell).font = {
+                                        bold: true,
+                                    };
+                                }
+                            })
+                        }
+                    }
+                }
+
+                if (cek) {
+                    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                    res.setHeader("Content-Disposition", "attachment; filename=" + "penyuluh-kecamatan.xlsx");
+
+                    workbook.xlsx.write(res).then(() => res.end());
+                    return;
+                }
+            }
+
+            res.status(404).json(response(404, 'Kecamatan or penyuluh kecamatan not found'));
         } catch (err) {
             console.log(err);
 
