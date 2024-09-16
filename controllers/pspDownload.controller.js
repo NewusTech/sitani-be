@@ -236,12 +236,9 @@ module.exports = {
 
     pupuk: async (req, res) => {
         try {
-            let { kecamatan, startDate, endDate } = req.query;
+            let { startDate, endDate } = req.query;
 
             let where = {};
-            if (!isNaN(parseInt(kecamatan))) {
-                where.kecamatanId = parseInt(kecamatan);
-            }
             if (startDate) {
                 startDate = new Date(startDate);
                 startDate = dateGenerate(startDate);
