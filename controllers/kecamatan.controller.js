@@ -23,4 +23,27 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getOne: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const kecamatan = await Kecamatan.findByPk(id);
+
+            if (!kecamatan) {
+                res.status(404).json(response(404, 'Kecamatan not found'));
+                return;
+            }
+
+            res.status(200).json(response(200, 'Get kecamatan successfully', kecamatan));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
