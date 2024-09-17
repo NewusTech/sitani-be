@@ -23,11 +23,10 @@ module.exports = {
                     key: 'id'
                 }
             },
-
-            nama_tanaman: {
-                type: Sequelize.STRING,
-                allowNull: false,
+            korluh_master_sayur_dan_buah_id: {
+                type: Sequelize.BIGINT,
             },
+
             hasil_produksi: {
                 type: Sequelize.STRING,
                 allowNull: false,
