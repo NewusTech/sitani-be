@@ -2,6 +2,7 @@ const { KorluhMasterPalawija } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
+const { Op } = require('sequelize');
 
 const v = new Validator();
 
@@ -9,22 +10,9 @@ module.exports = {
     getAll: async (req, res) => {
         try {
             const korluhMasterPalawija = await KorluhMasterPalawija.findAll({
-                attributes: { exclude: ['korluhMasterPalawijaId'] },
-                where: { korluhMasterPalawijaId: null },
-                include: [
-                    {
-                        attributes: { exclude: ['korluhMasterPalawijaId'] },
-                        model: KorluhMasterPalawija,
-                        as: 'anak',
-                        include: [
-                            {
-                                attributes: { exclude: ['korluhMasterPalawijaId'] },
-                                model: KorluhMasterPalawija,
-                                as: 'anak',
-                            }
-                        ]
-                    }
-                ]
+                where: {
+                    hide: { [Op.ne]: true }
+                }
             });
 
             res.status(200).json(response(200, 'Get korluh master palawija successfully', korluhMasterPalawija));

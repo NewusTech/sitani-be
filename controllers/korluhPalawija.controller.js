@@ -7,6 +7,130 @@ const { Op } = require('sequelize');
 
 const v = new Validator();
 
+const parentSync = async (id, obj, bef) => {
+    obj.korluhMasterPalawijaId = id;
+    const parent = await KorluhPalawijaList.findOrCreate({
+        where: {
+            korluhMasterPalawijaId: obj.korluhMasterPalawijaId,
+            korluhPalawijaId: obj.korluhPalawijaId,
+        },
+        defaults: obj
+    });
+
+    if (!parent[1]) {
+        for (let idx of [
+            "lahanSawahPanen",
+            "lahanSawahPanenMuda",
+            "lahanSawahPanenHijauanPakanTernak",
+            "lahanSawahTanam",
+            "lahanSawahPuso",
+            "lahanBukanSawahPanen",
+            "lahanBukanSawahPanenMuda",
+            "lahanBukanSawahPanenHijauanPakanTernak",
+            "lahanBukanSawahTanam",
+            "lahanBukanSawahPuso",
+        ]) {
+            if (obj[idx]) {
+                parent[0][idx] = parent[0][idx] ? parent[0][idx] + obj[idx] : obj[idx];
+            }
+            if (bef) {
+                if (bef[idx]) {
+                    parent[0][idx] = parent[0][idx] ? parent[0][idx] - bef[idx] : bef[idx];
+                }
+            }
+        }
+        await parent[0].save();
+    }
+}
+
+const parentSynchronization = async (obj, bef = undefined, deleted = false) => {
+    const korluhPalawijaId = obj.korluhPalawijaId, korluhMasterPalawijaId = obj.korluhMasterPalawijaId;
+    if ([1, 2, 3, 4].includes(korluhMasterPalawijaId)) {
+        await parentSync(17, obj, bef);
+        if (deleted) {
+            const cek = await KorluhPalawijaList.count({
+                where: {
+                    korluhPalawijaId,
+                    korluhMasterPalawijaId: {
+                        [Op.in]: [1, 2, 3, 4]
+                    }
+                }
+            });
+            if (!cek) {
+                await KorluhPalawijaList.destroy({
+                    where: {
+                        korluhPalawijaId,
+                        korluhMasterPalawijaId: 17,
+                    }
+                });
+            }
+        }
+    }
+    if ([1, 2].includes(korluhMasterPalawijaId)) {
+        await parentSync(18, obj, bef);
+        if (deleted) {
+            const cek = await KorluhPalawijaList.count({
+                where: {
+                    korluhPalawijaId,
+                    korluhMasterPalawijaId: {
+                        [Op.in]: [1, 2]
+                    }
+                }
+            });
+            if (!cek) {
+                await KorluhPalawijaList.destroy({
+                    where: {
+                        korluhPalawijaId,
+                        korluhMasterPalawijaId: 18,
+                    }
+                });
+            }
+        }
+    }
+    if ([5, 6].includes(korluhMasterPalawijaId)) {
+        await parentSync(19, obj, bef);
+        if (deleted) {
+            const cek = await KorluhPalawijaList.count({
+                where: {
+                    korluhPalawijaId,
+                    korluhMasterPalawijaId: {
+                        [Op.in]: [5, 6]
+                    }
+                }
+            });
+            if (!cek) {
+                await KorluhPalawijaList.destroy({
+                    where: {
+                        korluhPalawijaId,
+                        korluhMasterPalawijaId: 19,
+                    }
+                });
+            }
+        }
+    }
+    if ([8, 9].includes(korluhMasterPalawijaId)) {
+        await parentSync(20, obj, bef);
+        if (deleted) {
+            const cek = await KorluhPalawijaList.count({
+                where: {
+                    korluhPalawijaId,
+                    korluhMasterPalawijaId: {
+                        [Op.in]: [8, 9]
+                    }
+                }
+            });
+            if (!cek) {
+                await KorluhPalawijaList.destroy({
+                    where: {
+                        korluhPalawijaId,
+                        korluhMasterPalawijaId: 20,
+                    }
+                });
+            }
+        }
+    }
+}
+
 const coreSchema = {
     lahan_sawah_panen: {
         type: "number",
@@ -118,13 +242,11 @@ module.exports = {
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
 
-            const korluhMasterPalawija = await KorluhMasterPalawija.findByPk(korluh_master_palawija_id, {
-                include: [
-                    {
-                        model: KorluhMasterPalawija,
-                        as: 'anak',
-                    }
-                ]
+            const korluhMasterPalawija = await KorluhMasterPalawija.findOne({
+                where: {
+                    id: korluh_master_palawija_id,
+                    hide: { [Op.ne]: true }
+                }
             });
 
             if (!kecamatan) {
@@ -152,16 +274,6 @@ module.exports = {
                     {
                         type: 'notFound',
                         message: "Korluh master palawija doesn't exists",
-                        field: 'korluh_master_palawija_id',
-                    },
-                ]));
-                return;
-            }
-            if (korluhMasterPalawija.anak.length) {
-                res.status(400).json(response(400, 'Bad Request', [
-                    {
-                        type: 'errorType',
-                        message: "Do not use parent of master palawija",
                         field: 'korluh_master_palawija_id',
                     },
                 ]));
@@ -223,7 +335,7 @@ module.exports = {
                 return;
             }
 
-            await KorluhPalawijaList.create({
+            const obj = {
                 korluhMasterPalawijaId: korluhMasterPalawija.id,
                 korluhPalawijaId: korluhPalawija[0].id,
                 lahanSawahPanen: lahan_sawah_panen,
@@ -236,7 +348,11 @@ module.exports = {
                 lahanBukanSawahPanenHijauanPakanTernak: lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahanBukanSawahTanam: lahan_bukan_sawah_tanam,
                 lahanBukanSawahPuso: lahan_bukan_sawah_puso,
-            });
+            };
+
+            await KorluhPalawijaList.create(obj);
+
+            await parentSynchronization(obj);
 
             await transaction.commit();
 
@@ -350,6 +466,9 @@ module.exports = {
                     {
                         model: KorluhMasterPalawija,
                         as: 'master',
+                        where: {
+                            hide: { [Op.ne]: true }
+                        }
                     },
                 ],
             });
@@ -379,6 +498,15 @@ module.exports = {
 
             const korluhPalawijaList = await KorluhPalawijaList.findOne({
                 where: { id },
+                include: [
+                    {
+                        model: KorluhMasterPalawija,
+                        as: 'master',
+                        where: {
+                            hide: { [Op.ne]: true }
+                        }
+                    },
+                ],
             });
 
             const schema = {
@@ -449,21 +577,21 @@ module.exports = {
                 lahan_bukan_sawah_puso,
             } = req.body;
 
+            const objBef = korluhPalawijaList;
+
             if (korluh_master_palawija_id) {
-                const korluhMasterPalawija = await KorluhMasterPalawija.findByPk(korluh_master_palawija_id, {
-                    include: [
-                        {
-                            model: KorluhMasterPalawija,
-                            as: 'anak',
-                        }
-                    ]
+                const korluhMasterPalawija = await KorluhMasterPalawija.findOne({
+                    where: {
+                        id: korluh_master_palawija_id,
+                        hide: { [Op.ne]: true }
+                    }
                 });
 
-                if (korluhMasterPalawija?.anak?.length) {
+                if (!korluhMasterPalawija) {
                     res.status(400).json(response(400, 'Bad Request', [
                         {
-                            type: 'errorType',
-                            message: "Do not use parent of master palawija",
+                            type: 'notFound',
+                            message: "Korluh master palawija doesn't exists",
                             field: 'korluh_master_palawija_id',
                         },
                     ]));
@@ -494,7 +622,7 @@ module.exports = {
                 return;
             }
 
-            await korluhPalawijaList.update({
+            const obj = {
                 korluhMasterPalawijaId: korluh_master_palawija_id,
                 lahanSawahPanen: lahan_sawah_panen,
                 lahanSawahPanenMuda: lahan_sawah_panen_muda,
@@ -506,7 +634,11 @@ module.exports = {
                 lahanBukanSawahPanenHijauanPakanTernak: lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahanBukanSawahTanam: lahan_bukan_sawah_tanam,
                 lahanBukanSawahPuso: lahan_bukan_sawah_puso,
-            });
+            }
+
+            await korluhPalawijaList.update(obj);
+
+            await parentSynchronization(obj, objBef);
 
             await transaction.commit();
 
@@ -532,6 +664,15 @@ module.exports = {
 
             const korluhPalawijaList = await KorluhPalawijaList.findOne({
                 where: { id },
+                include: [
+                    {
+                        model: KorluhMasterPalawija,
+                        as: 'master',
+                        where: {
+                            hide: { [Op.ne]: true }
+                        }
+                    },
+                ],
             });
 
             if (!korluhPalawijaList) {
@@ -566,7 +707,15 @@ module.exports = {
                 return;
             }
 
+            const objBef = korluhPalawijaList;
+            const obj = {
+                korluhMasterPalawijaId: objBef.korluhMasterPalawijaId,
+                korluhPalawijaId: objBef.korluhPalawijaId,
+            }
+
             await korluhPalawijaList.destroy();
+
+            await parentSynchronization(obj, objBef, true);
 
             const korluhPalawijaExits = await KorluhPalawijaList.findOne({
                 where: { korluhPalawijaId }

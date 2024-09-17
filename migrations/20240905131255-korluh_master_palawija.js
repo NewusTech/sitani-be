@@ -16,12 +16,13 @@ module.exports = {
                 primaryKey: true,
                 allowNull: false,
             },
-            korluh_master_palawija_id: {
-                type: Sequelize.BIGINT,
-            },
             nama: {
                 type: Sequelize.STRING,
                 allowNull: false,
+            },
+            hide: {
+                type: Sequelize.BOOLEAN,
+                defaultValue: false,
             },
             created_at: {
                 type: Sequelize.DATE,
@@ -31,16 +32,6 @@ module.exports = {
                 type: Sequelize.DATE,
                 allowNull: false,
             },
-        });
-
-        await queryInterface.addConstraint('korluh_master_palawija', {
-            name: 'korluh_master_palawija_parent_fk',
-            fields: ['korluh_master_palawija_id'],
-            type: 'foreign key',
-            references: {
-                table: 'korluh_master_palawija',
-                field: 'id'
-            }
         });
     },
 
