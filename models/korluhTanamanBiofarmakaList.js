@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'korluhTanamanBiofarmakaId',
                 as: 'korluhTanamanBiofarmaka',
             });
+            KorluhTanamanBiofarmakaList.belongsTo(models.KorluhMasterTanamanBiofarmaka, {
+                foreignKey: 'korluhMasterTanamanBiofarmakaId',
+                as: 'master',
+            });
         }
     }
 
@@ -17,12 +21,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BIGINT,
             field: 'korluh_tanaman_biofarmaka_id',
         },
-
-        namaTanaman: {
-            type: DataTypes.STRING,
-            field: 'nama_tanaman',
-            allowNull: false,
+        korluhMasterTanamanBiofarmakaId: {
+            type: DataTypes.BIGINT,
+            field: 'korluh_master_tanaman_biofarmaka_id',
         },
+
         luasPanenHabis: {
             type: DataTypes.DOUBLE,
             field: 'luas_panen_habis'

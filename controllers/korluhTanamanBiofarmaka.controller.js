@@ -1,4 +1,12 @@
-const { ValidasiKorluhTanamanBiofarmaka, KorluhTanamanBiofarmakaList, KorluhTanamanBiofarmaka, Kecamatan, Desa, sequelize } = require('../models');
+const {
+    ValidasiKorluhTanamanBiofarmaka,
+    KorluhMasterTanamanBiofarmaka,
+    KorluhTanamanBiofarmakaList,
+    KorluhTanamanBiofarmaka,
+    Kecamatan,
+    Desa,
+    sequelize
+} = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
@@ -68,14 +76,15 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
+                korluh_master_tanaman_biofarmaka_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 tanggal: {
                     type: "date",
                     convert: true,
-                },
-                nama_tanaman: {
-                    type: "string",
-                    max: 255,
-                    min: 1,
                 },
                 ...coreSchema,
             };
@@ -88,10 +97,10 @@ module.exports = {
             }
 
             let {
+                korluh_master_tanaman_biofarmaka_id,
                 kecamatan_id,
                 desa_id,
                 tanggal,
-                nama_tanaman,
                 luas_panen_habis,
                 luas_panen_belum_habis,
                 luas_rusak,
@@ -102,6 +111,7 @@ module.exports = {
                 keterangan,
             } = req.body;
 
+            const korluhMasterTanamanBiofarmaka = await KorluhMasterTanamanBiofarmaka.findByPk(korluh_master_tanaman_biofarmaka_id);
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
 
@@ -121,6 +131,16 @@ module.exports = {
                         type: 'notFound',
                         message: "Desa doesn't exists",
                         field: 'desa_id',
+                    },
+                ]));
+                return;
+            }
+            if (!korluhMasterTanamanBiofarmaka) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: "Korluh master tanaman biofarmaka doesn't exists",
+                        field: 'korluh_master_tanaman_biofarmaka_id',
                     },
                 ]));
                 return;
@@ -164,8 +184,8 @@ module.exports = {
 
             const korluhTanamanBiofarmakaListExists = await KorluhTanamanBiofarmakaList.findOne({
                 where: {
+                    korluhMasterTanamanBiofarmakaId: korluhMasterTanamanBiofarmaka.id,
                     korluhTanamanBiofarmakaId: korluhTanamanBiofarmaka[0].id,
-                    namaTanaman: { [Op.like]: nama_tanaman }
                 }
             });
 
@@ -173,8 +193,8 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh tanaman biofarmaka, please use another name",
-                        field: 'nama_tanaman',
+                        message: "Cannot created korluh tanaman biofarmaka, please use another master",
+                        field: 'korluh_master_tanaman_biofarmaka_id',
                     },
                 ]));
                 await transaction.rollback();
@@ -182,8 +202,8 @@ module.exports = {
             }
 
             await KorluhTanamanBiofarmakaList.create({
+                korluhMasterTanamanBiofarmakaId: korluhMasterTanamanBiofarmaka.id,
                 korluhTanamanBiofarmakaId: korluhTanamanBiofarmaka[0].id,
-                namaTanaman: nama_tanaman,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
                 luasRusak: luas_rusak,
@@ -262,7 +282,13 @@ module.exports = {
                     },
                     {
                         model: KorluhTanamanBiofarmakaList,
-                        as: 'list'
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterTanamanBiofarmaka,
+                                as: 'master'
+                            }
+                        ]
                     }
                 ],
                 offset,
@@ -308,6 +334,10 @@ module.exports = {
                             },
                         ],
                     },
+                    {
+                        model: KorluhMasterTanamanBiofarmaka,
+                        as: 'master'
+                    }
                 ],
             });
 
@@ -339,12 +369,6 @@ module.exports = {
             });
 
             const schema = {
-                nama_tanaman: {
-                    type: "string",
-                    optional: true,
-                    max: 255,
-                    min: 1,
-                },
                 ...coreSchema,
             };
 
@@ -392,7 +416,6 @@ module.exports = {
             }
 
             let {
-                nama_tanaman,
                 luas_panen_habis,
                 luas_panen_belum_habis,
                 luas_rusak,
@@ -403,31 +426,7 @@ module.exports = {
                 keterangan,
             } = req.body;
 
-            if (nama_tanaman) {
-                const namaTanamanExists = await KorluhTanamanBiofarmakaList.findOne({
-                    where: {
-                        korluhTanamanBiofarmakaId: korluhTanamanBiofarmakaList.korluhTanamanBiofarmakaId,
-                        id: { [Op.not]: korluhTanamanBiofarmakaList.id },
-                        namaTanaman: { [Op.like]: nama_tanaman },
-                    }
-                });
-
-                if (namaTanamanExists) {
-                    res.status(400).json(response(400, 'Bad Request', [
-                        {
-                            type: 'duplicate',
-                            message: "Cannot updated korluh tanaman biofarmaka, please use another name",
-                            field: 'nama_tanaman',
-                        },
-                    ]));
-                    return;
-                }
-            } else {
-                nama_tanaman = korluhTanamanBiofarmakaList.namaTanaman;
-            }
-
             await korluhTanamanBiofarmakaList.update({
-                namaTanaman: nama_tanaman,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
                 luasRusak: luas_rusak,
