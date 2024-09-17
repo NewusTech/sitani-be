@@ -48,6 +48,8 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
+        await queryInterface.removeConstraint('korluh_sayur_dan_buah_list', 'fk_master_sayur_buah_id');
+
         await queryInterface.dropTable('korluh_master_sayur_dan_buah');
     }
 };
