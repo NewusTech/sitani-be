@@ -410,7 +410,7 @@ module.exports = {
                 }
             }
 
-            const korluhPalawija = await KorluhPalawija.findAll({
+            let korluhPalawija = await KorluhPalawija.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -439,6 +439,61 @@ module.exports = {
             const count = await KorluhPalawija.count({ where });
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/palawija/get');
+
+            const master = await KorluhMasterPalawija.findAll();
+
+            korluhPalawija = korluhPalawija.map(item => {
+                let masterList = [];
+                let temp = {};
+                item.list.forEach(i => {
+                    const idx = i.master.index;
+
+                    for (let idxVal of [
+                        "lahanSawahPanen",
+                        "lahanSawahPanenMuda",
+                        "lahanSawahPanenHijauanPakanTernak",
+                        "lahanSawahTanam",
+                        "lahanSawahPuso",
+                        "lahanBukanSawahPanen",
+                        "lahanBukanSawahPanenMuda",
+                        "lahanBukanSawahPanenHijauanPakanTernak",
+                        "lahanBukanSawahTanam",
+                        "lahanBukanSawahPuso",
+                    ]) {
+                        temp[idx + 'L' + idxVal.substring(1)] = i[idxVal];
+                    }
+
+                    masterList.push(i.korluhMasterPalawijaId);
+                });
+                master.forEach(i => {
+                    if (!masterList.includes(i.id)) {
+                        for (let idxVal of [
+                            "LahanSawahPanen",
+                            "LahanSawahPanenMuda",
+                            "LahanSawahPanenHijauanPakanTernak",
+                            "LahanSawahTanam",
+                            "LahanSawahPuso",
+                            "LahanBukanSawahPanen",
+                            "LahanBukanSawahPanenMuda",
+                            "LahanBukanSawahPanenHijauanPakanTernak",
+                            "LahanBukanSawahTanam",
+                            "LahanBukanSawahPuso",
+                        ]) {
+                            temp[i.index + idxVal] = null;
+                        }
+                    }
+                });
+                return {
+                    kecamatanId: item.kecamatanId,
+                    tanggal: item.tanggal,
+                    desaId: item.desaId,
+
+                    kecamatan: item?.kecamatan,
+                    desa: item?.desa,
+
+                    ...temp,
+                };
+            });
 
             res.status(200).json(response(200, 'Get korluh palawija successfully', { data: korluhPalawija, pagination }));
         } catch (err) {
