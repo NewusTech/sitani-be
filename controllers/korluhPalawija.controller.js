@@ -29,6 +29,7 @@ const parentSync = async (id, obj, bef) => {
             "lahanBukanSawahPanenHijauanPakanTernak",
             "lahanBukanSawahTanam",
             "lahanBukanSawahPuso",
+            "produksi",
         ]) {
             if (obj[idx]) {
                 parent[0][idx] = parent[0][idx] ? parent[0][idx] + obj[idx] : obj[idx];
@@ -182,6 +183,11 @@ const coreSchema = {
         optional: true,
         convert: true,
     },
+    produksi: {
+        type: "number",
+        optional: true,
+        convert: true,
+    },
 }
 
 module.exports = {
@@ -237,6 +243,7 @@ module.exports = {
                 lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahan_bukan_sawah_tanam,
                 lahan_bukan_sawah_puso,
+                produksi,
             } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
@@ -348,6 +355,7 @@ module.exports = {
                 lahanBukanSawahPanenHijauanPakanTernak: lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahanBukanSawahTanam: lahan_bukan_sawah_tanam,
                 lahanBukanSawahPuso: lahan_bukan_sawah_puso,
+                produksi,
             };
 
             await KorluhPalawijaList.create(obj);
@@ -459,6 +467,7 @@ module.exports = {
                         "lahanBukanSawahPanenHijauanPakanTernak",
                         "lahanBukanSawahTanam",
                         "lahanBukanSawahPuso",
+                        "produksi",
                     ]) {
                         temp[idx + 'L' + idxVal.substring(1)] = i[idxVal];
                     }
@@ -479,6 +488,7 @@ module.exports = {
                             "LahanBukanSawahPanenHijauanPakanTernak",
                             "LahanBukanSawahTanam",
                             "LahanBukanSawahPuso",
+                            "produksi",
                         ]) {
                             temp[i.index + idxVal] = null;
                         }
@@ -631,6 +641,7 @@ module.exports = {
                 lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahan_bukan_sawah_tanam,
                 lahan_bukan_sawah_puso,
+                produksi,
             } = req.body;
 
             const objBef = korluhPalawijaList;
@@ -690,6 +701,7 @@ module.exports = {
                 lahanBukanSawahPanenHijauanPakanTernak: lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahanBukanSawahTanam: lahan_bukan_sawah_tanam,
                 lahanBukanSawahPuso: lahan_bukan_sawah_puso,
+                produksi,
             }
 
             await korluhPalawijaList.update(obj);

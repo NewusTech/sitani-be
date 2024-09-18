@@ -62,6 +62,9 @@ module.exports = {
             lahan_bukan_sawah_puso: {
                 type: Sequelize.DOUBLE,
             },
+            produksi: {
+                type: Sequelize.DOUBLE,
+            },
 
             created_at: {
                 type: Sequelize.DATE,

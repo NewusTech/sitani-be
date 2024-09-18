@@ -67,6 +67,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
             field: 'lahan_bukan_sawah_puso',
         },
+        produksi: {
+            type: DataTypes.DOUBLE,
+        },
 
         createdAt: {
             type: DataTypes.DATE,

@@ -22,6 +22,7 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "lahanBukanSawahPanenHijauanPakanTernak",
                 "lahanBukanSawahTanam",
                 "lahanBukanSawahPuso",
+                "produksi",
             ]) {
                 sum['masterIds'] = sum['masterIds'] || [];
                 if (item[index]) {
