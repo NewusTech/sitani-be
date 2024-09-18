@@ -59,7 +59,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
         return {
             bulan: date.getMonth() + 1,
             tahun: date.getFullYear(),
-            kecamatan,
+            kecamatanId: kecamatan.id,
+            kecamatan: kecamatan.nama,
             validasi,
             ...sum,
         }
@@ -412,6 +413,7 @@ module.exports = {
             kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
             bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
 
+            const kec = await Kecamatan.findByPk(kecamatan);
 
             const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
                 where: {
@@ -435,7 +437,7 @@ module.exports = {
                 }
             });
 
-            current = dataMap(current, bulan, kecamatan, validasi);
+            current = dataMap(current, bulan, kec, validasi);
 
             bulan.setMonth(bulan.getMonth() - 1);
 
