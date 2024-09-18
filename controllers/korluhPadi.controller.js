@@ -7,6 +7,16 @@ const { Op } = require('sequelize');
 
 const v = new Validator();
 
+const getSum = (index) => {
+    let sum = null;
+    for (let idx of index) {
+        if (idx) {
+            sum = sum ? sum + idx : idx;
+        }
+    }
+    return sum;
+}
+
 const coreSchema = {
     hibrida_bantuan_pemerintah_lahan_sawah_panen: {
         type: "number",
@@ -341,6 +351,22 @@ module.exports = {
                 return;
             }
 
+            let hibrida_lahan_sawah_panen = getSum([hibrida_bantuan_pemerintah_lahan_sawah_panen, hibrida_non_bantuan_pemerintah_lahan_sawah_panen]);
+            let hibrida_lahan_sawah_tanam = getSum([hibrida_bantuan_pemerintah_lahan_sawah_tanam, hibrida_non_bantuan_pemerintah_lahan_sawah_tanam]);
+            let hibrida_lahan_sawah_puso = getSum([hibrida_bantuan_pemerintah_lahan_sawah_puso, hibrida_non_bantuan_pemerintah_lahan_sawah_puso]);
+            let unggul_lahan_sawah_panen = getSum([unggul_bantuan_pemerintah_lahan_sawah_panen, unggul_non_bantuan_pemerintah_lahan_sawah_panen]);
+            let unggul_lahan_sawah_tanam = getSum([unggul_bantuan_pemerintah_lahan_sawah_tanam, unggul_non_bantuan_pemerintah_lahan_sawah_tanam]);
+            let unggul_lahan_sawah_puso = getSum([unggul_bantuan_pemerintah_lahan_sawah_puso, unggul_non_bantuan_pemerintah_lahan_sawah_puso]);
+            let unggul_lahan_bukan_sawah_panen = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_panen, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen]);
+            let unggul_lahan_bukan_sawah_tanam = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam]);
+            let unggul_lahan_bukan_sawah_puso = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_puso, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso]);
+            let jumlah_padi_lahan_sawah_panen = getSum([hibrida_lahan_sawah_panen, unggul_lahan_sawah_panen, lokal_lahan_sawah_panen]);
+            let jumlah_padi_lahan_sawah_tanam = getSum([hibrida_lahan_sawah_tanam, unggul_lahan_sawah_tanam, lokal_lahan_sawah_tanam]);
+            let jumlah_padi_lahan_sawah_puso = getSum([hibrida_lahan_sawah_puso, unggul_lahan_sawah_puso, lokal_lahan_sawah_puso]);
+            let jumlah_padi_lahan_bukan_sawah_panen = getSum([unggul_lahan_bukan_sawah_panen, lokal_lahan_bukan_sawah_panen]);
+            let jumlah_padi_lahan_bukan_sawah_tanam = getSum([unggul_lahan_bukan_sawah_tanam, lokal_lahan_bukan_sawah_tanam]);
+            let jumlah_padi_lahan_bukan_sawah_puso = getSum([unggul_lahan_bukan_sawah_puso, lokal_lahan_bukan_sawah_puso]);
+
             await KorluhPadi.create({
                 kecamatanId: kecamatan.id,
                 desaId: desa.id,
@@ -381,6 +407,22 @@ module.exports = {
                 sawah_rawa_lebak_lahan_sawah_panen,
                 sawah_rawa_lebak_lahan_sawah_tanam,
                 sawah_rawa_lebak_lahan_sawah_puso,
+
+                hibrida_lahan_sawah_panen,
+                hibrida_lahan_sawah_tanam,
+                hibrida_lahan_sawah_puso,
+                unggul_lahan_sawah_panen,
+                unggul_lahan_sawah_tanam,
+                unggul_lahan_sawah_puso,
+                unggul_lahan_bukan_sawah_panen,
+                unggul_lahan_bukan_sawah_tanam,
+                unggul_lahan_bukan_sawah_puso,
+                jumlah_padi_lahan_sawah_panen,
+                jumlah_padi_lahan_sawah_tanam,
+                jumlah_padi_lahan_sawah_puso,
+                jumlah_padi_lahan_bukan_sawah_panen,
+                jumlah_padi_lahan_bukan_sawah_tanam,
+                jumlah_padi_lahan_bukan_sawah_puso,
             });
 
             await transaction.commit();
@@ -620,6 +662,22 @@ module.exports = {
                 return;
             }
 
+            let hibrida_lahan_sawah_panen = getSum([hibrida_bantuan_pemerintah_lahan_sawah_panen, hibrida_non_bantuan_pemerintah_lahan_sawah_panen]);
+            let hibrida_lahan_sawah_tanam = getSum([hibrida_bantuan_pemerintah_lahan_sawah_tanam, hibrida_non_bantuan_pemerintah_lahan_sawah_tanam]);
+            let hibrida_lahan_sawah_puso = getSum([hibrida_bantuan_pemerintah_lahan_sawah_puso, hibrida_non_bantuan_pemerintah_lahan_sawah_puso]);
+            let unggul_lahan_sawah_panen = getSum([unggul_bantuan_pemerintah_lahan_sawah_panen, unggul_non_bantuan_pemerintah_lahan_sawah_panen]);
+            let unggul_lahan_sawah_tanam = getSum([unggul_bantuan_pemerintah_lahan_sawah_tanam, unggul_non_bantuan_pemerintah_lahan_sawah_tanam]);
+            let unggul_lahan_sawah_puso = getSum([unggul_bantuan_pemerintah_lahan_sawah_puso, unggul_non_bantuan_pemerintah_lahan_sawah_puso]);
+            let unggul_lahan_bukan_sawah_panen = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_panen, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen]);
+            let unggul_lahan_bukan_sawah_tanam = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam]);
+            let unggul_lahan_bukan_sawah_puso = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_puso, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso]);
+            let jumlah_padi_lahan_sawah_panen = getSum([hibrida_lahan_sawah_panen, unggul_lahan_sawah_panen, lokal_lahan_sawah_panen]);
+            let jumlah_padi_lahan_sawah_tanam = getSum([hibrida_lahan_sawah_tanam, unggul_lahan_sawah_tanam, lokal_lahan_sawah_tanam]);
+            let jumlah_padi_lahan_sawah_puso = getSum([hibrida_lahan_sawah_puso, unggul_lahan_sawah_puso, lokal_lahan_sawah_puso]);
+            let jumlah_padi_lahan_bukan_sawah_panen = getSum([unggul_lahan_bukan_sawah_panen, lokal_lahan_bukan_sawah_panen]);
+            let jumlah_padi_lahan_bukan_sawah_tanam = getSum([unggul_lahan_bukan_sawah_tanam, lokal_lahan_bukan_sawah_tanam]);
+            let jumlah_padi_lahan_bukan_sawah_puso = getSum([unggul_lahan_bukan_sawah_puso, lokal_lahan_bukan_sawah_puso]);
+
             await korluhPadi.update({
                 tanggal,
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
@@ -658,6 +716,22 @@ module.exports = {
                 sawah_rawa_lebak_lahan_sawah_panen,
                 sawah_rawa_lebak_lahan_sawah_tanam,
                 sawah_rawa_lebak_lahan_sawah_puso,
+
+                hibrida_lahan_sawah_panen,
+                hibrida_lahan_sawah_tanam,
+                hibrida_lahan_sawah_puso,
+                unggul_lahan_sawah_panen,
+                unggul_lahan_sawah_tanam,
+                unggul_lahan_sawah_puso,
+                unggul_lahan_bukan_sawah_panen,
+                unggul_lahan_bukan_sawah_tanam,
+                unggul_lahan_bukan_sawah_puso,
+                jumlah_padi_lahan_sawah_panen,
+                jumlah_padi_lahan_sawah_tanam,
+                jumlah_padi_lahan_sawah_puso,
+                jumlah_padi_lahan_bukan_sawah_panen,
+                jumlah_padi_lahan_bukan_sawah_tanam,
+                jumlah_padi_lahan_bukan_sawah_puso,
             });
 
             await transaction.commit();

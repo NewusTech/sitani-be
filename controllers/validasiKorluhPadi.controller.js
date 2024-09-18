@@ -47,6 +47,22 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
             "sawah_rawa_lebak_lahan_sawah_panen",
             "sawah_rawa_lebak_lahan_sawah_tanam",
             "sawah_rawa_lebak_lahan_sawah_puso",
+
+            "hibrida_lahan_sawah_panen",
+            "hibrida_lahan_sawah_tanam",
+            "hibrida_lahan_sawah_puso",
+            "unggul_lahan_sawah_panen",
+            "unggul_lahan_sawah_tanam",
+            "unggul_lahan_sawah_puso",
+            "unggul_lahan_bukan_sawah_panen",
+            "unggul_lahan_bukan_sawah_tanam",
+            "unggul_lahan_bukan_sawah_puso",
+            "jumlah_padi_lahan_sawah_panen",
+            "jumlah_padi_lahan_sawah_tanam",
+            "jumlah_padi_lahan_sawah_puso",
+            "jumlah_padi_lahan_bukan_sawah_panen",
+            "jumlah_padi_lahan_bukan_sawah_tanam",
+            "jumlah_padi_lahan_bukan_sawah_puso",
         ]) {
             sum[index] = sum[index] !== undefined ? sum[index] : null;
             if (item[index]) {
@@ -84,6 +100,12 @@ const combineData = (current, before) => {
             bulan_lalu_sawah_rawa_pasang_surut_lahan_sawah: 0,
             bulan_lalu_sawah_rawa_lebak_lahan_sawah: 0,
 
+            bulan_lalu_hibrida_lahan_sawah: 0,
+            bulan_lalu_unggul_lahan_sawah: 0,
+            bulan_lalu_unggul_lahan_bukan_sawah: 0,
+            bulan_lalu_jumlah_padi_lahan_sawah: 0,
+            bulan_lalu_jumlah_padi_lahan_bukan_sawah: 0,
+
             akhir_hibrida_bantuan_pemerintah_lahan_sawah: current.hibrida_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_bantuan_pemerintah_lahan_sawah_puso,
             akhir_hibrida_non_bantuan_pemerintah_lahan_sawah: current.hibrida_non_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_non_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_non_bantuan_pemerintah_lahan_sawah_puso,
             akhir_unggul_bantuan_pemerintah_lahan_sawah: current.unggul_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_sawah_puso,
@@ -96,6 +118,13 @@ const combineData = (current, before) => {
             akhir_sawah_tadah_hujan_lahan_sawah: current.sawah_tadah_hujan_lahan_sawah_tanam - current.sawah_tadah_hujan_lahan_sawah_panen - current.sawah_tadah_hujan_lahan_sawah_puso,
             akhir_sawah_rawa_pasang_surut_lahan_sawah: current.sawah_rawa_pasang_surut_lahan_sawah_tanam - current.sawah_rawa_pasang_surut_lahan_sawah_panen - current.sawah_rawa_pasang_surut_lahan_sawah_puso,
             akhir_sawah_rawa_lebak_lahan_sawah: current.sawah_rawa_lebak_lahan_sawah_tanam - current.sawah_rawa_lebak_lahan_sawah_panen - current.sawah_rawa_lebak_lahan_sawah_puso,
+
+            akhir_hibrida_lahan_sawah: current.hibrida_lahan_sawah_tanam - current.hibrida_lahan_sawah_panen - current.hibrida_lahan_sawah_puso,
+            akhir_unggul_lahan_sawah: current.unggul_lahan_sawah_tanam - current.unggul_lahan_sawah_panen - current.unggul_lahan_sawah_puso,
+            akhir_unggul_lahan_bukan_sawah: current.unggul_lahan_bukan_sawah_tanam - current.unggul_lahan_bukan_sawah_panen - current.unggul_lahan_bukan_sawah_puso,
+            akhir_jumlah_padi_lahan_sawah: current.jumlah_padi_lahan_sawah_tanam - current.jumlah_padi_lahan_sawah_panen - current.jumlah_padi_lahan_sawah_puso,
+            akhir_jumlah_padi_lahan_bukan_sawah: current.jumlah_padi_lahan_bukan_sawah_tanam - current.jumlah_padi_lahan_bukan_sawah_panen - current.jumlah_padi_lahan_bukan_sawah_puso,
+
             ...current,
         };
     }
@@ -113,6 +142,12 @@ const combineData = (current, before) => {
         bulan_lalu_sawah_rawa_pasang_surut_lahan_sawah: before.akhir_sawah_rawa_pasang_surut_lahan_sawah,
         bulan_lalu_sawah_rawa_lebak_lahan_sawah: before.akhir_sawah_rawa_lebak_lahan_sawah,
 
+        bulan_lalu_hibrida_lahan_sawah: before.akhir_hibrida_lahan_sawah,
+        bulan_lalu_unggul_lahan_sawah: before.akhir_unggul_lahan_sawah,
+        bulan_lalu_unggul_lahan_bukan_sawah: before.akhir_unggul_lahan_bukan_sawah,
+        bulan_lalu_jumlah_padi_lahan_sawah: before.akhir_jumlah_padi_lahan_sawah,
+        bulan_lalu_jumlah_padi_lahan_bukan_sawah: before.akhir_jumlah_padi_lahan_bukan_sawah,
+
         akhir_hibrida_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_bantuan_pemerintah_lahan_sawah + current.hibrida_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_bantuan_pemerintah_lahan_sawah_puso,
         akhir_hibrida_non_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_non_bantuan_pemerintah_lahan_sawah + current.hibrida_non_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_non_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_non_bantuan_pemerintah_lahan_sawah_puso,
         akhir_unggul_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_sawah + current.unggul_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_sawah_puso,
@@ -125,6 +160,13 @@ const combineData = (current, before) => {
         akhir_sawah_tadah_hujan_lahan_sawah: before.akhir_sawah_tadah_hujan_lahan_sawah + current.sawah_tadah_hujan_lahan_sawah_tanam - current.sawah_tadah_hujan_lahan_sawah_panen - current.sawah_tadah_hujan_lahan_sawah_puso,
         akhir_sawah_rawa_pasang_surut_lahan_sawah: before.akhir_sawah_rawa_pasang_surut_lahan_sawah + current.sawah_rawa_pasang_surut_lahan_sawah_tanam - current.sawah_rawa_pasang_surut_lahan_sawah_panen - current.sawah_rawa_pasang_surut_lahan_sawah_puso,
         akhir_sawah_rawa_lebak_lahan_sawah: before.akhir_sawah_rawa_lebak_lahan_sawah + current.sawah_rawa_lebak_lahan_sawah_tanam - current.sawah_rawa_lebak_lahan_sawah_panen - current.sawah_rawa_lebak_lahan_sawah_puso,
+
+        akhir_hibrida_lahan_sawah: before.akhir_hibrida_lahan_sawah + current.hibrida_lahan_sawah_tanam - current.hibrida_lahan_sawah_panen - current.hibrida_lahan_sawah_puso,
+        akhir_unggul_lahan_sawah: before.akhir_unggul_lahan_sawah + current.unggul_lahan_sawah_tanam - current.unggul_lahan_sawah_panen - current.unggul_lahan_sawah_puso,
+        akhir_unggul_lahan_bukan_sawah: before.akhir_unggul_lahan_bukan_sawah + current.unggul_lahan_bukan_sawah_tanam - current.unggul_lahan_bukan_sawah_panen - current.unggul_lahan_bukan_sawah_puso,
+        akhir_jumlah_padi_lahan_sawah: before.akhir_jumlah_padi_lahan_sawah + current.jumlah_padi_lahan_sawah_tanam - current.jumlah_padi_lahan_sawah_panen - current.jumlah_padi_lahan_sawah_puso,
+        akhir_jumlah_padi_lahan_bukan_sawah: before.akhir_jumlah_padi_lahan_bukan_sawah + current.jumlah_padi_lahan_bukan_sawah_tanam - current.jumlah_padi_lahan_bukan_sawah_panen - current.jumlah_padi_lahan_bukan_sawah_puso,
+
         ...current,
     };
 }
