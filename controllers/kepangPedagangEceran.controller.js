@@ -148,15 +148,19 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { equalDate, startDate, endDate, limit, page } = req.query;
+            let { equalDate, startDate, endDate, search, limit, page } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
             const offset = (page - 1) * limit;
 
+            let komoditasWhere = {};
             let where = {};
 
+            if (search) {
+                komoditasWhere.nama = { [Op.like]: `%${search}%` };
+            }
             if (equalDate) {
                 equalDate = new Date(equalDate);
                 equalDate = dateGenerate(equalDate);
@@ -188,7 +192,8 @@ module.exports = {
                         include: [
                             {
                                 model: KepangMasterKomoditas,
-                                as: 'komoditas'
+                                as: 'komoditas',
+                                where: komoditasWhere,
                             }
                         ]
                     }
