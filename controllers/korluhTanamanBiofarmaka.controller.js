@@ -270,7 +270,7 @@ module.exports = {
                 }
             }
 
-            const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findAll({
+            let korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -300,6 +300,44 @@ module.exports = {
             const count = await KorluhTanamanBiofarmaka.count({ where });
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/tanaman-biofarmaka/get');
+
+            korluhTanamanBiofarmaka = korluhTanamanBiofarmaka.map(item => {
+                let temp = {
+                    masterIds: [],
+                };
+                item.list.forEach(i => {
+                    const idx = i.master.id;
+
+                    temp[idx] = {
+                        master: i.master,
+                    };
+                    for (let idxVal of [
+                        "luasPanenHabis",
+                        "luasPanenBelumHabis",
+                        "luasRusak",
+                        "luasPenanamanBaru",
+                        "produksiHabis",
+                        "produksiBelumHabis",
+                        "rerataHarga",
+                        "keterangan",
+                    ]) {
+                        temp[idx][idxVal] = i[idxVal];
+                    }
+                    temp[idx]['id'] = i.id;
+
+                    temp.masterIds.push(idx);
+                });
+                return {
+                    kecamatanId: item.kecamatanId,
+                    tanggal: item.tanggal,
+                    desaId: item.desaId,
+
+                    kecamatan: item?.kecamatan,
+                    desa: item?.desa,
+
+                    ...temp,
+                };
+            });
 
             res.status(200).json(response(200, 'Get korluh tanaman biofarmaka successfully', { data: korluhTanamanBiofarmaka, pagination }));
         } catch (err) {
