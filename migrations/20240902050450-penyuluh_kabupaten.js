@@ -22,19 +22,15 @@ module.exports = {
             },
             nip: {
                 type: Sequelize.STRING(20),
-                allowNull: false,
             },
             pangkat: {
                 type: Sequelize.STRING,
-                allowNull: false,
             },
             golongan: {
                 type: Sequelize.STRING,
-                allowNull: false,
             },
             keterangan: {
                 type: Sequelize.STRING,
-                allowNull: false,
             },
         });
     },

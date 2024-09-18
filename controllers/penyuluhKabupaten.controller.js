@@ -20,24 +20,24 @@ module.exports = {
                 },
                 nip: {
                     type: "string",
+                    optional: true,
                     convert: true,
                     max: 20,
-                    min: 1,
                 },
                 pangkat: {
                     type: "string",
+                    optional: true,
                     max: 255,
-                    min: 1,
                 },
                 golongan: {
                     type: "string",
+                    optional: true,
                     max: 255,
-                    min: 1,
                 },
                 keterangan: {
                     type: "string",
+                    optional: true,
                     max: 255,
-                    min: 1,
                 },
                 kecamatan_list: {
                     type: "array",
