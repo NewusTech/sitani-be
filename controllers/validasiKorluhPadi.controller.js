@@ -48,10 +48,9 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
             "sawah_rawa_lebak_lahan_sawah_tanam",
             "sawah_rawa_lebak_lahan_sawah_puso",
         ]) {
+            sum[index] = sum[index] !== undefined ? sum[index] : null;
             if (item[index]) {
                 sum[index] = sum[index] ? sum[index] + item[index] : item[index];
-            } else if (sum[index] === undefined) {
-                sum[index] = 0;
             }
         }
     });

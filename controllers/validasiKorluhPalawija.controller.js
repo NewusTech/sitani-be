@@ -36,10 +36,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "lahanBukanSawahPuso",
                 "produksi",
             ]) {
+                sum[index] = sum[index] !== undefined ? sum[index] : null;
                 if (item[index]) {
-                    if (sum[idx][index] === undefined) {
-                        sum[idx][index] = 0;
-                    }
                     sum[idx][index] = sum[idx][index] ? sum[idx][index] + item[index] : item[index];
                 }
             }
