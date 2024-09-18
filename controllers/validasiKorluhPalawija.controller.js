@@ -7,10 +7,22 @@ const { Op } = require('sequelize');
 const v = new Validator();
 
 const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undefined) => {
-    let sum = {};
+    let sum = {
+        masterIds: []
+    };
 
     data.forEach(i => {
         i.list.forEach(item => {
+            const idx = item.master.id;
+
+            if (!sum['masterIds'].includes(idx)) {
+                sum['masterIds'].push(idx);
+            }
+            if (!sum[idx]) {
+                sum[idx] = {
+                    nama: item.master.nama,
+                };
+            }
             for (let index of [
                 "lahanSawahPanen",
                 "lahanSawahPanenMuda",
@@ -24,20 +36,11 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "lahanBukanSawahPuso",
                 "produksi",
             ]) {
-                sum['masterIds'] = sum['masterIds'] || [];
                 if (item[index]) {
-                    if (!sum['masterIds'].includes(item.master.id)) {
-                        sum['masterIds'].push(item.master.id);
+                    if (sum[idx][index] === undefined) {
+                        sum[idx][index] = 0;
                     }
-                    if (!sum[item.master.id]) {
-                        sum[item.master.id] = {
-                            nama: item.master.nama,
-                        };
-                    }
-                    if (sum[item.master.id][index] === undefined) {
-                        sum[item.master.id][index] = 0;
-                    }
-                    sum[item.master.id][index] = sum[item.master.id][index] ? sum[item.master.id][index] + item[index] : item[index];
+                    sum[idx][index] = sum[idx][index] ? sum[idx][index] + item[index] : item[index];
                 }
             }
         });
@@ -47,7 +50,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
         return {
             bulan: date.getMonth() + 1,
             tahun: date.getFullYear(),
-            kecamatan,
+            kecamatanId: kecamatan?.id,
+            kecamatan: kecamatan?.nama,
             validasi,
             ...sum,
         }
@@ -372,6 +376,7 @@ module.exports = {
             kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
             bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
 
+            const kec = await Kecamatan.findByPk(kecamatan);
 
             const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
                 where: {
@@ -407,7 +412,7 @@ module.exports = {
                 }
             });
 
-            current = dataMap(current, bulan, kecamatan, validasi);
+            current = dataMap(current, bulan, kec, validasi);
 
             bulan.setMonth(bulan.getMonth() - 1);
 
