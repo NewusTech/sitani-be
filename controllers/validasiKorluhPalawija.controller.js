@@ -36,7 +36,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "lahanBukanSawahPuso",
                 "produksi",
             ]) {
-                sum[index] = sum[index] !== undefined ? sum[index] : null;
+                sum[idx][index] = sum[idx][index] !== undefined ? sum[idx][index] : null;
+
                 if (item[index]) {
                     sum[idx][index] = sum[idx][index] ? sum[idx][index] + item[index] : item[index];
                 }
