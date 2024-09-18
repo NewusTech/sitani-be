@@ -1,4 +1,4 @@
-const { ValidasiKorluhSayurBuah, KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, sequelize } = require('../models');
+const { ValidasiKorluhSayurBuah, KorluhMasterSayurBuah, KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, sequelize } = require('../models');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -11,6 +11,21 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
     data.forEach(i => {
         i.list.forEach(item => {
+            const masterId = item.master.id;
+
+            sum['masterIds'] = sum['masterIds'] || [];
+
+            if (!sum['masterIds'].includes(masterId)) {
+                sum['masterIds'].push(masterId);
+            }
+            if (!sum[masterId]) {
+                sum[masterId] = {
+                    master: item.master,
+                    keterangan: item.keterangan,
+                    hasilProduksi: item.hasilProduksi,
+                };
+            }
+
             for (let index of [
                 "luasPanenHabis",
                 "luasPanenBelumHabis",
@@ -20,26 +35,14 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "produksiBelumHabis",
                 "rerataHarga",
             ]) {
-                sum['namaTanaman'] = sum['namaTanaman'] || [];
-                if (item[index]) {
-                    const nt = item.namaTanaman.toLowerCase();
-                    if (!sum['namaTanaman'].includes(nt)) {
-                        sum['namaTanaman'].push(nt);
-                    }
-                    if (!sum[nt]) {
-                        sum[nt] = {
-                            namaTanaman: nt,
-                            keterangan: item.keterangan,
-                            hasilProduksi: item.hasilProduksi,
-                        };
-                    }
-                    if (sum[nt][index] === undefined) {
-                        sum[nt][index] = 0;
-                    }
-                    sum[nt][index] = sum[nt][index] ? sum[nt][index] + item[index] : item[index];
-                    if (index === 'rerataHarga') {
-                        sum[nt]['count'] = sum[nt]['count'] ? sum[nt]['count'] + 1 : 1;
-                    }
+                if (sum[masterId][index] === undefined) {
+                    sum[masterId][index] = 0;
+                }
+
+                sum[masterId][index] = item[index] ? sum[masterId][index] + item[index] : sum[masterId][index];
+
+                if (index === 'rerataHarga' && item[index]) {
+                    sum[masterId]['count'] = sum[masterId]['count'] ? sum[masterId]['count'] + 1 : 1;
                 }
             }
         });
@@ -59,14 +62,14 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
 const combineData = (current, before) => {
     if (before === 0) {
-        current['namaTanaman']?.forEach(nt => {
+        current['masterIds']?.forEach(nt => {
             current[nt]['bulanLalu'] = 0;
 
             current[nt]['akhir'] = current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
         });
         return current;
     }
-    current['namaTanaman']?.forEach(nt => {
+    current['masterIds']?.forEach(nt => {
         current[nt]['bulanLalu'] = before[nt] ? before[nt]['akhir'] || 0 : 0;
 
         current[nt]['akhir'] = current[nt]['bulanLalu'] + current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
@@ -85,7 +88,13 @@ const getSum = async (bulan, kecamatan = undefined) => {
         include: [
             {
                 model: KorluhSayurBuahList,
-                as: 'list'
+                as: 'list',
+                include: [
+                    {
+                        model: KorluhMasterSayurBuah,
+                        as: 'master'
+                    }
+                ]
             }
         ],
         where: {
@@ -381,7 +390,13 @@ module.exports = {
                 include: [
                     {
                         model: KorluhSayurBuahList,
-                        as: 'list'
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterSayurBuah,
+                                as: 'master'
+                            }
+                        ]
                     }
                 ],
                 where: {
@@ -437,7 +452,13 @@ module.exports = {
                 include: [
                     {
                         model: KorluhSayurBuahList,
-                        as: 'list'
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterSayurBuah,
+                                as: 'master'
+                            }
+                        ]
                     }
                 ],
                 where: {
