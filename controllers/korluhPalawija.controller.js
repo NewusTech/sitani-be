@@ -448,14 +448,14 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/palawija/get');
 
-            const master = await KorluhMasterPalawija.findAll();
-
             korluhPalawija = korluhPalawija.map(item => {
-                let masterList = [];
-                let temp = {};
+                let temp = {
+                    masterIds: [],
+                };
                 item.list.forEach(i => {
-                    const idx = i.master.index;
+                    const idx = i.master.id;
 
+                    temp[idx] = {};
                     for (let idxVal of [
                         "lahanSawahPanen",
                         "lahanSawahPanenMuda",
@@ -469,30 +469,11 @@ module.exports = {
                         "lahanBukanSawahPuso",
                         "produksi",
                     ]) {
-                        temp[idx + 'L' + idxVal.substring(1)] = i[idxVal];
+                        temp[idx][idxVal] = i[idxVal];
                     }
-                    temp[idx + 'Id'] = i.id;
+                    temp[idx]['id'] = i.id;
 
-                    masterList.push(i.korluhMasterPalawijaId);
-                });
-                master.forEach(i => {
-                    if (!masterList.includes(i.id)) {
-                        for (let idxVal of [
-                            "LahanSawahPanen",
-                            "LahanSawahPanenMuda",
-                            "LahanSawahPanenHijauanPakanTernak",
-                            "LahanSawahTanam",
-                            "LahanSawahPuso",
-                            "LahanBukanSawahPanen",
-                            "LahanBukanSawahPanenMuda",
-                            "LahanBukanSawahPanenHijauanPakanTernak",
-                            "LahanBukanSawahTanam",
-                            "LahanBukanSawahPuso",
-                            "produksi",
-                        ]) {
-                            temp[i.index + idxVal] = null;
-                        }
-                    }
+                    temp.masterIds.push(idx);
                 });
                 return {
                     kecamatanId: item.kecamatanId,

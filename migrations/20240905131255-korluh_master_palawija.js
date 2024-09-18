@@ -20,10 +20,6 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            index: {
-                type: Sequelize.STRING,
-                allowNull: false,
-            },
             hide: {
                 type: Sequelize.BOOLEAN,
                 defaultValue: false,
