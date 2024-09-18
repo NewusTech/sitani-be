@@ -268,7 +268,7 @@ module.exports = {
                 }
             }
 
-            const korluhTanamanHias = await KorluhTanamanHias.findAll({
+            let korluhTanamanHias = await KorluhTanamanHias.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -298,6 +298,45 @@ module.exports = {
             const count = await KorluhTanamanHias.count({ where });
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/tanaman-hias/get');
+
+            korluhTanamanHias = korluhTanamanHias.map(item => {
+                let temp = {
+                    masterIds: [],
+                };
+                item.list.forEach(i => {
+                    const idx = i.master.id;
+
+                    temp[idx] = {
+                        master: i.master,
+                    };
+                    for (let idxVal of [
+                        "luasPanenHabis",
+                        "luasPanenBelumHabis",
+                        "luasRusak",
+                        "luasPenanamanBaru",
+                        "produksiHabis",
+                        "produksiBelumHabis",
+                        "satuanProduksi",
+                        "rerataHarga",
+                        "keterangan",
+                    ]) {
+                        temp[idx][idxVal] = i[idxVal];
+                    }
+                    temp[idx]['id'] = i.id;
+
+                    temp.masterIds.push(idx);
+                });
+                return {
+                    kecamatanId: item.kecamatanId,
+                    tanggal: item.tanggal,
+                    desaId: item.desaId,
+
+                    kecamatan: item?.kecamatan,
+                    desa: item?.desa,
+
+                    ...temp,
+                };
+            });
 
             res.status(200).json(response(200, 'Get korluh tanaman hias successfully', { data: korluhTanamanHias, pagination }));
         } catch (err) {
