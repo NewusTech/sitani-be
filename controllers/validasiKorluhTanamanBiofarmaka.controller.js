@@ -1,4 +1,11 @@
-const { ValidasiKorluhTanamanBiofarmaka, KorluhTanamanBiofarmakaList, KorluhTanamanBiofarmaka, Kecamatan, sequelize } = require('../models');
+const {
+    ValidasiKorluhTanamanBiofarmaka,
+    KorluhMasterTanamanBiofarmaka,
+    KorluhTanamanBiofarmakaList,
+    KorluhTanamanBiofarmaka,
+    Kecamatan,
+    sequelize
+} = require('../models');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -7,10 +14,24 @@ const { Op } = require('sequelize');
 const v = new Validator();
 
 const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undefined) => {
-    let sum = {};
+    let sum = {
+        masterIds: []
+    };
 
     data.forEach(i => {
         i.list.forEach(item => {
+            const masterId = item.master.id;
+
+            if (!sum['masterIds'].includes(masterId)) {
+                sum['masterIds'].push(masterId);
+            }
+            if (!sum[masterId]) {
+                sum[masterId] = {
+                    master: item.master,
+                    keterangan: item.keterangan,
+                };
+            }
+
             for (let index of [
                 "luasPanenHabis",
                 "luasPanenBelumHabis",
@@ -20,24 +41,13 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "produksiBelumHabis",
                 "rerataHarga",
             ]) {
-                sum['namaTanaman'] = sum['namaTanaman'] || [];
+                sum[masterId][index] = sum[masterId][index] !== undefined ? sum[masterId][index] : null;
+
                 if (item[index]) {
-                    const nt = item.namaTanaman.toLowerCase();
-                    if (!sum['namaTanaman'].includes(nt)) {
-                        sum['namaTanaman'].push(nt);
-                    }
-                    if (!sum[nt]) {
-                        sum[nt] = {
-                            namaTanaman: nt,
-                            keterangan: item.keterangan,
-                        };
-                    }
-                    if (sum[nt][index] === undefined) {
-                        sum[nt][index] = 0;
-                    }
-                    sum[nt][index] = sum[nt][index] ? sum[nt][index] + item[index] : item[index];
+                    sum[masterId][index] = sum[masterId][index] ? sum[masterId][index] + item[index] : item[index];
+
                     if (index === 'rerataHarga') {
-                        sum[nt]['count'] = sum[nt]['count'] ? sum[nt]['count'] + 1 : 1;
+                        sum[masterId]['count'] = sum[masterId]['count'] ? sum[masterId]['count'] + 1 : 1;
                     }
                 }
             }
@@ -48,7 +58,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
         return {
             bulan: date.getMonth() + 1,
             tahun: date.getFullYear(),
-            kecamatan,
+            kecamatanId: kecamatan?.id,
+            kecamatan: kecamatan?.nama,
             validasi,
             ...sum,
         }
@@ -58,14 +69,14 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
 const combineData = (current, before) => {
     if (before === 0) {
-        current['namaTanaman']?.forEach(nt => {
+        current['masterIds']?.forEach(nt => {
             current[nt]['bulanLalu'] = 0;
 
             current[nt]['akhir'] = current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
         });
         return current;
     }
-    current['namaTanaman']?.forEach(nt => {
+    current['masterIds']?.forEach(nt => {
         current[nt]['bulanLalu'] = before[nt] ? before[nt]['akhir'] || 0 : 0;
 
         current[nt]['akhir'] = current[nt]['bulanLalu'] + current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
@@ -84,7 +95,13 @@ const getSum = async (bulan, kecamatan = undefined) => {
         include: [
             {
                 model: KorluhTanamanBiofarmakaList,
-                as: 'list'
+                as: 'list',
+                include: [
+                    {
+                        model: KorluhMasterTanamanBiofarmaka,
+                        as: 'master'
+                    }
+                ]
             }
         ],
         where: {
@@ -363,6 +380,7 @@ module.exports = {
             kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
             bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
 
+            const kec = await Kecamatan.findByPk(kecamatan);
 
             const validasiKorluhTanamanBiofarmaka = await ValidasiKorluhTanamanBiofarmaka.findOne({
                 where: {
@@ -380,7 +398,13 @@ module.exports = {
                 include: [
                     {
                         model: KorluhTanamanBiofarmakaList,
-                        as: 'list'
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterTanamanBiofarmaka,
+                                as: 'master'
+                            }
+                        ]
                     }
                 ],
                 where: {
@@ -392,7 +416,7 @@ module.exports = {
                 }
             });
 
-            current = dataMap(current, bulan, kecamatan, validasi);
+            current = dataMap(current, bulan, kec, validasi);
 
             bulan.setMonth(bulan.getMonth() - 1);
 
