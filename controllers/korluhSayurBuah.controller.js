@@ -268,7 +268,7 @@ module.exports = {
                 }
             }
 
-            const korluhSayurBuah = await KorluhSayurBuah.findAll({
+            let korluhSayurBuah = await KorluhSayurBuah.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -298,6 +298,45 @@ module.exports = {
             const count = await KorluhSayurBuah.count({ where });
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/sayur-buah/get');
+
+            korluhSayurBuah = korluhSayurBuah.map(item => {
+                let temp = {
+                    masterIds: [],
+                };
+                item.list.forEach(i => {
+                    const idx = i.master.id;
+
+                    temp[idx] = {
+                        master: i.master,
+                    };
+                    for (let idxVal of [
+                        "hasilProduksi",
+                        "luasPanenHabis",
+                        "luasPanenBelumHabis",
+                        "luasRusak",
+                        "luasPenanamanBaru",
+                        "produksiHabis",
+                        "produksiBelumHabis",
+                        "rerataHarga",
+                        "keterangan",
+                    ]) {
+                        temp[idx][idxVal] = i[idxVal];
+                    }
+                    temp[idx]['id'] = i.id;
+
+                    temp.masterIds.push(idx);
+                });
+                return {
+                    kecamatanId: item.kecamatanId,
+                    tanggal: item.tanggal,
+                    desaId: item.desaId,
+
+                    kecamatan: item?.kecamatan,
+                    desa: item?.desa,
+
+                    ...temp,
+                };
+            });
 
             res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', { data: korluhSayurBuah, pagination }));
         } catch (err) {

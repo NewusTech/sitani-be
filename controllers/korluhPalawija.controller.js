@@ -455,7 +455,9 @@ module.exports = {
                 item.list.forEach(i => {
                     const idx = i.master.id;
 
-                    temp[idx] = {};
+                    temp[idx] = {
+                        master: i.master
+                    };
                     for (let idxVal of [
                         "lahanSawahPanen",
                         "lahanSawahPanenMuda",
