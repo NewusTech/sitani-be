@@ -462,6 +462,7 @@ module.exports = {
                     ]) {
                         temp[idx + 'L' + idxVal.substring(1)] = i[idxVal];
                     }
+                    temp[idx + 'Id'] = i.id;
 
                     masterList.push(i.korluhMasterPalawijaId);
                 });
