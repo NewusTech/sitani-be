@@ -6,6 +6,7 @@ const route = express.Router();
 let prefix = '/korluh/master-tahun';
 /* -- ROUTE -- */
 route.get(prefix + '/padi', korluhMasterTahunController.padi);
+route.get(prefix + '/palawija', korluhMasterTahunController.palawija);
 /* -- ROUTE -- */
 
 module.exports = route;
