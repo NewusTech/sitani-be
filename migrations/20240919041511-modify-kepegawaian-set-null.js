@@ -4,7 +4,7 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.changeColumn('master_kepegawaian', 'nip', {
-      type: Sequelize.BIGINT,
+      type: Sequelize.STRING,
       allowNull: true,
     });
 
@@ -29,7 +29,7 @@ module.exports = {
     });
 
     await queryInterface.changeColumn('master_kepegawaian', 'tmt_pangkat', {
-      type: Sequelize.DATE,
+      type: Sequelize.STRING,
       allowNull: true,
     });
 
@@ -39,7 +39,7 @@ module.exports = {
     });
 
     await queryInterface.changeColumn('master_kepegawaian', 'tmt_jabatan', {
-      type: Sequelize.DATE,
+      type: Sequelize.STRING,
       allowNull: true,
     });
 
@@ -49,7 +49,7 @@ module.exports = {
     });
 
     await queryInterface.changeColumn('master_kepegawaian', 'tgl_diklat', {
-      type: Sequelize.DATE,
+      type: Sequelize.STRING,
       allowNull: true,
     });
 
