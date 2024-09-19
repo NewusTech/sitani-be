@@ -295,6 +295,12 @@ module.exports = {
                     list[pos]['sumProduktivitas'] = list[pos]['sumProduktivitas'] ? list[pos]['sumProduktivitas'] + i.produktivitas : i.produktivitas || 0;
                     list[pos]['sumProduksi'] = list[pos]['sumProduksi'] ? list[pos]['sumProduksi'] + i.produksi : i.produksi || 0;
 
+                    list[pos]['masterIds'] = list[pos]['masterIds'] || [];
+
+                    if (!list[pos]['masterIds'].includes(i.komoditas.id)) {
+                        list[pos]['masterIds'].push(i.komoditas.id);
+                    }
+
                     list[pos]['list'] = list[pos]['list'] || {};
                     list[pos]['list'][i.komoditas.id] = {
                         id: i.id,

@@ -160,6 +160,12 @@ module.exports = {
                         if (kom.perkebunanMasterKategoriId === katId) {
                             const komId = kom.id;
 
+                            data[katId]['ids'] = data[katId]['ids'] || [];
+
+                            if (!data[katId]['ids'].includes(komId)) {
+                                data[katId]['ids'].push(komId);
+                            }
+
                             data[katId]['list'][komId] = data[katId]['list'][komId] || { komoditas: kom.nama }
                             for (let temp of [
                                 'Tbm',
