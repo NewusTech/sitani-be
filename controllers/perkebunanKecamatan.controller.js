@@ -149,6 +149,17 @@ module.exports = {
                 return;
             }
 
+            if (masterKomoditas.perkebunanMasterKategoriId !== masterKategoriKomoditas.id) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: "Master komoditas doesn't exists in the following kategori",
+                        field: 'master_komoditas_id',
+                    },
+                ]));
+                return;
+            }
+
             const perkebunanKecamatan = await PerkebunanKecamatan.findOrCreate({
                 where: {
                     kecamatanId: kecamatan.id,
@@ -455,6 +466,25 @@ module.exports = {
                 }
             } else {
                 master_kategori_komoditas_id = perkebunanKecamatanList.masterKategoriKomoditasId;
+            }
+
+            const masterKategoriKomoditas = await PerkebunanMasterKategoriKomoditas.findByPk(master_kategori_komoditas_id);
+            const masterKomoditas = await PerkebunanMasterKomoditas.findByPk(master_komoditas_id);
+
+            if (masterKomoditas.perkebunanMasterKategoriId !== masterKategoriKomoditas.id) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: "Master komoditas doesn't exists in the following kategori",
+                        field: 'master_komoditas_id',
+                    },
+                    {
+                        type: 'notFound',
+                        message: "Master komoditas doesn't exists in the following kategori",
+                        field: 'master_kategori_komoditas_id',
+                    },
+                ]));
+                return;
             }
 
             let jumlah = 0;
