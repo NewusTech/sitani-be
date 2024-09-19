@@ -10,6 +10,7 @@ const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
+const validasiKorluhSayurBuahController = require('./validasiKorluhSayurBuah.controller');
 
 const v = new Validator();
 
@@ -60,7 +61,10 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
             tahun: date.getFullYear(),
             kecamatanId: kecamatan?.id,
             kecamatan: kecamatan?.nama,
-            validasi,
+            validasiKecamatan: validasi?.statusTkKecamatan || 'belum',
+            validasiKabupaten: validasi?.statusTkKabupaten || 'belum',
+            keteranganKecamatan: validasi?.keteranganKecamatan,
+            keteranganKabupaten: validasi?.keteranganKabupaten,
             ...sum,
         }
     }
@@ -224,11 +228,11 @@ module.exports = {
                 return;
             }
 
-            keterangan = keterangan || validasiKorluhTanamanBiofarmaka[0].keterangan;
+            keterangan = keterangan || null;
 
             await validasiKorluhTanamanBiofarmaka[0].update({
                 statusTkKecamatan: status,
-                keterangan,
+                keteranganKecamatan: keterangan,
             });
 
             // VALIDATOR CREATE
@@ -342,7 +346,7 @@ module.exports = {
 
             await ValidasiKorluhTanamanBiofarmaka.update({
                 statusTkKabupaten: status,
-                keterangan,
+                keteranganKabupaten: keterangan,
             }, {
                 where: {
                     [Op.and]: [
@@ -392,8 +396,6 @@ module.exports = {
                 },
             });
 
-            validasi = validasiKorluhTanamanBiofarmaka?.statusTkKecamatan || 'belum';
-
             let current = await KorluhTanamanBiofarmaka.findAll({
                 include: [
                     {
@@ -416,7 +418,7 @@ module.exports = {
                 }
             });
 
-            current = dataMap(current, bulan, kec, validasi);
+            current = dataMap(current, bulan, kec, validasiKorluhTanamanBiofarmaka);
 
             bulan.setMonth(bulan.getMonth() - 1);
 
@@ -454,8 +456,6 @@ module.exports = {
                 },
             });
 
-            validasi = validasiKorluhTanamanBiofarmaka?.statusTkKabupaten || 'belum';
-
             let current = await KorluhTanamanBiofarmaka.findAll({
                 include: [
                     {
@@ -471,7 +471,7 @@ module.exports = {
                 }
             });
 
-            current = dataMap(current, bulan, undefined, validasi);
+            current = dataMap(current, bulan, undefined, validasiKorluhTanamanBiofarmaka);
 
             bulan.setMonth(bulan.getMonth() - 1);
 

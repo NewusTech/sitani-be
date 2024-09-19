@@ -51,7 +51,10 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
             tahun: date.getFullYear(),
             kecamatanId: kecamatan?.id,
             kecamatan: kecamatan?.nama,
-            validasi,
+            validasiKecamatan: validasi?.statusTkKecamatan || 'belum',
+            validasiKabupaten: validasi?.statusTkKabupaten || 'belum',
+            keteranganKecamatan: validasi?.keteranganKecamatan,
+            keteranganKabupaten: validasi?.keteranganKabupaten,
             ...sum,
         }
     }
@@ -219,11 +222,11 @@ module.exports = {
                 return;
             }
 
-            keterangan = keterangan || validasiKorluhPalawija[0].keterangan;
+            keterangan = keterangan || null;
 
             await validasiKorluhPalawija[0].update({
                 statusTkKecamatan: status,
-                keterangan,
+                keteranganKecamatan: keterangan,
             });
 
             // VALIDATOR CREATE
@@ -333,11 +336,11 @@ module.exports = {
                 return;
             }
 
-            keterangan = keterangan || '';
+            keterangan = keterangan || null;
 
             await ValidasiKorluhPalawija.update({
                 statusTkKabupaten: status,
-                keterangan,
+                keteranganKabupaten: keterangan,
             }, {
                 where: {
                     [Op.and]: [
@@ -387,8 +390,6 @@ module.exports = {
                 },
             });
 
-            validasi = validasiKorluhPalawija?.statusTkKecamatan || 'belum';
-
             let current = await KorluhPalawija.findAll({
                 include: [
                     {
@@ -411,7 +412,7 @@ module.exports = {
                 }
             });
 
-            current = dataMap(current, bulan, kec, validasi);
+            current = dataMap(current, bulan, kec, validasiKorluhPalawija);
 
             bulan.setMonth(bulan.getMonth() - 1);
 
@@ -449,8 +450,6 @@ module.exports = {
                 },
             });
 
-            validasi = validasiKorluhPalawija?.statusTkKabupaten || 'belum';
-
             let current = await KorluhPalawija.findAll({
                 include: [
                     {
@@ -472,7 +471,7 @@ module.exports = {
                 }
             });
 
-            current = dataMap(current, bulan, undefined, validasi);
+            current = dataMap(current, bulan, undefined, validasiKorluhPalawija);
 
             bulan.setMonth(bulan.getMonth() - 1);
 

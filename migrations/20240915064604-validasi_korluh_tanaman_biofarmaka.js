@@ -28,16 +28,19 @@ module.exports = {
                 allowNull: false,
             },
             status_tk_kecamatan: {
-                type: Sequelize.ENUM('proses', 'tolak', 'terima'),
-                defaultValue: 'proses',
+                type: Sequelize.ENUM('belum', 'tolak', 'terima'),
+                defaultValue: 'belum',
                 allowNull: false,
             },
             status_tk_kabupaten: {
-                type: Sequelize.ENUM('proses', 'tolak', 'terima'),
-                defaultValue: 'proses',
+                type: Sequelize.ENUM('belum', 'tolak', 'terima'),
+                defaultValue: 'belum',
                 allowNull: false,
             },
-            keterangan: {
+            keterangan_kecamatan: {
+                type: Sequelize.STRING,
+            },
+            keterangan_kabupaten: {
                 type: Sequelize.STRING,
             },
             created_at: {
