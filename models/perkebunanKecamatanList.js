@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'masterKategoriKomoditasId',
                 as: 'kategoriKomoditas',
             });
-            PerkebunanKecamatanList.belongsTo(models.KepangMasterKomoditas, {
+            PerkebunanKecamatanList.belongsTo(models.PerkebunanMasterKomoditas, {
                 foreignKey: 'masterKomoditasId',
                 as: 'komoditas'
             });
