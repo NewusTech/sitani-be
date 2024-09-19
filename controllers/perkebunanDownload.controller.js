@@ -1,4 +1,11 @@
-const { PerkebunanMasterKategoriKomoditas, PerkebunanKecamatanList, PerkebunanKecamatan, KepangMasterKomoditas, Kecamatan, sequelize } = require('../models');
+const {
+    PerkebunanMasterKategoriKomoditas,
+    PerkebunanMasterKomoditas,
+    PerkebunanKecamatanList,
+    PerkebunanKecamatan,
+    Kecamatan,
+    sequelize
+} = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
@@ -29,7 +36,7 @@ const getOne = async (year, kecamatan = undefined) => {
                         as: 'kategoriKomoditas'
                     },
                     {
-                        model: KepangMasterKomoditas,
+                        model: PerkebunanMasterKomoditas,
                         as: 'komoditas'
                     },
                 ],

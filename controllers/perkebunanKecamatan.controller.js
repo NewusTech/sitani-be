@@ -1,4 +1,11 @@
-const { PerkebunanMasterKategoriKomoditas, PerkebunanKecamatanList, PerkebunanKecamatan, KepangMasterKomoditas, Kecamatan, sequelize } = require('../models');
+const {
+    PerkebunanMasterKategoriKomoditas,
+    PerkebunanMasterKomoditas,
+    PerkebunanKecamatanList,
+    PerkebunanKecamatan,
+    Kecamatan,
+    sequelize
+} = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -106,7 +113,7 @@ module.exports = {
             } = req.body;
 
             const masterKategoriKomoditas = await PerkebunanMasterKategoriKomoditas.findByPk(master_kategori_komoditas_id);
-            const masterKomoditas = await KepangMasterKomoditas.findByPk(master_komoditas_id);
+            const masterKomoditas = await PerkebunanMasterKomoditas.findByPk(master_komoditas_id);
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
 
             if (!kecamatan) {
@@ -248,7 +255,7 @@ module.exports = {
                                 as: 'kategoriKomoditas'
                             },
                             {
-                                model: KepangMasterKomoditas,
+                                model: PerkebunanMasterKomoditas,
                                 as: 'komoditas'
                             },
                         ],
@@ -340,7 +347,7 @@ module.exports = {
                         as: 'kategoriKomoditas'
                     },
                     {
-                        model: KepangMasterKomoditas,
+                        model: PerkebunanMasterKomoditas,
                         as: 'komoditas'
                     },
                 ],
@@ -417,7 +424,7 @@ module.exports = {
             } = req.body;
 
             if (master_komoditas_id) {
-                const masterKomoditas = await KepangMasterKomoditas.findByPk(master_komoditas_id);
+                const masterKomoditas = await PerkebunanMasterKomoditas.findByPk(master_komoditas_id);
 
                 if (!masterKomoditas) {
                     res.status(400).json(response(400, 'Bad Request', [
