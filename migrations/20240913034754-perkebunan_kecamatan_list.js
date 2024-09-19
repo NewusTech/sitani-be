@@ -32,10 +32,6 @@ module.exports = {
             },
             master_komoditas_id: {
                 type: Sequelize.BIGINT,
-                references: {
-                    model: 'kepang_master_komoditas',
-                    key: 'id'
-                }
             },
 
             tbm: {

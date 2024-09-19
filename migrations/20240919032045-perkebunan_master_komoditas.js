@@ -36,6 +36,16 @@ module.exports = {
                 allowNull: false,
             },
         });
+
+        await queryInterface.addConstraint('perkebunan_kecamatan_list', {
+            fields: ['master_komoditas_id'],
+            name: 'fk_perkebunan_master_komoditas_id',
+            type: 'foreign key',
+            references: {
+                table: 'perkebunan_master_komoditas',
+                field: 'id',
+            }
+        })
     },
 
     async down(queryInterface, Sequelize) {
@@ -45,6 +55,8 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
+        await queryInterface.removeConstraint('perkebunan_kecamatan_list', 'fk_perkebunan_master_komoditas_id');
+
         await queryInterface.dropTable('perkebunan_master_komoditas');
     }
 };
