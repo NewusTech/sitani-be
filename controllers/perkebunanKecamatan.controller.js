@@ -272,20 +272,19 @@ module.exports = {
             const pagination = generatePagination(count, page, limit, '/api/perkebunan/kecamatan/get');
 
             perkebunanKecamatan = perkebunanKecamatan.map(item => {
-                let temp = [];
-                let list = [];
+                let list = {};
                 for (let i of item.list) {
-                    let masterKategoriKomoditasId = i.masterKategoriKomoditasId;
+                    list['sumJumlah'] = list['sumJumlah'] ? list['sumJumlah'] + i.jumlah : i.jumlah || 0;
+                    list['sumTbm'] = list['sumTbm'] ? list['sumTbm'] + i.tbm : i.tbm || 0;
+                    list['sumTm'] = list['sumTm'] ? list['sumTm'] + i.tm : i.tm || 0;
+                    list['sumTr'] = list['sumTr'] ? list['sumTr'] + i.tr : i.tr || 0;
+                    list['sumJmlPetaniPekebun'] = list['sumJmlPetaniPekebun'] ? list['sumJmlPetaniPekebun'] + i.jmlPetaniPekebun : i.jmlPetaniPekebun || 0;
+                    list['sumProduktivitas'] = list['sumProduktivitas'] ? list['sumProduktivitas'] + i.produktivitas : i.produktivitas || 0;
+                    list['sumProduksi'] = list['sumProduksi'] ? list['sumProduksi'] + i.produksi : i.produksi || 0;
 
-                    if (!temp.includes(masterKategoriKomoditasId)) {
-                        temp.push(masterKategoriKomoditasId);
-                    }
+                    let pos = i.masterKategoriKomoditasId;
 
-                    let pos = temp.indexOf(masterKategoriKomoditasId);
-
-                    if (!list[pos]) {
-                        list[pos] = {};
-                    }
+                    list[pos] = list[pos] || {};
 
                     list[pos]['kategori'] = i?.kategoriKomoditas?.nama || 'error';
                     list[pos]['sumJumlah'] = list[pos]['sumJumlah'] ? list[pos]['sumJumlah'] + i.jumlah : i.jumlah || 0;
@@ -296,7 +295,8 @@ module.exports = {
                     list[pos]['sumProduktivitas'] = list[pos]['sumProduktivitas'] ? list[pos]['sumProduktivitas'] + i.produktivitas : i.produktivitas || 0;
                     list[pos]['sumProduksi'] = list[pos]['sumProduksi'] ? list[pos]['sumProduksi'] + i.produksi : i.produksi || 0;
 
-                    let objTemp = {
+                    list[pos]['list'] = list[pos]['list'] || {};
+                    list[pos]['list'][i.komoditas.id] = {
                         id: i.id,
                         komoditas: i?.komoditas?.nama || 'error',
                         tbm: i.tbm,
@@ -308,12 +308,6 @@ module.exports = {
                         jmlPetaniPekebun: i.jmlPetaniPekebun,
                         bentukHasil: i.bentukHasil,
                         keterangan: i.keterangan,
-                    };
-
-                    if (list[pos]['list']) {
-                        list[pos]['list'].push(objTemp);
-                    } else {
-                        list[pos]['list'] = [objTemp];
                     }
                 }
                 return {
