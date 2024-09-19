@@ -99,7 +99,7 @@ module.exports = {
                     type: "string"
                 },
                 nip: {
-                    type: "number",
+                    type: "string",
                     optional: false
                 },
                 tempat_lahir: {
@@ -299,7 +299,7 @@ module.exports = {
                     type: "string"
                 },
                 nip: {
-                    type: "number",
+                    type: "string",
                     optional: true
                 },
                 tempat_lahir: {
