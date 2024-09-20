@@ -78,9 +78,10 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { startDate, endDate, search, limit, page } = req.query;
+            let { search, limit, page, year } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            year = isNaN(parseInt(year)) ? null : parseInt(year);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
             const offset = (page - 1) * limit;
@@ -97,19 +98,8 @@ module.exports = {
                     }
                 };
             }
-            if (startDate) {
-                startDate = new Date(startDate);
-                startDate = dateGenerate(startDate);
-                if (startDate instanceof Date && !isNaN(startDate)) {
-                    where.createdAt = { [Op.gte]: startDate };
-                }
-            }
-            if (endDate) {
-                endDate = new Date(endDate);
-                endDate = dateGenerate(endDate);
-                if (endDate instanceof Date && !isNaN(endDate)) {
-                    where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
-                }
+            if (year) {
+                where.tahun = year;
             }
 
             const pspPupuk = await PspPupuk.findAll({
