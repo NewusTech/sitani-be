@@ -25,6 +25,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BIGINT,
             field: 'desa_id',
         },
+        tahun: {
+            type: DataTypes.INTEGER,
+        },
         namaPoktan: {
             type: DataTypes.STRING,
             field: 'nama_poktan',

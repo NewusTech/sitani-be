@@ -25,6 +25,12 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
+                tahun: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 nama_poktan: {
                     type: "string",
                     max: 255,
@@ -49,7 +55,7 @@ module.exports = {
                 return;
             }
 
-            const { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id } = req.body;
+            const { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id, tahun } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
@@ -82,6 +88,7 @@ module.exports = {
                 titikKoordinat: titik_koordinat,
                 ketuaPoktan: ketua_poktan,
                 namaPoktan: nama_poktan,
+                tahun,
             });
 
             await transaction.commit();
@@ -229,6 +236,13 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
+                tahun: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 nama_poktan: {
                     type: "string",
                     optional: true,
@@ -281,6 +295,7 @@ module.exports = {
             titik_koordinat = titik_koordinat ?? pspPenerimaUppo.titikKoordinat;
             ketua_poktan = ketua_poktan ?? pspPenerimaUppo.ketuaPoktan;
             nama_poktan = nama_poktan ?? pspPenerimaUppo.namaPoktan;
+            tahun = tahun ?? pspPenerimaUppo.tahun;
 
             await pspPenerimaUppo.update({
                 kecamatanId: kecamatan_id,
@@ -288,6 +303,7 @@ module.exports = {
                 titikKoordinat: titik_koordinat,
                 ketuaPoktan: ketua_poktan,
                 namaPoktan: nama_poktan,
+                tahun,
             });
 
             await transaction.commit();

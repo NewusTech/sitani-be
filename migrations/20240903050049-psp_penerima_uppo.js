@@ -30,6 +30,9 @@ module.exports = {
                     key: 'id'
                 }
             },
+            tahun: {
+                type: Sequelize.INTEGER,
+            },
             nama_poktan: {
                 type: Sequelize.STRING,
                 allowNull: false,
