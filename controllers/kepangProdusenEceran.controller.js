@@ -129,7 +129,7 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { equalDate, startDate, endDate, limit, page, year } = req.query;
+            let { equalDate, startDate, endDate, limit, search, page, year } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
@@ -137,7 +137,13 @@ module.exports = {
 
             const offset = (page - 1) * limit;
 
-            let where = {};
+            let where = {}, searchWhere = {};
+
+            if (search) {
+                searchWhere = {
+                    nama: { [Op.like]: `%${search}%` }
+                }
+            }
 
             if (year) {
                 where = {
@@ -177,7 +183,8 @@ module.exports = {
                         include: [
                             {
                                 model: KepangMasterKomoditas,
-                                as: 'komoditas'
+                                as: 'komoditas',
+                                where: searchWhere
                             }
                         ]
                     }
