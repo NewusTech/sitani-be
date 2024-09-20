@@ -16,6 +16,10 @@ module.exports = {
                 primaryKey: true,
                 allowNull: false,
             },
+            tahun: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+            },
             jenis_pupuk: {
                 type: Sequelize.STRING,
                 allowNull: false,

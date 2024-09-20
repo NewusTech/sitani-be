@@ -13,6 +13,12 @@ module.exports = {
 
         try {
             const schema = {
+                tahun: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 jenis_pupuk: {
                     type: "string",
                     max: 255,
@@ -44,13 +50,14 @@ module.exports = {
                 return;
             }
 
-            const { jenis_pupuk, kandungan_pupuk, keterangan, harga_pupuk } = req.body;
+            const { jenis_pupuk, kandungan_pupuk, keterangan, harga_pupuk, tahun } = req.body;
 
             await PspPupuk.create({
                 kandunganPupuk: kandungan_pupuk,
                 jenisPupuk: jenis_pupuk,
                 hargaPupuk: harga_pupuk,
                 keterangan,
+                tahun,
             });
 
             await transaction.commit();
@@ -164,6 +171,13 @@ module.exports = {
             });
 
             const schema = {
+                tahun: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 jenis_pupuk: {
                     type: "string",
                     optional: true,
@@ -204,18 +218,20 @@ module.exports = {
                 return;
             }
 
-            let { jenis_pupuk, kandungan_pupuk, keterangan, harga_pupuk } = req.body;
+            let { jenis_pupuk, kandungan_pupuk, keterangan, harga_pupuk, tahun } = req.body;
 
             kandungan_pupuk = kandungan_pupuk ?? pspPupuk.kandunganPupuk;
             harga_pupuk = harga_pupuk ?? pspPupuk.hargaPupuk;
             jenis_pupuk = jenis_pupuk ?? pspPupuk.jenisPupuk;
             keterangan = keterangan ?? pspPupuk.keterangan;
+            tahun = tahun ?? pspPupuk.tahun;
 
             await pspPupuk.update({
                 kandunganPupuk: kandungan_pupuk,
                 hargaPupuk: harga_pupuk,
                 jenisPupuk: jenis_pupuk,
                 keterangan,
+                tahun,
             });
 
             await transaction.commit();

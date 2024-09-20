@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     PspPupuk.init({
+        tahun: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
         jenisPupuk: {
             type: DataTypes.STRING,
             field: 'jenis_pupuk',
