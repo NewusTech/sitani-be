@@ -213,7 +213,7 @@ module.exports = {
                 harga: item.rerataHarga,
             }));
 
-            res.status(200).json(response(200, 'Get PSP dashboard data successfully', {
+            res.status(200).json(response(200, 'Get dashboard data successfully', {
                 padiPanenCount,
                 padiTanamCount,
                 padiPusoCount,

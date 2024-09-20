@@ -29,6 +29,7 @@ const penyuluhDashboardRoute = require('./penyuluhDashboard.route');
 const kepangCvProdusenRoute = require('./kepangCvProdusen.route');
 const kepangCvProduksiRoute = require('./kepangCvProduksi.route');
 const tphRealisasiPadiRoute = require('./tphRealisasiPadi.route');
+const kepangDashboardRoute = require('./kepangDashboard.route');
 const korluhDashboardRoute = require('./korluhDashboard.route');
 const korluhSayurBuahRoute = require('./korluhSayurBuah.route');
 const pspPenerimaUppoRoute = require('./pspPenerimaUppo.route');
@@ -85,6 +86,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, kepangCvProdusenRoute);
     app.use(urlApi, kepangCvProduksiRoute);
     app.use(urlApi, tphRealisasiPadiRoute);
+    app.use(urlApi, kepangDashboardRoute);
     app.use(urlApi, korluhDashboardRoute);
     app.use(urlApi, korluhSayurBuahRoute);
     app.use(urlApi, pspPenerimaUppoRoute);
