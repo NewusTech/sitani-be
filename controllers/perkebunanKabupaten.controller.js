@@ -121,7 +121,24 @@ module.exports = {
             current = dataMap(current, 'asem');
             before = dataMap(before, 'atap');
 
-            if (current?.asem && before?.atap) {
+            for (let temp of [
+                'SumJumlah',
+                'SumTbm',
+                'SumTm',
+                'SumTr',
+                'SumJmlPetaniPekebun',
+                'SumProduktivitas',
+                'SumProduksi',
+            ]) {
+                data['asem' + temp] = current['asem' + temp];
+                data['atap' + temp] = before['atap' + temp];
+            }
+
+            kategori.forEach(kat => {
+                const katId = kat.id;
+
+                data[katId] = data[katId] || { kategori: kat.nama };
+
                 for (let temp of [
                     'SumJumlah',
                     'SumTbm',
@@ -131,76 +148,53 @@ module.exports = {
                     'SumProduktivitas',
                     'SumProduksi',
                 ]) {
-                    data['asem' + temp] = current['asem' + temp];
-                    data['atap' + temp] = before['atap' + temp];
+                    if (current[katId]) {
+                        data[katId]['asem' + temp] = current[katId]['asem' + temp] || 0;
+                    }
+                    if (before[katId]) {
+                        data[katId]['atap' + temp] = before[katId]['atap' + temp] || 0;
+                    }
                 }
 
-                kategori.forEach(kat => {
-                    const katId = kat.id;
+                data[katId]['list'] = data[katId]['list'] || {};
+                komoditas.forEach(kom => {
+                    if (kom.perkebunanMasterKategoriId === katId) {
+                        const komId = kom.id;
 
-                    data[katId] = data[katId] || { kategori: kat.nama };
+                        data[katId]['ids'] = data[katId]['ids'] || [];
 
-                    for (let temp of [
-                        'SumJumlah',
-                        'SumTbm',
-                        'SumTm',
-                        'SumTr',
-                        'SumJmlPetaniPekebun',
-                        'SumProduktivitas',
-                        'SumProduksi',
-                    ]) {
-                        if (current[katId]) {
-                            data[katId]['asem' + temp] = current[katId]['asem' + temp] || 0;
+                        if (!data[katId]['ids'].includes(komId)) {
+                            data[katId]['ids'].push(komId);
                         }
-                        if (before[katId]) {
-                            data[katId]['atap' + temp] = before[katId]['atap' + temp] || 0;
+
+                        data[katId]['list'][komId] = data[katId]['list'][komId] || { komoditas: kom.nama }
+                        for (let temp of [
+                            'Tbm',
+                            'Tm',
+                            'Tr',
+                            'Jumlah',
+                            'Produksi',
+                            'Produktivitas',
+                            'JmlPetaniPekebun',
+                        ]) {
+                            if (current[katId]) {
+                                if (current[katId]['list']) {
+                                    if (current[katId]['list'][komId]) {
+                                        data[katId]['list'][komId]['asem' + temp] = current[katId]['list'][komId]['asem' + temp] || 0;
+                                    }
+                                }
+                            }
+                            if (before[katId]) {
+                                if (before[katId]['list']) {
+                                    if (before[katId]['list'][komId]) {
+                                        data[katId]['list'][komId]['atap' + temp] = before[katId]['list'][komId]['atap' + temp] || 0;
+                                    }
+                                }
+                            }
                         }
                     }
-
-                    data[katId]['list'] = data[katId]['list'] || {};
-                    komoditas.forEach(kom => {
-                        if (kom.perkebunanMasterKategoriId === katId) {
-                            const komId = kom.id;
-
-                            data[katId]['ids'] = data[katId]['ids'] || [];
-
-                            if (!data[katId]['ids'].includes(komId)) {
-                                data[katId]['ids'].push(komId);
-                            }
-
-                            data[katId]['list'][komId] = data[katId]['list'][komId] || { komoditas: kom.nama }
-                            for (let temp of [
-                                'Tbm',
-                                'Tm',
-                                'Tr',
-                                'Jumlah',
-                                'Produksi',
-                                'Produktivitas',
-                                'JmlPetaniPekebun',
-                            ]) {
-                                if (current[katId]) {
-                                    if (current[katId]['list']) {
-                                        if (current[katId]['list'][komId]) {
-                                            data[katId]['list'][komId]['asem' + temp] = current[katId]['list'][komId]['asem' + temp] || 0;
-                                        }
-                                    }
-                                }
-                                if (before[katId]) {
-                                    if (before[katId]['list']) {
-                                        if (before[katId]['list'][komId]) {
-                                            data[katId]['list'][komId]['atap' + temp] = before[katId]['list'][komId]['atap' + temp] || 0;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    })
                 })
-            } else if (current?.asem) {
-                data = current;
-            } else {
-                data = before;
-            }
+            })
 
             res.status(200).json(response(200, 'Get perkebunan successfully', { yearBefore, currentYear, data }));
         } catch (err) {
