@@ -125,6 +125,7 @@ module.exports = {
                 for (let temp of [
                     'SumJumlah',
                     'SumTbm',
+                    'SumTm',
                     'SumTr',
                     'SumJmlPetaniPekebun',
                     'SumProduktivitas',
@@ -142,6 +143,7 @@ module.exports = {
                     for (let temp of [
                         'SumJumlah',
                         'SumTbm',
+                        'SumTm',
                         'SumTr',
                         'SumJmlPetaniPekebun',
                         'SumProduktivitas',
