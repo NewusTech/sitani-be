@@ -1,6 +1,6 @@
 const { ValidasiKorluhPadi, KorluhPadi, Kecamatan, Desa, sequelize } = require('../models');
+const { dateGenerate, fixedNumber, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -367,10 +367,7 @@ module.exports = {
             let jumlah_padi_lahan_bukan_sawah_tanam = getSum([unggul_lahan_bukan_sawah_tanam, lokal_lahan_bukan_sawah_tanam]);
             let jumlah_padi_lahan_bukan_sawah_puso = getSum([unggul_lahan_bukan_sawah_puso, lokal_lahan_bukan_sawah_puso]);
 
-            await KorluhPadi.create({
-                kecamatanId: kecamatan.id,
-                desaId: desa.id,
-                tanggal,
+            let obj = fixedNumber({
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
                 hibrida_bantuan_pemerintah_lahan_sawah_puso,
@@ -423,6 +420,13 @@ module.exports = {
                 jumlah_padi_lahan_bukan_sawah_panen,
                 jumlah_padi_lahan_bukan_sawah_tanam,
                 jumlah_padi_lahan_bukan_sawah_puso,
+            });
+
+            await KorluhPadi.create({
+                kecamatanId: kecamatan.id,
+                desaId: desa.id,
+                tanggal,
+                ...obj,
             });
 
             await transaction.commit();
@@ -678,8 +682,7 @@ module.exports = {
             let jumlah_padi_lahan_bukan_sawah_tanam = getSum([unggul_lahan_bukan_sawah_tanam, lokal_lahan_bukan_sawah_tanam]);
             let jumlah_padi_lahan_bukan_sawah_puso = getSum([unggul_lahan_bukan_sawah_puso, lokal_lahan_bukan_sawah_puso]);
 
-            await korluhPadi.update({
-                tanggal,
+            let obj = fixedNumber({
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
                 hibrida_bantuan_pemerintah_lahan_sawah_puso,
@@ -732,6 +735,11 @@ module.exports = {
                 jumlah_padi_lahan_bukan_sawah_panen,
                 jumlah_padi_lahan_bukan_sawah_tanam,
                 jumlah_padi_lahan_bukan_sawah_puso,
+            });
+
+            await korluhPadi.update({
+                tanggal,
+                ...obj,
             });
 
             await transaction.commit();
