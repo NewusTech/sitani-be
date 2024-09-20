@@ -51,24 +51,27 @@ module.exports = {
                 }
             }
 
-            const min = await KepangProdusenEceranList.min('harga', {
+            let kepangProdusenEceranTemp = await KepangProdusenEceranList.findAll({
                 include: [
                     {
                         model: KepangProdusenEceran,
                         as: 'kepangProdusenEceran',
                         where,
                     }
-                ]
+                ],
             });
-            const max = await KepangProdusenEceranList.max('harga', {
-                include: [
-                    {
-                        model: KepangProdusenEceran,
-                        as: 'kepangProdusenEceran',
-                        where,
+
+            let min = max = 0;
+            kepangProdusenEceranTemp.forEach(item => {
+                if (item.harga) {
+                    if (!min || min > item.harga) {
+                        min = item.harga;
                     }
-                ]
-            });
+                    if (!max || max < item.harga) {
+                        max = item.harga;
+                    }
+                }
+            })
 
             const komoditas = await KepangMasterKomoditas.findAll();
 
@@ -145,7 +148,7 @@ module.exports = {
                 }
 
                 if (kepangCvProdusen.length < limit && limit > 0) {
-                    const sumData = await KepangCvProdusenList.sum('nilai', {
+                    temp = await KepangCvProdusenList.findAll({
                         include: [
                             {
                                 model: KepangCvProdusen,
@@ -156,43 +159,21 @@ module.exports = {
                         where: {
                             kepangMasterKomoditasId: kom.id
                         }
-                    });
-                    const countData = await KepangCvProdusenList.count({
-                        include: [
-                            {
-                                model: KepangCvProdusen,
-                                as: 'kepangCvProdusen',
-                                where: secWhere,
+                    })
+
+                    let sumData = countData = maxData = minData = 0
+                    temp.forEach(item => {
+                        if (item.nilai) {
+                            sumData += item.nilai;
+                            countData++;
+                            if (!minData || minData > item.nilai) {
+                                minData = item.nilai
                             }
-                        ],
-                        where: {
-                            kepangMasterKomoditasId: kom.id
-                        }
-                    });
-                    const maxData = await KepangCvProdusenList.max('nilai', {
-                        include: [
-                            {
-                                model: KepangCvProdusen,
-                                as: 'kepangCvProdusen',
-                                where: secWhere,
+                            if (!maxData || maxData < item.nilai) {
+                                maxData = item.nilai
                             }
-                        ],
-                        where: {
-                            kepangMasterKomoditasId: kom.id
                         }
-                    });
-                    const minData = await KepangCvProdusenList.min('nilai', {
-                        include: [
-                            {
-                                model: KepangCvProdusen,
-                                as: 'kepangCvProdusen',
-                                where: secWhere,
-                            }
-                        ],
-                        where: {
-                            kepangMasterKomoditasId: kom.id
-                        }
-                    });
+                    })
 
                     kepangCvProdusen.push({
                         komoditas: kom.nama,
