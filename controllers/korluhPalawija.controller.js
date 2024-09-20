@@ -1,6 +1,6 @@
 const { ValidasiKorluhPalawija, KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, Desa, sequelize } = require('../models');
+const { dateGenerate, response, fixedNumber } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -18,6 +18,7 @@ const parentSync = async (id, obj, bef) => {
     });
 
     if (!parent[1]) {
+        let temp = {};
         for (let idx of [
             "lahanSawahPanen",
             "lahanSawahPanenMuda",
@@ -31,16 +32,20 @@ const parentSync = async (id, obj, bef) => {
             "lahanBukanSawahPuso",
             "produksi",
         ]) {
+            temp[idx] = parent[0][idx];
             if (obj[idx]) {
-                parent[0][idx] = parent[0][idx] ? parent[0][idx] + obj[idx] : obj[idx];
+                temp[idx] = temp[idx] ? Number(temp[idx]) + Number(obj[idx]) : obj[idx];
             }
             if (bef) {
                 if (bef[idx]) {
-                    parent[0][idx] = parent[0][idx] ? parent[0][idx] - bef[idx] : bef[idx];
+                    temp[idx] = temp[idx] ? Number(temp[idx]) - Number(bef[idx]) : bef[idx];
                 }
             }
         }
-        await parent[0].save();
+
+        temp = fixedNumber(temp);
+
+        await parent[0].update(temp);
     }
 }
 
@@ -342,9 +347,7 @@ module.exports = {
                 return;
             }
 
-            const obj = {
-                korluhMasterPalawijaId: korluhMasterPalawija.id,
-                korluhPalawijaId: korluhPalawija[0].id,
+            let obj = fixedNumber({
                 lahanSawahPanen: lahan_sawah_panen,
                 lahanSawahPanenMuda: lahan_sawah_panen_muda,
                 lahanSawahPanenHijauanPakanTernak: lahan_sawah_panen_hijauan_pakan_ternak,
@@ -356,6 +359,12 @@ module.exports = {
                 lahanBukanSawahTanam: lahan_bukan_sawah_tanam,
                 lahanBukanSawahPuso: lahan_bukan_sawah_puso,
                 produksi,
+            });
+
+            obj = {
+                korluhMasterPalawijaId: korluhMasterPalawija.id,
+                korluhPalawijaId: korluhPalawija[0].id,
+                ...obj,
             };
 
             await KorluhPalawijaList.create(obj);
@@ -672,7 +681,7 @@ module.exports = {
                 return;
             }
 
-            const obj = {
+            let obj = {
                 korluhMasterPalawijaId: korluh_master_palawija_id,
                 lahanSawahPanen: lahan_sawah_panen,
                 lahanSawahPanenMuda: lahan_sawah_panen_muda,
@@ -686,6 +695,8 @@ module.exports = {
                 lahanBukanSawahPuso: lahan_bukan_sawah_puso,
                 produksi,
             }
+
+            obj = fixedNumber(obj);
 
             await korluhPalawijaList.update(obj);
 
