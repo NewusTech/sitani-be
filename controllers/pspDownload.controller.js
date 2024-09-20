@@ -222,27 +222,15 @@ module.exports = {
 
     pupuk: async (req, res) => {
         try {
-            let { startDate, endDate } = req.query;
+            let { year } = req.query;
 
-            let where = {};
-            if (startDate) {
-                startDate = new Date(startDate);
-                startDate = dateGenerate(startDate);
-                if (startDate instanceof Date && !isNaN(startDate)) {
-                    where.createdAt = { [Op.gte]: startDate };
-                }
-            }
-            if (endDate) {
-                endDate = new Date(endDate);
-                endDate = dateGenerate(endDate);
-                if (endDate instanceof Date && !isNaN(endDate)) {
-                    where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
-                }
-            }
+            year = isNaN(parseInt(year)) ? new Date().getFullYear() : parseInt(year);
 
             const pspPupuk = await PspPupuk.findAll({
                 order: [['createdAt', 'DESC'], ['jenisPupuk', 'ASC']],
-                where,
+                where: {
+                    tahun: year
+                },
             });
 
             if (pspPupuk.length) {
@@ -257,11 +245,8 @@ module.exports = {
                     { width: 25 },
                 ];
 
-                if (pspPupuk.length > 1) {
-                    worksheet.getCell('A2').value = `DATA PUPUK KABUPATEN LAMPUNG TIMUR PERIODE ${new Date(pspPupuk[pspPupuk.length - 1].createdAt).toLocaleDateString()} - ${new Date(pspPupuk[0].createdAt).toLocaleDateString()}`;
-                } else {
-                    worksheet.getCell('A2').value = `DATA PUPUK KABUPATEN LAMPUNG TIMUR PERIODE ${new Date(pspPupuk[0].createdAt).toLocaleDateString()}`;
-                }
+                worksheet.getCell('A2').value = `DATA PUPUK KABUPATEN LAMPUNG TIMUR TAHUN ${year}`;
+
                 worksheet.mergeCells('A2:E2');
 
                 worksheet.getRow(4).values = ['NO', 'JENIS PUPUK', 'KANDUNGAN PUPUK', 'HARGA', 'KETERANGAN'];
