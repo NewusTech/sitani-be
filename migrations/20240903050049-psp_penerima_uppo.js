@@ -32,6 +32,7 @@ module.exports = {
             },
             tahun: {
                 type: Sequelize.INTEGER,
+                allowNull: false,
             },
             nama_poktan: {
                 type: Sequelize.STRING,
