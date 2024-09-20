@@ -123,25 +123,15 @@ module.exports = {
 
     penerimaUppo: async (req, res) => {
         try {
-            let { kecamatan, startDate, endDate } = req.query;
+            let { kecamatan, year } = req.query;
 
-            let where = {};
+            year = isNaN(parseInt(year)) ? new Date().getFullYear() : parseInt(year);
+
+            let where = {
+                tahun: year
+            };
             if (!isNaN(parseInt(kecamatan))) {
                 where.kecamatanId = parseInt(kecamatan);
-            }
-            if (startDate) {
-                startDate = new Date(startDate);
-                startDate = dateGenerate(startDate);
-                if (startDate instanceof Date && !isNaN(startDate)) {
-                    where.createdAt = { [Op.gte]: startDate };
-                }
-            }
-            if (endDate) {
-                endDate = new Date(endDate);
-                endDate = dateGenerate(endDate);
-                if (endDate instanceof Date && !isNaN(endDate)) {
-                    where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
-                }
             }
 
             const pspPenerimaUppo = await PspPenerimaUppo.findAll({
@@ -172,11 +162,7 @@ module.exports = {
                     { width: 25 },
                 ];
 
-                if (pspPenerimaUppo.length > 1) {
-                    worksheet.getCell('A2').value = `DATA PENERIMA UPPO KABUPATEN LAMPUNG TIMUR PERIODE ${new Date(pspPenerimaUppo[pspPenerimaUppo.length - 1].createdAt).toLocaleDateString()} - ${new Date(pspPenerimaUppo[0].createdAt).toLocaleDateString()}`;
-                } else {
-                    worksheet.getCell('A2').value = `DATA PENERIMA UPPO KABUPATEN LAMPUNG TIMUR PERIODE ${new Date(pspPenerimaUppo[0].createdAt).toLocaleDateString()}`;
-                }
+                worksheet.getCell('A2').value = `DATA PENERIMA UPPO KABUPATEN LAMPUNG TIMUR TAHUN ${year}`;
                 worksheet.mergeCells('A2:F2');
 
                 worksheet.getRow(4).values = ['NO', 'KECAMATAN', 'DESA', 'NAMA POKTAN', 'NAMA KETUA', 'TITIK KOORDINAT'];
