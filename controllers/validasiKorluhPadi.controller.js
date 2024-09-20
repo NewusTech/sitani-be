@@ -75,8 +75,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
         return {
             bulan: date.getMonth() + 1,
             tahun: date.getFullYear(),
-            kecamatanId: kecamatan.id,
-            kecamatan: kecamatan.nama,
+            kecamatanId: kecamatan?.id,
+            kecamatan: kecamatan?.nama,
             validasiKecamatan: validasi?.statusTkKecamatan || 'belum',
             validasiKabupaten: validasi?.statusTkKabupaten || 'belum',
             keteranganKecamatan: validasi?.keteranganKecamatan,
