@@ -109,7 +109,7 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { kecamatan, startDate, endDate, search, limit, page } = req.query;
+            let { kecamatan, search, limit, page, year } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
@@ -128,19 +128,8 @@ module.exports = {
             if (!isNaN(parseInt(kecamatan))) {
                 where.kecamatanId = parseInt(kecamatan);
             }
-            if (startDate) {
-                startDate = new Date(startDate);
-                startDate = dateGenerate(startDate);
-                if (startDate instanceof Date && !isNaN(startDate)) {
-                    where.createdAt = { [Op.gte]: startDate };
-                }
-            }
-            if (endDate) {
-                endDate = new Date(endDate);
-                endDate = dateGenerate(endDate);
-                if (endDate instanceof Date && !isNaN(endDate)) {
-                    where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
-                }
+            if (year) {
+                where.tahun = year;
             }
 
             const pspPenerimaUppo = await PspPenerimaUppo.findAll({
@@ -274,7 +263,7 @@ module.exports = {
                 return;
             }
 
-            let { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id } = req.body;
+            let { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id, tahun } = req.body;
 
             if (kecamatan_id) {
                 const kecamatan = await Kecamatan.findByPk(kecamatan_id);
