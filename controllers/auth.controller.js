@@ -113,4 +113,38 @@ module.exports = {
 			res.status(500).json(response(500, err.message));
 		}
 	},
+
+	userPermissions: async (req, res) => {
+		try {
+			const user = await User.findOne({
+				include: [
+					{
+						model: Role,
+						as: 'roles',
+						include: [
+							{
+								model: Permission,
+								as: 'permissions'
+							}
+						]
+					}
+				],
+				where: {
+					id: req?.root?.userId
+				},
+			});
+
+			let permissions = user?.roles[0]?.permissions?.map(permission => permission?.permissionName);
+
+			res.status(200).json(response(200, 'Success get user permissions', permissions));
+		} catch (err) {
+			console.log(err);
+
+			logger.error(`Error : ${err}`);
+			logger.error(`Error message: ${err.message}`);
+
+			// res.status(500).json(response(500, 'Internal server error'));
+			res.status(500).json(response(500, err.message));
+		}
+	},
 }
