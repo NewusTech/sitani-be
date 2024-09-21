@@ -23,6 +23,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 sum[idx] = {
                     nama: item.master.nama,
                 };
+            } else {
+                temp = sum[idx];
             }
             for (let index of [
                 "lahanSawahPanen",
