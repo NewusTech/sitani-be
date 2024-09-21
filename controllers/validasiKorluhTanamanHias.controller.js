@@ -1,5 +1,5 @@
 const { ValidasiKorluhTanamanHias, KorluhMasterTanamanHias, KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, sequelize } = require('../models');
-const { dateGenerate, response } = require('../helpers');
+const { dateGenerate, response, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -13,6 +13,7 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
     data.forEach(i => {
         i.list.forEach(item => {
+            let temp = {}
             const masterId = item.master.id;
 
             if (!sum['masterIds'].includes(masterId)) {
@@ -26,6 +27,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 };
             }
 
+            temp = sum[masterId];
+
             for (let index of [
                 "luasPanenHabis",
                 "luasPanenBelumHabis",
@@ -35,16 +38,18 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "produksiBelumHabis",
                 "rerataHarga",
             ]) {
-                sum[masterId][index] = sum[masterId][index] !== undefined ? sum[masterId][index] : null;
+                temp[index] = temp[index] !== undefined ? temp[index] : null;
 
                 if (item[index]) {
-                    sum[masterId][index] = sum[masterId][index] ? sum[masterId][index] + item[index] : item[index];
+                    temp[index] = temp[index] ? Number(temp[index]) + Number(item[index]) : item[index];
 
                     if (index === 'rerataHarga') {
-                        sum[masterId]['count'] = sum[masterId]['count'] ? sum[masterId]['count'] + 1 : 1;
+                        temp['count'] = temp['count'] ? temp['count'] + 1 : 1;
                     }
                 }
             }
+
+            sum[masterId] = fixedNumber(temp);
         });
     });
 
@@ -67,16 +72,24 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 const combineData = (current, before) => {
     if (before === 0) {
         current['masterIds']?.forEach(nt => {
-            current[nt]['bulanLalu'] = 0;
-
-            current[nt]['akhir'] = current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
+            current[nt] = {
+                ...current[nt],
+                ...fixedNumber({
+                    bulanLalu: 0,
+                    akhir: Number(current[nt]["luasPenanamanBaru"]) - Number(current[nt]["luasPanenHabis"]) - Number(current[nt]["luasRusak"]),
+                }),
+            }
         });
         return current;
     }
     current['masterIds']?.forEach(nt => {
-        current[nt]['bulanLalu'] = before[nt] ? before[nt]['akhir'] || 0 : 0;
-
-        current[nt]['akhir'] = current[nt]['bulanLalu'] + current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
+        current[nt] = {
+            ...current[nt],
+            ...fixedNumber({
+                bulanLalu: before[nt] ? before[nt]['akhir'] || 0 : 0,
+                akhir: Number(current[nt]['bulanLalu']) + Number(current[nt]["luasPenanamanBaru"]) - Number(current[nt]["luasPanenHabis"]) - Number(current[nt]["luasRusak"]),
+            }),
+        }
     });
     return current;
 }
