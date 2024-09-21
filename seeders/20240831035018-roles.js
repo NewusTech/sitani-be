@@ -12,13 +12,29 @@ module.exports = {
          *   isBetaMember: false
          * }], {});
         */
-        const roles = [
-            {
-                id: 1,
-                role_name: "SUPER_ADMIN",
-                description: "Super admin have all permissions",
-            },
-        ];
+        let roles = [];
+
+        let i = 1;
+        for (let temp of [
+            'super admin',
+            'bidang master',
+            'bidang ketahanan pangan',
+            'bidang tanaman pangan dan hortikultura',
+            'bidang perkebunan',
+            'bidang penyuluh',
+            'bidang psp',
+            'bidang kepegawaian',
+            'korluh',
+            'validasi kecamatan',
+            'validasi kabupaten',
+        ]) {
+            roles.push({
+                id: i,
+                role_name: temp,
+                description: "",
+            });
+            i++;
+        }
 
         await queryInterface.bulkInsert({ tableName: "roles" }, roles, {});
     },
