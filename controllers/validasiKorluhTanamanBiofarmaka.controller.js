@@ -6,11 +6,10 @@ const {
     Kecamatan,
     sequelize
 } = require('../models');
-const { dateGenerate, response } = require('../helpers');
+const { dateGenerate, fixedNumber, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
-const validasiKorluhSayurBuahController = require('./validasiKorluhSayurBuah.controller');
 
 const v = new Validator();
 
@@ -21,6 +20,7 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
     data.forEach(i => {
         i.list.forEach(item => {
+            let temp = {};
             const masterId = item.master.id;
 
             if (!sum['masterIds'].includes(masterId)) {
@@ -33,6 +33,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 };
             }
 
+            temp = sum[masterId];
+
             for (let index of [
                 "luasPanenHabis",
                 "luasPanenBelumHabis",
@@ -42,16 +44,20 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "produksiBelumHabis",
                 "rerataHarga",
             ]) {
-                sum[masterId][index] = sum[masterId][index] !== undefined ? sum[masterId][index] : null;
+                temp[index] = temp[index] !== undefined ? temp[index] : null;
 
                 if (item[index]) {
-                    sum[masterId][index] = sum[masterId][index] ? sum[masterId][index] + item[index] : item[index];
+                    temp[index] = temp[index] ? Number(temp[index]) + Number(item[index]) : item[index];
 
                     if (index === 'rerataHarga') {
-                        sum[masterId]['count'] = sum[masterId]['count'] ? sum[masterId]['count'] + 1 : 1;
+                        temp['count'] = temp['count'] ? temp['count'] + 1 : 1;
                     }
                 }
             }
+
+            temp = fixedNumber(temp);
+
+            sum[masterId] = temp;
         });
     });
 

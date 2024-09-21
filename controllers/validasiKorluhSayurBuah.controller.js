@@ -25,9 +25,9 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                     keterangan: item.keterangan,
                     hasilProduksi: item.hasilProduksi,
                 };
-            } else {
-                temp = sum[masterId];
             }
+
+            temp = sum[masterId];
 
             for (let index of [
                 "luasPanenHabis",
@@ -51,10 +51,7 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
             temp = fixedNumber(temp);
 
-            sum[masterId] = {
-                ...sum[masterId],
-                ...temp,
-            };
+            sum[masterId] = temp;
         });
     });
 
@@ -87,14 +84,11 @@ const combineData = (current, before) => {
         });
     } else {
         current['masterIds']?.forEach(nt => {
-            current[nt]['bulanLalu'] = before[nt] ? before[nt]['akhir'] || 0 : 0;
-
-            current[nt]['akhir'] = current[nt]['bulanLalu'] + current[nt]["luasPenanamanBaru"] - current[nt]["luasPanenHabis"] - current[nt]["luasRusak"];
             current[nt] = {
                 ...current[nt],
                 ...fixedNumber({
-                    bulanLalu: 0,
-                    akhir: Number(current[nt]["luasPenanamanBaru"]) - Number(current[nt]["luasPanenHabis"]) - Number(current[nt]["luasRusak"]),
+                    bulanLalu: before[nt] ? before[nt]['akhir'] || 0 : 0,
+                    akhir: Number(current[nt]['bulanLalu']) + Number(current[nt]["luasPenanamanBaru"]) - Number(current[nt]["luasPanenHabis"]) - Number(current[nt]["luasRusak"]),
                 }),
             };
         });

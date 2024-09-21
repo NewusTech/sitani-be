@@ -23,9 +23,10 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 sum[idx] = {
                     nama: item.master.nama,
                 };
-            } else {
-                temp = sum[idx];
             }
+
+            temp = sum[idx];
+
             for (let index of [
                 "lahanSawahPanen",
                 "lahanSawahPanenMuda",
@@ -48,10 +49,7 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
             temp = fixedNumber(temp);
 
-            sum[idx] = {
-                ...sum[idx],
-                ...temp,
-            }
+            sum[idx] = temp;
         });
     });
 
