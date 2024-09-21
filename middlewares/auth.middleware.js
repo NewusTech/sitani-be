@@ -31,12 +31,16 @@ const checkPermissionAndLogout = (allowPermission) => async (req, res, next) => 
         }
 
         let cek = false;
-        for (let permission of allowPermission) {
-            const temp = decoded.permissions.includes(permission);
-            if (temp) {
-                cek = true;
-                break;
+        if (allowPermission?.length) {
+            for (let permission of allowPermission) {
+                const temp = decoded.permissions.includes(permission);
+                if (temp) {
+                    cek = true;
+                    break;
+                }
             }
+        } else {
+            cek = true;
         }
 
         if (cek) {
