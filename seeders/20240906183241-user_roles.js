@@ -12,12 +12,14 @@ module.exports = {
          *   isBetaMember: false
          * }], {});
         */
-        const dataList = [
-            {
-                role_id: 1,
-                user_id: 1,
-            },
-        ];
+        const dataList = [];
+
+        for (let i = 1; i <= 11; i++) {
+            dataList.push({
+                role_id: i,
+                user_id: i,
+            })
+        }
 
         await queryInterface.bulkInsert({ tableName: "user_roles" }, dataList, {});
     },
