@@ -12,323 +12,163 @@ module.exports = {
          *   isBetaMember: false
          * }], {});
         */
-        const permissions = [
-            {
-                id: 1,
-                permission_name: "semua",
-                description: ""
-            },
-            {
-                id: 2,
-                permission_name: "berita tambah",
-                description: ""
-            },
-            {
-                id: 3,
-                permission_name: "berita lihat",
-                description: ""
-            },
-            {
-                id: 4,
-                permission_name: "berita ubah",
-                description: ""
-            },
-            {
-                id: 5,
-                permission_name: "berita hapus",
-                description: ""
-            },
-            {
-                id: 6,
-                permission_name: "galeri tambah",
-                description: ""
-            },
-            {
-                id: 7,
-                permission_name: "galeri lihat",
-                description: ""
-            },
-            {
-                id: 8,
-                permission_name: "galeri ubah",
-                description: ""
-            },
-            {
-                id: 9,
-                permission_name: "galeri hapus",
-                description: ""
-            },
-            {
-                id: 10,
-                permission_name: "penyuluh kabupaten tambah",
-                description: ""
-            },
-            {
-                id: 11,
-                permission_name: "penyuluh kabupaten lihat",
-                description: ""
-            },
-            {
-                id: 12,
-                permission_name: "penyuluh kabupaten ubah",
-                description: ""
-            },
-            {
-                id: 13,
-                permission_name: "penyuluh kabupaten hapus",
-                description: ""
-            },
-            {
-                id: 14,
-                permission_name: "penyuluh kecamatan tambah",
-                description: ""
-            },
-            {
-                id: 15,
-                permission_name: "penyuluh kecamatan lihat",
-                description: ""
-            },
-            {
-                id: 16,
-                permission_name: "penyuluh kecamatan ubah",
-                description: ""
-            },
-            {
-                id: 17,
-                permission_name: "penyuluh kecamatan hapus",
-                description: ""
-            },
-            {
-                id: 18,
-                permission_name: "psp uppo tambah",
-                description: ""
-            },
-            {
-                id: 19,
-                permission_name: "psp uppo lihat",
-                description: ""
-            },
-            {
-                id: 20,
-                permission_name: "psp uppo ubah",
-                description: ""
-            },
-            {
-                id: 21,
-                permission_name: "psp uppo hapus",
-                description: ""
-            },
-            {
-                id: 22,
-                permission_name: "psp pupuk tambah",
-                description: ""
-            },
-            {
-                id: 23,
-                permission_name: "psp pupuk lihat",
-                description: ""
-            },
-            {
-                id: 24,
-                permission_name: "psp pupuk ubah",
-                description: ""
-            },
-            {
-                id: 25,
-                permission_name: "psp pupuk hapus",
-                description: ""
-            },
-            {
-                id: 26,
-                permission_name: "psp bantuan tambah",
-                description: ""
-            },
-            {
-                id: 27,
-                permission_name: "psp bantuan lihat",
-                description: ""
-            },
-            {
-                id: 28,
-                permission_name: "psp bantuan ubah",
-                description: ""
-            },
-            {
-                id: 29,
-                permission_name: "psp bantuan hapus",
-                description: ""
-            },
-            {
-                id: 30,
-                permission_name: "kepegawaian tambah",
-                description: ""
-            },
-            {
-                id: 31,
-                permission_name: "kepegawaian lihat",
-                description: ""
-            },
-            {
-                id: 32,
-                permission_name: "kepegawaian ubah",
-                description: ""
-            },
-            {
-                id: 33,
-                permission_name: "kepegawaian hapus",
-                description: ""
-            },
-            {
-                id: 34,
-                permission_name: "korluh padi tambah",
-                description: ""
-            },
-            {
-                id: 35,
-                permission_name: "korluh padi lihat",
-                description: ""
-            },
-            {
-                id: 36,
-                permission_name: "korluh padi ubah",
-                description: ""
-            },
-            {
-                id: 37,
-                permission_name: "korluh padi hapus",
-                description: ""
-            },
-            {
-                id: 38,
-                permission_name: "korluh palawija tambah",
-                description: ""
-            },
-            {
-                id: 39,
-                permission_name: "korluh palawija lihat",
-                description: ""
-            },
-            {
-                id: 40,
-                permission_name: "korluh palawija ubah",
-                description: ""
-            },
-            {
-                id: 41,
-                permission_name: "korluh palawija hapus",
-                description: ""
-            },
-            {
-                id: 42,
-                permission_name: "korluh sayur buah tambah",
-                description: ""
-            },
-            {
-                id: 43,
-                permission_name: "korluh sayur buah lihat",
-                description: ""
-            },
-            {
-                id: 44,
-                permission_name: "korluh sayur buah ubah",
-                description: ""
-            },
-            {
-                id: 45,
-                permission_name: "korluh sayur buah hapus",
-                description: ""
-            },
-            {
-                id: 46,
-                permission_name: "korluh tanaman hias tambah",
-                description: ""
-            },
-            {
-                id: 47,
-                permission_name: "korluh tanaman hias lihat",
-                description: ""
-            },
-            {
-                id: 48,
-                permission_name: "korluh tanaman hias ubah",
-                description: ""
-            },
-            {
-                id: 49,
-                permission_name: "korluh tanaman hias hapus",
-                description: ""
-            },
-            {
-                id: 50,
-                permission_name: "korluh tanaman biofarmaka tambah",
-                description: ""
-            },
-            {
-                id: 51,
-                permission_name: "korluh tanaman biofarmaka lihat",
-                description: ""
-            },
-            {
-                id: 52,
-                permission_name: "korluh tanaman biofarmaka ubah",
-                description: ""
-            },
-            {
-                id: 53,
-                permission_name: "korluh tanaman biofarmaka hapus",
-                description: ""
-            },
-            {
-                id: 54,
-                permission_name: "kecamatan korluh padi validasi",
-                description: ""
-            },
-            {
-                id: 55,
-                permission_name: "kecamatan korluh palawija validasi",
-                description: ""
-            },
-            {
-                id: 56,
-                permission_name: "kecamatan korluh sayur buah validasi",
-                description: ""
-            },
-            {
-                id: 57,
-                permission_name: "kecamatan korluh tanaman hias validasi",
-                description: ""
-            },
-            {
-                id: 58,
-                permission_name: "kecamatan korluh tanaman biofarmaka validasi",
-                description: ""
-            },
-            {
-                id: 59,
-                permission_name: "kabupaten korluh padi validasi",
-                description: ""
-            },
-            {
-                id: 60,
-                permission_name: "kabupaten korluh palawija validasi",
-                description: ""
-            },
-            {
-                id: 61,
-                permission_name: "kabupaten korluh sayur buah validasi",
-                description: ""
-            },
-            {
-                id: 62,
-                permission_name: "kabupaten korluh tanaman hias validasi",
-                description: ""
-            },
-            {
-                id: 63,
-                permission_name: "kabupaten korluh tanaman biofarmaka validasi",
-                description: ""
-            },
-        ];
+        let permissions = [];
+
+        let i = 1;
+        for (let temp of [
+            "semua",
+            "pengguna tambah",
+            "pengguna lihat",
+            "pengguna ubah",
+            "pengguna hapus",
+            "berita tambah",
+            "berita lihat",
+            "berita ubah",
+            "berita hapus",
+            "galeri tambah",
+            "galeri lihat",
+            "galeri ubah",
+            "galeri hapus",
+            "kepang produsen eceran tambah",
+            "kepang produsen eceran lihat",
+            "kepang produsen eceran ubah",
+            "kepang produsen eceran hapus",
+            "kepang perbandingan harga tambah",
+            "kepang perbandingan harga lihat",
+            "kepang perbandingan harga ubah",
+            "kepang perbandingan harga hapus",
+            "kepang pedagang eceran tambah",
+            "kepang pedagang eceran lihat",
+            "kepang pedagang eceran ubah",
+            "kepang pedagang eceran hapus",
+            "kepang cv produksi tambah",
+            "kepang cv produksi lihat",
+            "kepang cv produksi ubah",
+            "kepang cv produksi hapus",
+            "kepang cv produsen tambah",
+            "kepang cv produsen lihat",
+            "kepang cv produsen ubah",
+            "kepang cv produsen hapus",
+            "tph realisasi padi tambah",
+            "tph realisasi padi lihat",
+            "tph realisasi padi ubah",
+            "tph realisasi padi hapus",
+            "tph realisasi palawija 1 tambah",
+            "tph realisasi palawija 1 lihat",
+            "tph realisasi palawija 1 ubah",
+            "tph realisasi palawija 1 hapus",
+            "tph realisasi palawija 2 tambah",
+            "tph realisasi palawija 2 lihat",
+            "tph realisasi palawija 2 ubah",
+            "tph realisasi palawija 2 hapus",
+            "tph lahan sawah tambah",
+            "tph lahan sawah lihat",
+            "tph lahan sawah ubah",
+            "tph lahan sawah hapus",
+            "tph lahan bukan sawah tambah",
+            "tph lahan bukan sawah lihat",
+            "tph lahan bukan sawah ubah",
+            "tph lahan bukan sawah hapus",
+            "perkebunan kabupaten tambah",
+            "perkebunan kabupaten lihat",
+            "perkebunan kabupaten ubah",
+            "perkebunan kabupaten hapus",
+            "perkebunan kecamatan tambah",
+            "perkebunan kecamatan lihat",
+            "perkebunan kecamatan ubah",
+            "perkebunan kecamatan hapus",
+            "penyuluh kabupaten tambah",
+            "penyuluh kabupaten lihat",
+            "penyuluh kabupaten ubah",
+            "penyuluh kabupaten hapus",
+            "penyuluh kecamatan tambah",
+            "penyuluh kecamatan lihat",
+            "penyuluh kecamatan ubah",
+            "penyuluh kecamatan hapus",
+            "psp uppo tambah",
+            "psp uppo lihat",
+            "psp uppo ubah",
+            "psp uppo hapus",
+            "psp pupuk tambah",
+            "psp pupuk lihat",
+            "psp pupuk ubah",
+            "psp pupuk hapus",
+            "psp bantuan tambah",
+            "psp bantuan lihat",
+            "psp bantuan ubah",
+            "psp bantuan hapus",
+            "kepegawaian tambah",
+            "kepegawaian lihat",
+            "kepegawaian ubah",
+            "kepegawaian hapus",
+            "korluh padi tambah",
+            "korluh padi lihat",
+            "korluh padi ubah",
+            "korluh padi hapus",
+            "korluh palawija tambah",
+            "korluh palawija lihat",
+            "korluh palawija ubah",
+            "korluh palawija hapus",
+            "korluh sayur buah tambah",
+            "korluh sayur buah lihat",
+            "korluh sayur buah ubah",
+            "korluh sayur buah hapus",
+            "korluh tanaman hias tambah",
+            "korluh tanaman hias lihat",
+            "korluh tanaman hias ubah",
+            "korluh tanaman hias hapus",
+            "korluh tanaman biofarmaka tambah",
+            "korluh tanaman biofarmaka lihat",
+            "korluh tanaman biofarmaka ubah",
+            "korluh tanaman biofarmaka hapus",
+            "validasi kec korluh padi tambah",
+            "validasi kec korluh padi lihat",
+            "validasi kec korluh padi ubah",
+            "validasi kec korluh padi hapus",
+            "validasi kec korluh palawija tambah",
+            "validasi kec korluh palawija lihat",
+            "validasi kec korluh palawija ubah",
+            "validasi kec korluh palawija hapus",
+            "validasi kec korluh sayur buah tambah",
+            "validasi kec korluh sayur buah lihat",
+            "validasi kec korluh sayur buah ubah",
+            "validasi kec korluh sayur buah hapus",
+            "validasi kec korluh tanaman hias tambah",
+            "validasi kec korluh tanaman hias lihat",
+            "validasi kec korluh tanaman hias ubah",
+            "validasi kec korluh tanaman hias hapus",
+            "validasi kec korluh tanaman biofarmaka tambah",
+            "validasi kec korluh tanaman biofarmaka lihat",
+            "validasi kec korluh tanaman biofarmaka ubah",
+            "validasi kec korluh tanaman biofarmaka hapus",
+            "validasi kab korluh padi tambah",
+            "validasi kab korluh padi lihat",
+            "validasi kab korluh padi ubah",
+            "validasi kab korluh padi hapus",
+            "validasi kab korluh palawija tambah",
+            "validasi kab korluh palawija lihat",
+            "validasi kab korluh palawija ubah",
+            "validasi kab korluh palawija hapus",
+            "validasi kab korluh sayur buah tambah",
+            "validasi kab korluh sayur buah lihat",
+            "validasi kab korluh sayur buah ubah",
+            "validasi kab korluh sayur buah hapus",
+            "validasi kab korluh tanaman hias tambah",
+            "validasi kab korluh tanaman hias lihat",
+            "validasi kab korluh tanaman hias ubah",
+            "validasi kab korluh tanaman hias hapus",
+            "validasi kab korluh tanaman biofarmaka tambah",
+            "validasi kab korluh tanaman biofarmaka lihat",
+            "validasi kab korluh tanaman biofarmaka ubah",
+            "validasi kab korluh tanaman biofarmaka hapus",
+        ]) {
+            permissions.push({
+                id: i,
+                permission_name: temp,
+                description: '',
+            });
+            i++;
+        }
 
         await queryInterface.bulkInsert({ tableName: "permissions" }, permissions, {});
     },
