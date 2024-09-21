@@ -1,5 +1,5 @@
 const { ValidasiKorluhPalawija, KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, sequelize } = require('../models');
-const { dateGenerate, response } = require('../helpers');
+const { dateGenerate, fixedNumber, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -13,6 +13,7 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 
     data.forEach(i => {
         i.list.forEach(item => {
+            let temp = {};
             const idx = item.master.id;
 
             if (!sum['masterIds'].includes(idx)) {
@@ -23,6 +24,9 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                     nama: item.master.nama,
                 };
             }
+
+            temp = sum[idx];
+
             for (let index of [
                 "lahanSawahPanen",
                 "lahanSawahPanenMuda",
@@ -36,12 +40,16 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
                 "lahanBukanSawahPuso",
                 "produksi",
             ]) {
-                sum[idx][index] = sum[idx][index] !== undefined ? sum[idx][index] : null;
+                temp[index] = temp[index] !== undefined ? temp[index] : null;
 
                 if (item[index]) {
-                    sum[idx][index] = sum[idx][index] ? sum[idx][index] + item[index] : item[index];
+                    temp[index] = temp[index] ? Number(temp[index]) + Number(item[index]) : item[index];
                 }
             }
+
+            temp = fixedNumber(temp);
+
+            sum[idx] = temp;
         });
     });
 
@@ -62,23 +70,34 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
 }
 
 const combineData = (current, before) => {
+    let temp = {};
     if (before === 0) {
         current['masterIds']?.forEach(id => {
-            current[id]['bulanLaluLahanSawah'] = 0;
-            current[id]['bulanLaluLahanBukanSawah'] = 0;
-
-            current[id]['akhirLahanSawah'] = current[id]["lahanSawahTanam"] - current[id]["lahanSawahPanen"] - current[id]["lahanSawahPanenMuda"] - current[id]["lahanSawahPanenHijauanPakanTernak"] - current[id]["lahanSawahPuso"];
-            current[id]['akhirLahanBukanSawah'] = current[id]["lahanBukanSawahTanam"] - current[id]["lahanBukanSawahPanen"] - current[id]["lahanBukanSawahPanenMuda"] - current[id]["lahanBukanSawahPanenHijauanPakanTernak"] - current[id]["lahanBukanSawahPuso"];
+            temp = fixedNumber({
+                bulanLaluLahanSawah: 0,
+                bulanLaluLahanBukanSawah: 0,
+                akhirLahanSawah: current[id]["lahanSawahTanam"] - current[id]["lahanSawahPanen"] - current[id]["lahanSawahPanenMuda"] - current[id]["lahanSawahPanenHijauanPakanTernak"] - current[id]["lahanSawahPuso"],
+                akhirLahanBukanSawah: current[id]["lahanBukanSawahTanam"] - current[id]["lahanBukanSawahPanen"] - current[id]["lahanBukanSawahPanenMuda"] - current[id]["lahanBukanSawahPanenHijauanPakanTernak"] - current[id]["lahanBukanSawahPuso"],
+            });
+            current[id] = {
+                ...current[id],
+                ...temp,
+            };
         });
-        return current;
+    } else {
+        current['masterIds']?.forEach(id => {
+            temp = fixedNumber({
+                bulanLaluLahanSawah: before[id] ? before[id]['akhirLahanSawah'] || 0 : 0,
+                bulanLaluLahanBukanSawah: before[id] ? before[id]['akhirLahanBukanSawah'] || 0 : 0,
+                akhirLahanSawah: current[id]['bulanLaluLahanSawah'] + current[id]["lahanSawahTanam"] - current[id]["lahanSawahPanen"] - current[id]["lahanSawahPanenMuda"] - current[id]["lahanSawahPanenHijauanPakanTernak"] - current[id]["lahanSawahPuso"],
+                akhirLahanBukanSawah: current[id]['bulanLaluLahanBukanSawah'] + current[id]["lahanBukanSawahTanam"] - current[id]["lahanBukanSawahPanen"] - current[id]["lahanBukanSawahPanenMuda"] - current[id]["lahanBukanSawahPanenHijauanPakanTernak"] - current[id]["lahanBukanSawahPuso"],
+            });
+            current[id] = {
+                ...current[id],
+                ...temp,
+            };
+        });
     }
-    current['masterIds']?.forEach(id => {
-        current[id]['bulanLaluLahanSawah'] = before[id] ? before[id]['akhirLahanSawah'] || 0 : 0;
-        current[id]['bulanLaluLahanBukanSawah'] = before[id] ? before[id]['akhirLahanBukanSawah'] || 0 : 0;
-
-        current[id]['akhirLahanSawah'] = current[id]['bulanLaluLahanSawah'] + current[id]["lahanSawahTanam"] - current[id]["lahanSawahPanen"] - current[id]["lahanSawahPanenMuda"] - current[id]["lahanSawahPanenHijauanPakanTernak"] - current[id]["lahanSawahPuso"];
-        current[id]['akhirLahanBukanSawah'] = current[id]['bulanLaluLahanBukanSawah'] + current[id]["lahanBukanSawahTanam"] - current[id]["lahanBukanSawahPanen"] - current[id]["lahanBukanSawahPanenMuda"] - current[id]["lahanBukanSawahPanenHijauanPakanTernak"] - current[id]["lahanBukanSawahPuso"];
-    });
     return current;
 }
 

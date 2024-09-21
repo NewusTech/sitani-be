@@ -1,6 +1,6 @@
 const { ValidasiKorluhSayurBuah, KorluhMasterSayurBuah, KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, Desa, sequelize } = require('../models');
+const { dateGenerate, fixedNumber, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -202,14 +202,16 @@ module.exports = {
                 korluhMasterSayurBuahId: korluhMasterSayurBuah.id,
                 korluhSayurBuahId: korluhSayurBuah[0].id,
                 hasilProduksi: hasil_produksi,
-                luasPanenHabis: luas_panen_habis,
-                luasPanenBelumHabis: luas_panen_belum_habis,
-                luasRusak: luas_rusak,
-                luasPenanamanBaru: luas_penanaman_baru,
-                produksiHabis: produksi_habis,
-                produksiBelumHabis: produksi_belum_habis,
-                rerataHarga: rerata_harga,
                 keterangan,
+                ...fixedNumber({
+                    luasPanenHabis: luas_panen_habis,
+                    luasPanenBelumHabis: luas_panen_belum_habis,
+                    luasRusak: luas_rusak,
+                    luasPenanamanBaru: luas_penanaman_baru,
+                    produksiHabis: produksi_habis,
+                    produksiBelumHabis: produksi_belum_habis,
+                    rerataHarga: rerata_harga,
+                }),
             });
 
             await transaction.commit();
@@ -466,14 +468,16 @@ module.exports = {
 
             await korluhSayurBuahList.update({
                 hasilProduksi: hasil_produksi,
-                luasPanenHabis: luas_panen_habis,
-                luasPanenBelumHabis: luas_panen_belum_habis,
-                luasRusak: luas_rusak,
-                luasPenanamanBaru: luas_penanaman_baru,
-                produksiHabis: produksi_habis,
-                produksiBelumHabis: produksi_belum_habis,
-                rerataHarga: rerata_harga,
                 keterangan,
+                ...fixedNumber({
+                    luasPanenHabis: luas_panen_habis,
+                    luasPanenBelumHabis: luas_panen_belum_habis,
+                    luasRusak: luas_rusak,
+                    luasPenanamanBaru: luas_penanaman_baru,
+                    produksiHabis: produksi_habis,
+                    produksiBelumHabis: produksi_belum_habis,
+                    rerataHarga: rerata_harga,
+                }),
             });
 
             await transaction.commit();
