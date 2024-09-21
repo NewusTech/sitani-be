@@ -29,19 +29,15 @@ module.exports = (sequelize, DataTypes) => {
         },
         nip: {
             type: DataTypes.STRING(20),
-            allowNull: false,
         },
         pangkat: {
             type: DataTypes.STRING,
-            allowNull: false,
         },
         golongan: {
             type: DataTypes.STRING,
-            allowNull: false,
         },
         keterangan: {
             type: DataTypes.STRING,
-            allowNull: false,
         },
     }, {
         tableName: 'penyuluh_kecamatan',

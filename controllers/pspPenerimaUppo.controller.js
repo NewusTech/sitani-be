@@ -25,6 +25,12 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
+                tahun: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 nama_poktan: {
                     type: "string",
                     max: 255,
@@ -49,7 +55,7 @@ module.exports = {
                 return;
             }
 
-            const { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id } = req.body;
+            const { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id, tahun } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
@@ -82,6 +88,7 @@ module.exports = {
                 titikKoordinat: titik_koordinat,
                 ketuaPoktan: ketua_poktan,
                 namaPoktan: nama_poktan,
+                tahun,
             });
 
             await transaction.commit();
@@ -102,7 +109,7 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { kecamatan, startDate, endDate, search, limit, page } = req.query;
+            let { kecamatan, search, limit, page, year } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
@@ -121,19 +128,8 @@ module.exports = {
             if (!isNaN(parseInt(kecamatan))) {
                 where.kecamatanId = parseInt(kecamatan);
             }
-            if (startDate) {
-                startDate = new Date(startDate);
-                startDate = dateGenerate(startDate);
-                if (startDate instanceof Date && !isNaN(startDate)) {
-                    where.createdAt = { [Op.gte]: startDate };
-                }
-            }
-            if (endDate) {
-                endDate = new Date(endDate);
-                endDate = dateGenerate(endDate);
-                if (endDate instanceof Date && !isNaN(endDate)) {
-                    where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
-                }
+            if (year) {
+                where.tahun = year;
             }
 
             const pspPenerimaUppo = await PspPenerimaUppo.findAll({
@@ -229,6 +225,13 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
+                tahun: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 nama_poktan: {
                     type: "string",
                     optional: true,
@@ -260,7 +263,7 @@ module.exports = {
                 return;
             }
 
-            let { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id } = req.body;
+            let { kecamatan_id, titik_koordinat, ketua_poktan, nama_poktan, desa_id, tahun } = req.body;
 
             if (kecamatan_id) {
                 const kecamatan = await Kecamatan.findByPk(kecamatan_id);
@@ -281,6 +284,7 @@ module.exports = {
             titik_koordinat = titik_koordinat ?? pspPenerimaUppo.titikKoordinat;
             ketua_poktan = ketua_poktan ?? pspPenerimaUppo.ketuaPoktan;
             nama_poktan = nama_poktan ?? pspPenerimaUppo.namaPoktan;
+            tahun = tahun ?? pspPenerimaUppo.tahun;
 
             await pspPenerimaUppo.update({
                 kecamatanId: kecamatan_id,
@@ -288,6 +292,7 @@ module.exports = {
                 titikKoordinat: titik_koordinat,
                 ketuaPoktan: ketua_poktan,
                 namaPoktan: nama_poktan,
+                tahun,
             });
 
             await transaction.commit();

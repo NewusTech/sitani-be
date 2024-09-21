@@ -31,6 +31,39 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
 
+        // Jumlah Padi lahan sawah
+        jumlah_padi_lahan_sawah_panen: {
+            type: DataTypes.DOUBLE,
+        },
+        jumlah_padi_lahan_sawah_tanam: {
+            type: DataTypes.DOUBLE,
+        },
+        jumlah_padi_lahan_sawah_puso: {
+            type: DataTypes.DOUBLE,
+        },
+
+        // Jumlah Padi lahan bukan sawah
+        jumlah_padi_lahan_bukan_sawah_panen: {
+            type: DataTypes.DOUBLE,
+        },
+        jumlah_padi_lahan_bukan_sawah_tanam: {
+            type: DataTypes.DOUBLE,
+        },
+        jumlah_padi_lahan_bukan_sawah_puso: {
+            type: DataTypes.DOUBLE,
+        },
+
+        // Hibrida lahan sawah
+        hibrida_lahan_sawah_panen: {
+            type: DataTypes.DOUBLE,
+        },
+        hibrida_lahan_sawah_tanam: {
+            type: DataTypes.DOUBLE,
+        },
+        hibrida_lahan_sawah_puso: {
+            type: DataTypes.DOUBLE,
+        },
+
         // Hibrida bantuan pemerintah lahan sawah
         hibrida_bantuan_pemerintah_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
@@ -41,7 +74,7 @@ module.exports = (sequelize, DataTypes) => {
         hibrida_bantuan_pemerintah_lahan_sawah_puso: {
             type: DataTypes.DOUBLE,
         },
-        
+
         // Hibrida non bantuan pemerintah lahan sawah
         hibrida_non_bantuan_pemerintah_lahan_sawah_panen: {
             type: DataTypes.DOUBLE,
@@ -50,6 +83,28 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DOUBLE,
         },
         hibrida_non_bantuan_pemerintah_lahan_sawah_puso: {
+            type: DataTypes.DOUBLE,
+        },
+
+        // Unggul lahan sawah
+        unggul_lahan_sawah_panen: {
+            type: DataTypes.DOUBLE,
+        },
+        unggul_lahan_sawah_tanam: {
+            type: DataTypes.DOUBLE,
+        },
+        unggul_lahan_sawah_puso: {
+            type: DataTypes.DOUBLE,
+        },
+
+        // Unggul lahan bukan sawah
+        unggul_lahan_bukan_sawah_panen: {
+            type: DataTypes.DOUBLE,
+        },
+        unggul_lahan_bukan_sawah_tanam: {
+            type: DataTypes.DOUBLE,
+        },
+        unggul_lahan_bukan_sawah_puso: {
             type: DataTypes.DOUBLE,
         },
 

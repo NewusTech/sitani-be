@@ -5,25 +5,17 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class KorluhMasterPalawija extends Model {
         static associate(models) {
-            KorluhMasterPalawija.belongsTo(models.KorluhMasterPalawija, {
-                foreignKey: 'korluhMasterPalawijaId',
-                as: 'induk',
-            });
-            KorluhMasterPalawija.hasMany(models.KorluhMasterPalawija, {
-                foreignKey: 'korluhMasterPalawijaId',
-                as: 'anak',
-            });
         }
     }
 
     KorluhMasterPalawija.init({
-        korluhMasterPalawijaId: {
-            type: DataTypes.BIGINT,
-            field: 'korluh_master_palawija_id'
-        },
         nama: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        hide: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
         },
         createdAt: {
             type: DataTypes.DATE,

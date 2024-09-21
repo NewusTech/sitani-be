@@ -39,7 +39,7 @@ module.exports = {
             }
 
             bantuanWhere.periode = { [Op.between]: [start, end] };
-            uppoWhere.createdAt = { [Op.between]: [start, end] };
+            uppoWhere.tahun = start.getFullYear();
 
             const bantuanSubsidiCount = await PspBantuan.count({
                 where: {

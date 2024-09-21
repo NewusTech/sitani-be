@@ -1,4 +1,4 @@
-const { KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, Desa, sequelize } = require('../models');
+const { ValidasiKorluhSayurBuah, KorluhMasterSayurBuah, KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
@@ -72,14 +72,15 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
+                korluh_master_sayur_buah_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 tanggal: {
                     type: "date",
                     convert: true,
-                },
-                nama_tanaman: {
-                    type: "string",
-                    max: 255,
-                    min: 1,
                 },
                 ...coreSchema,
             };
@@ -92,10 +93,10 @@ module.exports = {
             }
 
             let {
+                korluh_master_sayur_buah_id,
                 kecamatan_id,
                 desa_id,
                 tanggal,
-                nama_tanaman,
                 hasil_produksi,
                 luas_panen_habis,
                 luas_panen_belum_habis,
@@ -107,6 +108,7 @@ module.exports = {
                 keterangan,
             } = req.body;
 
+            const korluhMasterSayurBuah = await KorluhMasterSayurBuah.findByPk(korluh_master_sayur_buah_id);
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
 
@@ -130,8 +132,40 @@ module.exports = {
                 ]));
                 return;
             }
+            if (!korluhMasterSayurBuah) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: "Korluh master sayur dan buah doesn't exists",
+                        field: 'korluh_master_sayur_buah_id',
+                    },
+                ]));
+                return;
+            }
 
             tanggal = dateGenerate(tanggal);
+
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: kecamatan.id,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhSayurBuah) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh sayur dan buah because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
 
             const korluhSayurBuah = await KorluhSayurBuah.findOrCreate({
                 where: {
@@ -147,8 +181,8 @@ module.exports = {
 
             const korluhSayurBuahListExists = await KorluhSayurBuahList.findOne({
                 where: {
+                    korluhMasterSayurBuahId: korluhMasterSayurBuah.id,
                     korluhSayurBuahId: korluhSayurBuah[0].id,
-                    namaTanaman: { [Op.like]: nama_tanaman }
                 }
             });
 
@@ -156,8 +190,8 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh sayur dan buah, please use another name",
-                        field: 'nama_tanaman',
+                        message: "Cannot created korluh sayur dan buah, please use another master",
+                        field: 'korluh_master_sayur_buah_id',
                     },
                 ]));
                 await transaction.rollback();
@@ -165,8 +199,8 @@ module.exports = {
             }
 
             await KorluhSayurBuahList.create({
+                korluhMasterSayurBuahId: korluhMasterSayurBuah.id,
                 korluhSayurBuahId: korluhSayurBuah[0].id,
-                namaTanaman: nama_tanaman,
                 hasilProduksi: hasil_produksi,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
@@ -234,7 +268,7 @@ module.exports = {
                 }
             }
 
-            const korluhSayurBuah = await KorluhSayurBuah.findAll({
+            let korluhSayurBuah = await KorluhSayurBuah.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -246,7 +280,13 @@ module.exports = {
                     },
                     {
                         model: KorluhSayurBuahList,
-                        as: 'list'
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterSayurBuah,
+                                as: 'master'
+                            }
+                        ]
                     }
                 ],
                 offset,
@@ -258,6 +298,45 @@ module.exports = {
             const count = await KorluhSayurBuah.count({ where });
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/sayur-buah/get');
+
+            korluhSayurBuah = korluhSayurBuah.map(item => {
+                let temp = {
+                    masterIds: [],
+                };
+                item.list.forEach(i => {
+                    const idx = i.master.id;
+
+                    temp[idx] = {
+                        master: i.master,
+                    };
+                    for (let idxVal of [
+                        "hasilProduksi",
+                        "luasPanenHabis",
+                        "luasPanenBelumHabis",
+                        "luasRusak",
+                        "luasPenanamanBaru",
+                        "produksiHabis",
+                        "produksiBelumHabis",
+                        "rerataHarga",
+                        "keterangan",
+                    ]) {
+                        temp[idx][idxVal] = i[idxVal];
+                    }
+                    temp[idx]['id'] = i.id;
+
+                    temp.masterIds.push(idx);
+                });
+                return {
+                    kecamatanId: item.kecamatanId,
+                    tanggal: item.tanggal,
+                    desaId: item.desaId,
+
+                    kecamatan: item?.kecamatan,
+                    desa: item?.desa,
+
+                    ...temp,
+                };
+            });
 
             res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', { data: korluhSayurBuah, pagination }));
         } catch (err) {
@@ -292,6 +371,10 @@ module.exports = {
                             },
                         ],
                     },
+                    {
+                        model: KorluhMasterSayurBuah,
+                        as: 'master'
+                    }
                 ],
             });
 
@@ -323,12 +406,6 @@ module.exports = {
             });
 
             const schema = {
-                nama_tanaman: {
-                    type: "string",
-                    optional: true,
-                    max: 255,
-                    min: 1,
-                },
                 ...coreSchema,
             };
 
@@ -344,8 +421,38 @@ module.exports = {
                 return;
             }
 
+            const korluhSayurBuah = await KorluhSayurBuah.findByPk(korluhSayurBuahList.korluhSayurBuahId);
+
+            if (!korluhSayurBuah) {
+                res.status(404).json(response(404, 'Korluh sayur dan buah error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhSayurBuah.tanggal);
+
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhSayurBuah.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhSayurBuah) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh sayur dan buah because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
             let {
-                nama_tanaman,
                 hasil_produksi,
                 luas_panen_habis,
                 luas_panen_belum_habis,
@@ -357,31 +464,7 @@ module.exports = {
                 keterangan,
             } = req.body;
 
-            if (nama_tanaman) {
-                const namaTanamanExists = await KorluhSayurBuahList.findOne({
-                    where: {
-                        korluhSayurBuahId: korluhSayurBuahList.korluhSayurBuahId,
-                        namaTanaman: { [Op.like]: nama_tanaman },
-                        id: { [Op.not]: korluhSayurBuahList.id },
-                    }
-                });
-
-                if (namaTanamanExists) {
-                    res.status(400).json(response(400, 'Bad Request', [
-                        {
-                            type: 'duplicate',
-                            message: "Cannot updated korluh sayur dan buah, please use another name",
-                            field: 'nama_tanaman',
-                        },
-                    ]));
-                    return;
-                }
-            } else {
-                nama_tanaman = korluhSayurBuahList.namaTanaman;
-            }
-
             await korluhSayurBuahList.update({
-                namaTanaman: nama_tanaman,
                 hasilProduksi: hasil_produksi,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
@@ -425,6 +508,31 @@ module.exports = {
             }
 
             const korluhSayurBuahId = korluhSayurBuahList.korluhSayurBuahId;
+
+            const korluhSayurBuah = await KorluhSayurBuah.findByPk(korluhSayurBuahId);
+
+            if (!korluhSayurBuah) {
+                res.status(404).json(response(404, 'Korluh sayur dan buah error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhSayurBuah.tanggal);
+
+            const validasiKorluhSayurBuah = await ValidasiKorluhSayurBuah.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhSayurBuah.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhSayurBuah) {
+                res.status(403).json(response(403, 'Korluh sayur dan buah deleted failed because kacamatan has validated'));
+                return;
+            }
 
             await korluhSayurBuahList.destroy();
 

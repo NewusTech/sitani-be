@@ -13,6 +13,12 @@ module.exports = {
 
         try {
             const schema = {
+                tahun: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 jenis_pupuk: {
                     type: "string",
                     max: 255,
@@ -44,13 +50,14 @@ module.exports = {
                 return;
             }
 
-            const { jenis_pupuk, kandungan_pupuk, keterangan, harga_pupuk } = req.body;
+            const { jenis_pupuk, kandungan_pupuk, keterangan, harga_pupuk, tahun } = req.body;
 
             await PspPupuk.create({
                 kandunganPupuk: kandungan_pupuk,
                 jenisPupuk: jenis_pupuk,
                 hargaPupuk: harga_pupuk,
                 keterangan,
+                tahun,
             });
 
             await transaction.commit();
@@ -71,9 +78,10 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { startDate, endDate, search, limit, page } = req.query;
+            let { search, limit, page, year } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            year = isNaN(parseInt(year)) ? null : parseInt(year);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
             const offset = (page - 1) * limit;
@@ -90,19 +98,8 @@ module.exports = {
                     }
                 };
             }
-            if (startDate) {
-                startDate = new Date(startDate);
-                startDate = dateGenerate(startDate);
-                if (startDate instanceof Date && !isNaN(startDate)) {
-                    where.createdAt = { [Op.gte]: startDate };
-                }
-            }
-            if (endDate) {
-                endDate = new Date(endDate);
-                endDate = dateGenerate(endDate);
-                if (endDate instanceof Date && !isNaN(endDate)) {
-                    where.createdAt = { ...where.createdAt, [Op.lte]: endDate };
-                }
+            if (year) {
+                where.tahun = year;
             }
 
             const pspPupuk = await PspPupuk.findAll({
@@ -164,6 +161,13 @@ module.exports = {
             });
 
             const schema = {
+                tahun: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 jenis_pupuk: {
                     type: "string",
                     optional: true,
@@ -204,18 +208,20 @@ module.exports = {
                 return;
             }
 
-            let { jenis_pupuk, kandungan_pupuk, keterangan, harga_pupuk } = req.body;
+            let { jenis_pupuk, kandungan_pupuk, keterangan, harga_pupuk, tahun } = req.body;
 
             kandungan_pupuk = kandungan_pupuk ?? pspPupuk.kandunganPupuk;
             harga_pupuk = harga_pupuk ?? pspPupuk.hargaPupuk;
             jenis_pupuk = jenis_pupuk ?? pspPupuk.jenisPupuk;
             keterangan = keterangan ?? pspPupuk.keterangan;
+            tahun = tahun ?? pspPupuk.tahun;
 
             await pspPupuk.update({
                 kandunganPupuk: kandungan_pupuk,
                 hargaPupuk: harga_pupuk,
                 jenisPupuk: jenis_pupuk,
                 keterangan,
+                tahun,
             });
 
             await transaction.commit();

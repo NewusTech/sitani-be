@@ -1,11 +1,141 @@
-const { KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, Desa, sequelize } = require('../models');
+const { ValidasiKorluhPalawija, KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, Desa, sequelize } = require('../models');
+const { dateGenerate, response, fixedNumber } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
 const v = new Validator();
+
+const parentSync = async (id, obj, bef) => {
+    obj.korluhMasterPalawijaId = id;
+    const parent = await KorluhPalawijaList.findOrCreate({
+        where: {
+            korluhMasterPalawijaId: obj.korluhMasterPalawijaId,
+            korluhPalawijaId: obj.korluhPalawijaId,
+        },
+        defaults: obj
+    });
+
+    if (!parent[1]) {
+        let temp = {};
+        for (let idx of [
+            "lahanSawahPanen",
+            "lahanSawahPanenMuda",
+            "lahanSawahPanenHijauanPakanTernak",
+            "lahanSawahTanam",
+            "lahanSawahPuso",
+            "lahanBukanSawahPanen",
+            "lahanBukanSawahPanenMuda",
+            "lahanBukanSawahPanenHijauanPakanTernak",
+            "lahanBukanSawahTanam",
+            "lahanBukanSawahPuso",
+            "produksi",
+        ]) {
+            temp[idx] = parent[0][idx];
+            if (obj[idx]) {
+                temp[idx] = temp[idx] ? Number(temp[idx]) + Number(obj[idx]) : obj[idx];
+            }
+            if (bef) {
+                if (bef[idx]) {
+                    temp[idx] = temp[idx] ? Number(temp[idx]) - Number(bef[idx]) : bef[idx];
+                }
+            }
+        }
+
+        temp = fixedNumber(temp);
+
+        await parent[0].update(temp);
+    }
+}
+
+const parentSynchronization = async (obj, bef = undefined, deleted = false) => {
+    const korluhPalawijaId = obj.korluhPalawijaId, korluhMasterPalawijaId = obj.korluhMasterPalawijaId;
+    if ([1, 2, 3, 4].includes(korluhMasterPalawijaId)) {
+        await parentSync(17, obj, bef);
+        if (deleted) {
+            const cek = await KorluhPalawijaList.count({
+                where: {
+                    korluhPalawijaId,
+                    korluhMasterPalawijaId: {
+                        [Op.in]: [1, 2, 3, 4]
+                    }
+                }
+            });
+            if (!cek) {
+                await KorluhPalawijaList.destroy({
+                    where: {
+                        korluhPalawijaId,
+                        korluhMasterPalawijaId: 17,
+                    }
+                });
+            }
+        }
+    }
+    if ([1, 2].includes(korluhMasterPalawijaId)) {
+        await parentSync(18, obj, bef);
+        if (deleted) {
+            const cek = await KorluhPalawijaList.count({
+                where: {
+                    korluhPalawijaId,
+                    korluhMasterPalawijaId: {
+                        [Op.in]: [1, 2]
+                    }
+                }
+            });
+            if (!cek) {
+                await KorluhPalawijaList.destroy({
+                    where: {
+                        korluhPalawijaId,
+                        korluhMasterPalawijaId: 18,
+                    }
+                });
+            }
+        }
+    }
+    if ([5, 6].includes(korluhMasterPalawijaId)) {
+        await parentSync(19, obj, bef);
+        if (deleted) {
+            const cek = await KorluhPalawijaList.count({
+                where: {
+                    korluhPalawijaId,
+                    korluhMasterPalawijaId: {
+                        [Op.in]: [5, 6]
+                    }
+                }
+            });
+            if (!cek) {
+                await KorluhPalawijaList.destroy({
+                    where: {
+                        korluhPalawijaId,
+                        korluhMasterPalawijaId: 19,
+                    }
+                });
+            }
+        }
+    }
+    if ([8, 9].includes(korluhMasterPalawijaId)) {
+        await parentSync(20, obj, bef);
+        if (deleted) {
+            const cek = await KorluhPalawijaList.count({
+                where: {
+                    korluhPalawijaId,
+                    korluhMasterPalawijaId: {
+                        [Op.in]: [8, 9]
+                    }
+                }
+            });
+            if (!cek) {
+                await KorluhPalawijaList.destroy({
+                    where: {
+                        korluhPalawijaId,
+                        korluhMasterPalawijaId: 20,
+                    }
+                });
+            }
+        }
+    }
+}
 
 const coreSchema = {
     lahan_sawah_panen: {
@@ -54,6 +184,11 @@ const coreSchema = {
         convert: true,
     },
     lahan_bukan_sawah_puso: {
+        type: "number",
+        optional: true,
+        convert: true,
+    },
+    produksi: {
         type: "number",
         optional: true,
         convert: true,
@@ -113,18 +248,17 @@ module.exports = {
                 lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahan_bukan_sawah_tanam,
                 lahan_bukan_sawah_puso,
+                produksi,
             } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
 
-            const korluhMasterPalawija = await KorluhMasterPalawija.findByPk(korluh_master_palawija_id, {
-                include: [
-                    {
-                        model: KorluhMasterPalawija,
-                        as: 'anak',
-                    }
-                ]
+            const korluhMasterPalawija = await KorluhMasterPalawija.findOne({
+                where: {
+                    id: korluh_master_palawija_id,
+                    hide: { [Op.ne]: true }
+                }
             });
 
             if (!kecamatan) {
@@ -157,18 +291,30 @@ module.exports = {
                 ]));
                 return;
             }
-            if (korluhMasterPalawija.anak.length) {
+
+            tanggal = dateGenerate(tanggal);
+
+            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: kecamatan.id,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPalawija) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
-                        type: 'errorType',
-                        message: "Do not use parent of master palawija",
-                        field: 'korluh_master_palawija_id',
+                        type: 'error',
+                        message: "Cannot created korluh palawija because kecamatan has validated",
+                        field: 'tanggal',
                     },
                 ]));
                 return;
             }
-
-            tanggal = dateGenerate(tanggal);
 
             const korluhPalawija = await KorluhPalawija.findOrCreate({
                 where: {
@@ -201,9 +347,7 @@ module.exports = {
                 return;
             }
 
-            await KorluhPalawijaList.create({
-                korluhMasterPalawijaId: korluhMasterPalawija.id,
-                korluhPalawijaId: korluhPalawija[0].id,
+            let obj = fixedNumber({
                 lahanSawahPanen: lahan_sawah_panen,
                 lahanSawahPanenMuda: lahan_sawah_panen_muda,
                 lahanSawahPanenHijauanPakanTernak: lahan_sawah_panen_hijauan_pakan_ternak,
@@ -214,7 +358,18 @@ module.exports = {
                 lahanBukanSawahPanenHijauanPakanTernak: lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahanBukanSawahTanam: lahan_bukan_sawah_tanam,
                 lahanBukanSawahPuso: lahan_bukan_sawah_puso,
+                produksi,
             });
+
+            obj = {
+                korluhMasterPalawijaId: korluhMasterPalawija.id,
+                korluhPalawijaId: korluhPalawija[0].id,
+                ...obj,
+            };
+
+            await KorluhPalawijaList.create(obj);
+
+            await parentSynchronization(obj);
 
             await transaction.commit();
 
@@ -272,7 +427,7 @@ module.exports = {
                 }
             }
 
-            const korluhPalawija = await KorluhPalawija.findAll({
+            let korluhPalawija = await KorluhPalawija.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -302,6 +457,47 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/palawija/get');
 
+            korluhPalawija = korluhPalawija.map(item => {
+                let temp = {
+                    masterIds: [],
+                };
+                item.list.forEach(i => {
+                    const idx = i.master.id;
+
+                    temp[idx] = {
+                        master: i.master
+                    };
+                    for (let idxVal of [
+                        "lahanSawahPanen",
+                        "lahanSawahPanenMuda",
+                        "lahanSawahPanenHijauanPakanTernak",
+                        "lahanSawahTanam",
+                        "lahanSawahPuso",
+                        "lahanBukanSawahPanen",
+                        "lahanBukanSawahPanenMuda",
+                        "lahanBukanSawahPanenHijauanPakanTernak",
+                        "lahanBukanSawahTanam",
+                        "lahanBukanSawahPuso",
+                        "produksi",
+                    ]) {
+                        temp[idx][idxVal] = i[idxVal];
+                    }
+                    temp[idx]['id'] = i.id;
+
+                    temp.masterIds.push(idx);
+                });
+                return {
+                    kecamatanId: item.kecamatanId,
+                    tanggal: item.tanggal,
+                    desaId: item.desaId,
+
+                    kecamatan: item?.kecamatan,
+                    desa: item?.desa,
+
+                    ...temp,
+                };
+            });
+
             res.status(200).json(response(200, 'Get korluh palawija successfully', { data: korluhPalawija, pagination }));
         } catch (err) {
             console.log(err);
@@ -328,6 +524,9 @@ module.exports = {
                     {
                         model: KorluhMasterPalawija,
                         as: 'master',
+                        where: {
+                            hide: { [Op.ne]: true }
+                        }
                     },
                 ],
             });
@@ -357,6 +556,15 @@ module.exports = {
 
             const korluhPalawijaList = await KorluhPalawijaList.findOne({
                 where: { id },
+                include: [
+                    {
+                        model: KorluhMasterPalawija,
+                        as: 'master',
+                        where: {
+                            hide: { [Op.ne]: true }
+                        }
+                    },
+                ],
             });
 
             const schema = {
@@ -382,6 +590,37 @@ module.exports = {
                 return;
             }
 
+            const korluhPalawija = await KorluhPalawija.findByPk(korluhPalawijaList.korluhPalawijaId);
+
+            if (!korluhPalawija) {
+                res.status(404).json(response(404, 'Korluh palawija error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhPalawija.tanggal);
+
+            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhPalawija.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPalawija) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh palawija because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
             let {
                 korluh_master_palawija_id,
                 lahan_sawah_panen,
@@ -394,23 +633,24 @@ module.exports = {
                 lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahan_bukan_sawah_tanam,
                 lahan_bukan_sawah_puso,
+                produksi,
             } = req.body;
 
+            const objBef = korluhPalawijaList;
+
             if (korluh_master_palawija_id) {
-                const korluhMasterPalawija = await KorluhMasterPalawija.findByPk(korluh_master_palawija_id, {
-                    include: [
-                        {
-                            model: KorluhMasterPalawija,
-                            as: 'anak',
-                        }
-                    ]
+                const korluhMasterPalawija = await KorluhMasterPalawija.findOne({
+                    where: {
+                        id: korluh_master_palawija_id,
+                        hide: { [Op.ne]: true }
+                    }
                 });
 
-                if (korluhMasterPalawija?.anak?.length) {
+                if (!korluhMasterPalawija) {
                     res.status(400).json(response(400, 'Bad Request', [
                         {
-                            type: 'errorType',
-                            message: "Do not use parent of master palawija",
+                            type: 'notFound',
+                            message: "Korluh master palawija doesn't exists",
                             field: 'korluh_master_palawija_id',
                         },
                     ]));
@@ -441,7 +681,7 @@ module.exports = {
                 return;
             }
 
-            await korluhPalawijaList.update({
+            let obj = {
                 korluhMasterPalawijaId: korluh_master_palawija_id,
                 lahanSawahPanen: lahan_sawah_panen,
                 lahanSawahPanenMuda: lahan_sawah_panen_muda,
@@ -453,7 +693,14 @@ module.exports = {
                 lahanBukanSawahPanenHijauanPakanTernak: lahan_bukan_sawah_panen_hijauan_pakan_ternak,
                 lahanBukanSawahTanam: lahan_bukan_sawah_tanam,
                 lahanBukanSawahPuso: lahan_bukan_sawah_puso,
-            });
+                produksi,
+            }
+
+            obj = fixedNumber(obj);
+
+            await korluhPalawijaList.update(obj);
+
+            await parentSynchronization(obj, objBef);
 
             await transaction.commit();
 
@@ -479,6 +726,15 @@ module.exports = {
 
             const korluhPalawijaList = await KorluhPalawijaList.findOne({
                 where: { id },
+                include: [
+                    {
+                        model: KorluhMasterPalawija,
+                        as: 'master',
+                        where: {
+                            hide: { [Op.ne]: true }
+                        }
+                    },
+                ],
             });
 
             if (!korluhPalawijaList) {
@@ -488,7 +744,40 @@ module.exports = {
 
             const korluhPalawijaId = korluhPalawijaList.korluhPalawijaId;
 
+            const korluhPalawija = await KorluhPalawija.findByPk(korluhPalawijaId);
+
+            if (!korluhPalawija) {
+                res.status(404).json(response(404, 'Korluh palawija error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhPalawija.tanggal);
+
+            const validasiKorluhPalawija = await ValidasiKorluhPalawija.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhPalawija.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPalawija) {
+                res.status(403).json(response(403, 'Korluh palawija deleted failed because kacamatan has validated'));
+                return;
+            }
+
+            const objBef = korluhPalawijaList;
+            const obj = {
+                korluhMasterPalawijaId: objBef.korluhMasterPalawijaId,
+                korluhPalawijaId: objBef.korluhPalawijaId,
+            }
+
             await korluhPalawijaList.destroy();
+
+            await parentSynchronization(obj, objBef, true);
 
             const korluhPalawijaExits = await KorluhPalawijaList.findOne({
                 where: { korluhPalawijaId }

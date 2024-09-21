@@ -103,9 +103,10 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { kecamatan, startDate, endDate, search, limit, page } = req.query;
+            let { kecamatan, startDate, endDate, search, limit, page, year } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            year = isNaN(parseInt(year)) ? null : parseInt(year);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
             const offset = (page - 1) * limit;
@@ -121,6 +122,14 @@ module.exports = {
             }
             if (!isNaN(parseInt(kecamatan))) {
                 where.kecamatanId = parseInt(kecamatan);
+            }
+            if (year) {
+                where = {
+                    ...where,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('periode')), year),
+                    ]
+                }
             }
             if (startDate) {
                 startDate = new Date(startDate);

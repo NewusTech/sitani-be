@@ -35,6 +35,39 @@ module.exports = {
                 allowNull: false,
             },
 
+            // Jumlah Padi lahan sawah
+            jumlah_padi_lahan_sawah_panen: {
+                type: Sequelize.DOUBLE,
+            },
+            jumlah_padi_lahan_sawah_tanam: {
+                type: Sequelize.DOUBLE,
+            },
+            jumlah_padi_lahan_sawah_puso: {
+                type: Sequelize.DOUBLE,
+            },
+
+            // Jumlah Padi lahan bukan sawah
+            jumlah_padi_lahan_bukan_sawah_panen: {
+                type: Sequelize.DOUBLE,
+            },
+            jumlah_padi_lahan_bukan_sawah_tanam: {
+                type: Sequelize.DOUBLE,
+            },
+            jumlah_padi_lahan_bukan_sawah_puso: {
+                type: Sequelize.DOUBLE,
+            },
+
+            // Hibrida lahan sawah
+            hibrida_lahan_sawah_panen: {
+                type: Sequelize.DOUBLE,
+            },
+            hibrida_lahan_sawah_tanam: {
+                type: Sequelize.DOUBLE,
+            },
+            hibrida_lahan_sawah_puso: {
+                type: Sequelize.DOUBLE,
+            },
+
             // Hibrida bantuan pemerintah lahan sawah
             hibrida_bantuan_pemerintah_lahan_sawah_panen: {
                 type: Sequelize.DOUBLE,
@@ -45,7 +78,7 @@ module.exports = {
             hibrida_bantuan_pemerintah_lahan_sawah_puso: {
                 type: Sequelize.DOUBLE,
             },
-            
+
             // Hibrida non bantuan pemerintah lahan sawah
             hibrida_non_bantuan_pemerintah_lahan_sawah_panen: {
                 type: Sequelize.DOUBLE,
@@ -54,6 +87,28 @@ module.exports = {
                 type: Sequelize.DOUBLE,
             },
             hibrida_non_bantuan_pemerintah_lahan_sawah_puso: {
+                type: Sequelize.DOUBLE,
+            },
+
+            // Unggul lahan sawah
+            unggul_lahan_sawah_panen: {
+                type: Sequelize.DOUBLE,
+            },
+            unggul_lahan_sawah_tanam: {
+                type: Sequelize.DOUBLE,
+            },
+            unggul_lahan_sawah_puso: {
+                type: Sequelize.DOUBLE,
+            },
+
+            // Unggul lahan bukan sawah
+            unggul_lahan_bukan_sawah_panen: {
+                type: Sequelize.DOUBLE,
+            },
+            unggul_lahan_bukan_sawah_tanam: {
+                type: Sequelize.DOUBLE,
+            },
+            unggul_lahan_bukan_sawah_puso: {
                 type: Sequelize.DOUBLE,
             },
 

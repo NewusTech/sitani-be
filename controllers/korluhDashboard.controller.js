@@ -1,6 +1,9 @@
 const {
+    KorluhMasterTanamanBiofarmaka,
     KorluhTanamanBiofarmakaList,
+    KorluhMasterTanamanHias,
     KorluhTanamanBiofarmaka,
+    KorluhMasterSayurBuah,
     KorluhTanamanHiasList,
     KorluhMasterPalawija,
     KorluhSayurBuahList,
@@ -68,18 +71,6 @@ module.exports = {
                     {
                         model: KorluhMasterPalawija,
                         as: 'master',
-                        include: [
-                            {
-                                model: KorluhMasterPalawija,
-                                as: 'induk',
-                                include: [
-                                    {
-                                        model: KorluhMasterPalawija,
-                                        as: 'induk',
-                                    }
-                                ]
-                            }
-                        ]
                     }
                 ],
                 limit,
@@ -92,6 +83,10 @@ module.exports = {
                         as: 'korluhSayurBuah',
                         where,
                     },
+                    {
+                        model: KorluhMasterSayurBuah,
+                        as: 'master',
+                    }
                 ],
                 limit,
             });
@@ -103,6 +98,10 @@ module.exports = {
                         as: 'korluhTanamanHias',
                         where,
                     },
+                    {
+                        model: KorluhMasterTanamanHias,
+                        as: 'master',
+                    }
                 ],
                 limit,
             });
@@ -114,6 +113,10 @@ module.exports = {
                         as: 'korluhTanamanBiofarmaka',
                         where,
                     },
+                    {
+                        model: KorluhMasterTanamanBiofarmaka,
+                        as: 'master',
+                    }
                 ],
                 limit,
             });
@@ -173,7 +176,7 @@ module.exports = {
             let master = [];
             let temp = [];
             korluhPalawija.map((item) => {
-                let nama = item?.master?.induk?.induk?.nama ?? (item?.master?.induk?.nama ?? (item?.master?.nama ?? 'error'));
+                let nama = item.master.nama;
                 if (master.includes(nama)) {
                     const index = master.indexOf(nama);
                     temp[index].panen += item.lahanSawahPanen + item.lahanBukanSawahPanen;
@@ -195,22 +198,22 @@ module.exports = {
             korluhSayurBuah = korluhSayurBuah.map((item) => ({
                 luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru,
                 hasilProduksi: item.hasilProduksi,
-                namaTanaman: item.namaTanaman,
+                namaTanaman: item.master.nama,
             }));
 
             korluhTanamanHias = korluhTanamanHias.map((item) => ({
                 luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru,
-                namaTanaman: item.namaTanaman,
+                namaTanaman: item.master.nama,
                 harga: item.rerataHarga,
             }));
 
             korluhTanamanBiofarmaka = korluhTanamanBiofarmaka.map((item) => ({
                 luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru,
-                namaTanaman: item.namaTanaman,
+                namaTanaman: item.master.nama,
                 harga: item.rerataHarga,
             }));
 
-            res.status(200).json(response(200, 'Get PSP dashboard data successfully', {
+            res.status(200).json(response(200, 'Get dashboard data successfully', {
                 padiPanenCount,
                 padiTanamCount,
                 padiPusoCount,

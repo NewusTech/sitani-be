@@ -1,4 +1,4 @@
-const { KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, Desa, sequelize } = require('../models');
+const { ValidasiKorluhTanamanHias, KorluhMasterTanamanHias, KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
 const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
@@ -72,14 +72,15 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
+                korluh_master_tanaman_hias_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
                 tanggal: {
                     type: "date",
                     convert: true,
-                },
-                nama_tanaman: {
-                    type: "string",
-                    max: 255,
-                    min: 1,
                 },
                 ...coreSchema,
             };
@@ -92,10 +93,10 @@ module.exports = {
             }
 
             let {
+                korluh_master_tanaman_hias_id,
                 kecamatan_id,
                 desa_id,
                 tanggal,
-                nama_tanaman,
                 luas_panen_habis,
                 luas_panen_belum_habis,
                 luas_rusak,
@@ -107,6 +108,7 @@ module.exports = {
                 keterangan,
             } = req.body;
 
+            const korluhMasterTanamanHias = await KorluhMasterTanamanHias.findByPk(korluh_master_tanaman_hias_id);
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
             const desa = await Desa.findByPk(desa_id);
 
@@ -130,8 +132,40 @@ module.exports = {
                 ]));
                 return;
             }
+            if (!korluhMasterTanamanHias) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: "Korluh master tanaman hias doesn't exists",
+                        field: 'korluh_master_tanaman_hias_id',
+                    },
+                ]));
+                return;
+            }
 
             tanggal = dateGenerate(tanggal);
+
+            const validasiKorluhTanamanHias = await ValidasiKorluhTanamanHias.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: kecamatan.id,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhTanamanHias) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh tanaman hias because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
 
             const korluhTanamanHias = await KorluhTanamanHias.findOrCreate({
                 where: {
@@ -147,8 +181,8 @@ module.exports = {
 
             const korluhTanamanHiasListExists = await KorluhTanamanHiasList.findOne({
                 where: {
+                    korluhMasterTanamanHiasId: korluhMasterTanamanHias.id,
                     korluhTanamanHiasId: korluhTanamanHias[0].id,
-                    namaTanaman: { [Op.like]: nama_tanaman }
                 }
             });
 
@@ -156,8 +190,8 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh tanaman hias, please use another name",
-                        field: 'nama_tanaman',
+                        message: "Cannot created korluh tanaman hias, please use another master",
+                        field: 'korluh_master_tanaman_hias_id',
                     },
                 ]));
                 await transaction.rollback();
@@ -165,8 +199,8 @@ module.exports = {
             }
 
             await KorluhTanamanHiasList.create({
+                korluhMasterTanamanHiasId: korluhMasterTanamanHias.id,
                 korluhTanamanHiasId: korluhTanamanHias[0].id,
-                namaTanaman: nama_tanaman,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
                 luasRusak: luas_rusak,
@@ -234,7 +268,7 @@ module.exports = {
                 }
             }
 
-            const korluhTanamanHias = await KorluhTanamanHias.findAll({
+            let korluhTanamanHias = await KorluhTanamanHias.findAll({
                 include: [
                     {
                         model: Kecamatan,
@@ -246,7 +280,13 @@ module.exports = {
                     },
                     {
                         model: KorluhTanamanHiasList,
-                        as: 'list'
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterTanamanHias,
+                                as: 'master'
+                            }
+                        ]
                     }
                 ],
                 offset,
@@ -258,6 +298,45 @@ module.exports = {
             const count = await KorluhTanamanHias.count({ where });
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/tanaman-hias/get');
+
+            korluhTanamanHias = korluhTanamanHias.map(item => {
+                let temp = {
+                    masterIds: [],
+                };
+                item.list.forEach(i => {
+                    const idx = i.master.id;
+
+                    temp[idx] = {
+                        master: i.master,
+                    };
+                    for (let idxVal of [
+                        "luasPanenHabis",
+                        "luasPanenBelumHabis",
+                        "luasRusak",
+                        "luasPenanamanBaru",
+                        "produksiHabis",
+                        "produksiBelumHabis",
+                        "satuanProduksi",
+                        "rerataHarga",
+                        "keterangan",
+                    ]) {
+                        temp[idx][idxVal] = i[idxVal];
+                    }
+                    temp[idx]['id'] = i.id;
+
+                    temp.masterIds.push(idx);
+                });
+                return {
+                    kecamatanId: item.kecamatanId,
+                    tanggal: item.tanggal,
+                    desaId: item.desaId,
+
+                    kecamatan: item?.kecamatan,
+                    desa: item?.desa,
+
+                    ...temp,
+                };
+            });
 
             res.status(200).json(response(200, 'Get korluh tanaman hias successfully', { data: korluhTanamanHias, pagination }));
         } catch (err) {
@@ -292,6 +371,10 @@ module.exports = {
                             },
                         ],
                     },
+                    {
+                        model: KorluhMasterTanamanHias,
+                        as: 'master'
+                    }
                 ],
             });
 
@@ -323,12 +406,6 @@ module.exports = {
             });
 
             const schema = {
-                nama_tanaman: {
-                    type: "string",
-                    optional: true,
-                    max: 255,
-                    min: 1,
-                },
                 ...coreSchema,
             };
 
@@ -344,8 +421,38 @@ module.exports = {
                 return;
             }
 
+            const korluhTanamanHias = await KorluhTanamanHias.findByPk(korluhTanamanHiasList.korluhTanamanHiasId);
+
+            if (!korluhTanamanHias) {
+                res.status(404).json(response(404, 'Korluh tanaman hias error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhTanamanHias.tanggal);
+
+            const validasiKorluhTanamanHias = await ValidasiKorluhTanamanHias.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhTanamanHias.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhTanamanHias) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh tanaman hias because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
             let {
-                nama_tanaman,
                 luas_panen_habis,
                 luas_panen_belum_habis,
                 luas_rusak,
@@ -357,31 +464,7 @@ module.exports = {
                 keterangan,
             } = req.body;
 
-            if (nama_tanaman) {
-                const namaTanamanExists = await KorluhTanamanHiasList.findOne({
-                    where: {
-                        korluhTanamanHiasId: korluhTanamanHiasList.korluhTanamanHiasId,
-                        namaTanaman: { [Op.like]: nama_tanaman },
-                        id: { [Op.not]: korluhTanamanHiasList.id },
-                    }
-                });
-
-                if (namaTanamanExists) {
-                    res.status(400).json(response(400, 'Bad Request', [
-                        {
-                            type: 'duplicate',
-                            message: "Cannot updated korluh tanaman hias, please use another name",
-                            field: 'nama_tanaman',
-                        },
-                    ]));
-                    return;
-                }
-            } else {
-                nama_tanaman = korluhTanamanHiasList.namaTanaman;
-            }
-
             await korluhTanamanHiasList.update({
-                namaTanaman: nama_tanaman,
                 luasPanenHabis: luas_panen_habis,
                 luasPanenBelumHabis: luas_panen_belum_habis,
                 luasRusak: luas_rusak,
@@ -425,6 +508,31 @@ module.exports = {
             }
 
             const korluhTanamanHiasId = korluhTanamanHiasList.korluhTanamanHiasId;
+
+            const korluhTanamanHias = await KorluhTanamanHias.findByPk(korluhTanamanHiasId);
+
+            if (!korluhTanamanHias) {
+                res.status(404).json(response(404, 'Korluh tanaman hias error'));
+                return;
+            }
+
+            const tanggal = new Date(korluhTanamanHias.tanggal);
+
+            const validasiKorluhTanamanHias = await ValidasiKorluhTanamanHias.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhTanamanHias.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhTanamanHias) {
+                res.status(403).json(response(403, 'Korluh tanaman hias deleted failed because kacamatan has validated'));
+                return;
+            }
 
             await korluhTanamanHiasList.destroy();
 

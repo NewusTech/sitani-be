@@ -1,11 +1,21 @@
-const { KorluhPadi, Kecamatan, Desa, sequelize } = require('../models');
+const { ValidasiKorluhPadi, KorluhPadi, Kecamatan, Desa, sequelize } = require('../models');
+const { dateGenerate, fixedNumber, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
 const v = new Validator();
+
+const getSum = (index) => {
+    let sum = null;
+    for (let idx of index) {
+        if (idx) {
+            sum = sum ? sum + idx : idx;
+        }
+    }
+    return sum;
+}
 
 const coreSchema = {
     hibrida_bantuan_pemerintah_lahan_sawah_panen: {
@@ -301,6 +311,28 @@ module.exports = {
 
             tanggal = dateGenerate(tanggal);
 
+            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: kecamatan.id,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPadi) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot created korluh padi because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
             const korluhPadiExists = await KorluhPadi.findOne({
                 where: {
                     tanggal: { [Op.eq]: tanggal },
@@ -319,10 +351,23 @@ module.exports = {
                 return;
             }
 
-            await KorluhPadi.create({
-                kecamatanId: kecamatan.id,
-                desaId: desa.id,
-                tanggal,
+            let hibrida_lahan_sawah_panen = getSum([hibrida_bantuan_pemerintah_lahan_sawah_panen, hibrida_non_bantuan_pemerintah_lahan_sawah_panen]);
+            let hibrida_lahan_sawah_tanam = getSum([hibrida_bantuan_pemerintah_lahan_sawah_tanam, hibrida_non_bantuan_pemerintah_lahan_sawah_tanam]);
+            let hibrida_lahan_sawah_puso = getSum([hibrida_bantuan_pemerintah_lahan_sawah_puso, hibrida_non_bantuan_pemerintah_lahan_sawah_puso]);
+            let unggul_lahan_sawah_panen = getSum([unggul_bantuan_pemerintah_lahan_sawah_panen, unggul_non_bantuan_pemerintah_lahan_sawah_panen]);
+            let unggul_lahan_sawah_tanam = getSum([unggul_bantuan_pemerintah_lahan_sawah_tanam, unggul_non_bantuan_pemerintah_lahan_sawah_tanam]);
+            let unggul_lahan_sawah_puso = getSum([unggul_bantuan_pemerintah_lahan_sawah_puso, unggul_non_bantuan_pemerintah_lahan_sawah_puso]);
+            let unggul_lahan_bukan_sawah_panen = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_panen, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen]);
+            let unggul_lahan_bukan_sawah_tanam = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam]);
+            let unggul_lahan_bukan_sawah_puso = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_puso, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso]);
+            let jumlah_padi_lahan_sawah_panen = getSum([hibrida_lahan_sawah_panen, unggul_lahan_sawah_panen, lokal_lahan_sawah_panen]);
+            let jumlah_padi_lahan_sawah_tanam = getSum([hibrida_lahan_sawah_tanam, unggul_lahan_sawah_tanam, lokal_lahan_sawah_tanam]);
+            let jumlah_padi_lahan_sawah_puso = getSum([hibrida_lahan_sawah_puso, unggul_lahan_sawah_puso, lokal_lahan_sawah_puso]);
+            let jumlah_padi_lahan_bukan_sawah_panen = getSum([unggul_lahan_bukan_sawah_panen, lokal_lahan_bukan_sawah_panen]);
+            let jumlah_padi_lahan_bukan_sawah_tanam = getSum([unggul_lahan_bukan_sawah_tanam, lokal_lahan_bukan_sawah_tanam]);
+            let jumlah_padi_lahan_bukan_sawah_puso = getSum([unggul_lahan_bukan_sawah_puso, lokal_lahan_bukan_sawah_puso]);
+
+            let obj = fixedNumber({
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
                 hibrida_bantuan_pemerintah_lahan_sawah_puso,
@@ -359,6 +404,29 @@ module.exports = {
                 sawah_rawa_lebak_lahan_sawah_panen,
                 sawah_rawa_lebak_lahan_sawah_tanam,
                 sawah_rawa_lebak_lahan_sawah_puso,
+
+                hibrida_lahan_sawah_panen,
+                hibrida_lahan_sawah_tanam,
+                hibrida_lahan_sawah_puso,
+                unggul_lahan_sawah_panen,
+                unggul_lahan_sawah_tanam,
+                unggul_lahan_sawah_puso,
+                unggul_lahan_bukan_sawah_panen,
+                unggul_lahan_bukan_sawah_tanam,
+                unggul_lahan_bukan_sawah_puso,
+                jumlah_padi_lahan_sawah_panen,
+                jumlah_padi_lahan_sawah_tanam,
+                jumlah_padi_lahan_sawah_puso,
+                jumlah_padi_lahan_bukan_sawah_panen,
+                jumlah_padi_lahan_bukan_sawah_tanam,
+                jumlah_padi_lahan_bukan_sawah_puso,
+            });
+
+            await KorluhPadi.create({
+                kecamatanId: kecamatan.id,
+                desaId: desa.id,
+                tanggal,
+                ...obj,
             });
 
             await transaction.commit();
@@ -571,10 +639,50 @@ module.exports = {
                     ]));
                     return;
                 }
+            } else {
+                tanggal = new Date(korluhPadi.tanggal);
+                tanggal = dateGenerate(tanggal);
             }
 
-            await korluhPadi.update({
-                tanggal: tanggal ?? korluhPadi.tanggal,
+            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhPadi.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPadi) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'error',
+                        message: "Cannot updated korluh padi because kecamatan has validated",
+                        field: 'tanggal',
+                    },
+                ]));
+                return;
+            }
+
+            let hibrida_lahan_sawah_panen = getSum([hibrida_bantuan_pemerintah_lahan_sawah_panen, hibrida_non_bantuan_pemerintah_lahan_sawah_panen]);
+            let hibrida_lahan_sawah_tanam = getSum([hibrida_bantuan_pemerintah_lahan_sawah_tanam, hibrida_non_bantuan_pemerintah_lahan_sawah_tanam]);
+            let hibrida_lahan_sawah_puso = getSum([hibrida_bantuan_pemerintah_lahan_sawah_puso, hibrida_non_bantuan_pemerintah_lahan_sawah_puso]);
+            let unggul_lahan_sawah_panen = getSum([unggul_bantuan_pemerintah_lahan_sawah_panen, unggul_non_bantuan_pemerintah_lahan_sawah_panen]);
+            let unggul_lahan_sawah_tanam = getSum([unggul_bantuan_pemerintah_lahan_sawah_tanam, unggul_non_bantuan_pemerintah_lahan_sawah_tanam]);
+            let unggul_lahan_sawah_puso = getSum([unggul_bantuan_pemerintah_lahan_sawah_puso, unggul_non_bantuan_pemerintah_lahan_sawah_puso]);
+            let unggul_lahan_bukan_sawah_panen = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_panen, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen]);
+            let unggul_lahan_bukan_sawah_tanam = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam]);
+            let unggul_lahan_bukan_sawah_puso = getSum([unggul_bantuan_pemerintah_lahan_bukan_sawah_puso, unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso]);
+            let jumlah_padi_lahan_sawah_panen = getSum([hibrida_lahan_sawah_panen, unggul_lahan_sawah_panen, lokal_lahan_sawah_panen]);
+            let jumlah_padi_lahan_sawah_tanam = getSum([hibrida_lahan_sawah_tanam, unggul_lahan_sawah_tanam, lokal_lahan_sawah_tanam]);
+            let jumlah_padi_lahan_sawah_puso = getSum([hibrida_lahan_sawah_puso, unggul_lahan_sawah_puso, lokal_lahan_sawah_puso]);
+            let jumlah_padi_lahan_bukan_sawah_panen = getSum([unggul_lahan_bukan_sawah_panen, lokal_lahan_bukan_sawah_panen]);
+            let jumlah_padi_lahan_bukan_sawah_tanam = getSum([unggul_lahan_bukan_sawah_tanam, lokal_lahan_bukan_sawah_tanam]);
+            let jumlah_padi_lahan_bukan_sawah_puso = getSum([unggul_lahan_bukan_sawah_puso, lokal_lahan_bukan_sawah_puso]);
+
+            let obj = fixedNumber({
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
                 hibrida_bantuan_pemerintah_lahan_sawah_puso,
@@ -611,6 +719,27 @@ module.exports = {
                 sawah_rawa_lebak_lahan_sawah_panen,
                 sawah_rawa_lebak_lahan_sawah_tanam,
                 sawah_rawa_lebak_lahan_sawah_puso,
+
+                hibrida_lahan_sawah_panen,
+                hibrida_lahan_sawah_tanam,
+                hibrida_lahan_sawah_puso,
+                unggul_lahan_sawah_panen,
+                unggul_lahan_sawah_tanam,
+                unggul_lahan_sawah_puso,
+                unggul_lahan_bukan_sawah_panen,
+                unggul_lahan_bukan_sawah_tanam,
+                unggul_lahan_bukan_sawah_puso,
+                jumlah_padi_lahan_sawah_panen,
+                jumlah_padi_lahan_sawah_tanam,
+                jumlah_padi_lahan_sawah_puso,
+                jumlah_padi_lahan_bukan_sawah_panen,
+                jumlah_padi_lahan_bukan_sawah_tanam,
+                jumlah_padi_lahan_bukan_sawah_puso,
+            });
+
+            await korluhPadi.update({
+                tanggal,
+                ...obj,
             });
 
             await transaction.commit();
@@ -641,6 +770,24 @@ module.exports = {
 
             if (!korluhPadi) {
                 res.status(404).json(response(404, 'Korluh padi not found'));
+                return;
+            }
+
+            const temp = new Date(korluhPadi.tanggal);
+
+            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
+                where: {
+                    statusTkKecamatan: 'terima',
+                    kecamatanId: korluhPadi.kecamatanId,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), temp.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), temp.getFullYear()),
+                    ]
+                }
+            });
+
+            if (validasiKorluhPadi) {
+                res.status(403).json(response(403, 'Korluh padi deleted failed because kacamatan has validated'));
                 return;
             }
 
