@@ -46,6 +46,8 @@ module.exports = {
         try {
             let { id } = req.params;
 
+            id = !isNaN(parseInt(id)) ? parseInt(id) : 0;
+
             if (req?.root?.userId) {
                 const user = await User.findByPk(req.root.userId, {
                     include: [
@@ -58,8 +60,7 @@ module.exports = {
 
                 if (user?.kecamatans?.length) {
                     if (id !== String(user.kecamatans[0].id)) {
-                        res.status(404).json(response(404, 'Kecamatan not found'));
-                        return;
+                        id = 0;
                     }
                 }
             }

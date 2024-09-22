@@ -7,7 +7,7 @@ const route = express.Router();
 let prefix = '/desa';
 /* -- ROUTE -- */
 route.get(prefix + '/get', [mid.checkUserOrPass()], desaController.getAll);
-route.get(prefix + '/get/:id', desaController.getOne);
+route.get(prefix + '/get/:id', [mid.checkUserOrPass()], desaController.getOne);
 /* -- ROUTE -- */
 
 module.exports = route;

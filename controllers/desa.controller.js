@@ -52,7 +52,26 @@ module.exports = {
 
     getOne: async (req, res) => {
         try {
-            const { id } = req.params;
+            let { id } = req.params;
+
+            id = !isNaN(parseInt(id)) ? parseInt(id) : 0;
+
+            if (req?.root?.userId) {
+                const user = await User.findByPk(req.root.userId, {
+                    include: [
+                        {
+                            model: Desa,
+                            as: 'desas'
+                        }
+                    ]
+                });
+
+                if (user?.desas?.length) {
+                    if (id !== user.desas[0].id) {
+                        id = 0;
+                    }
+                }
+            }
 
             const desa = await Desa.findByPk(id);
 
