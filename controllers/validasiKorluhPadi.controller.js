@@ -395,7 +395,7 @@ module.exports = {
                 ||
                 bulan.getFullYear() > currentDate.getFullYear()
                 ||
-                count(korluhPadi) === 0
+                korluhPadi.length === 0
             ) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
