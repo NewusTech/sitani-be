@@ -568,13 +568,6 @@ module.exports = {
             });
 
             const schema = {
-                korluh_master_palawija_id: {
-                    type: "number",
-                    optional: true,
-                    positive: true,
-                    integer: true,
-                    convert: true,
-                },
                 ...coreSchema,
             };
 
@@ -622,7 +615,6 @@ module.exports = {
             }
 
             let {
-                korluh_master_palawija_id,
                 lahan_sawah_panen,
                 lahan_sawah_panen_muda,
                 lahan_sawah_panen_hijauan_pakan_ternak,
@@ -638,51 +630,9 @@ module.exports = {
 
             const objBef = korluhPalawijaList;
 
-            if (korluh_master_palawija_id) {
-                const korluhMasterPalawija = await KorluhMasterPalawija.findOne({
-                    where: {
-                        id: korluh_master_palawija_id,
-                        hide: { [Op.ne]: true }
-                    }
-                });
-
-                if (!korluhMasterPalawija) {
-                    res.status(400).json(response(400, 'Bad Request', [
-                        {
-                            type: 'notFound',
-                            message: "Korluh master palawija doesn't exists",
-                            field: 'korluh_master_palawija_id',
-                        },
-                    ]));
-                    return;
-                }
-
-                korluh_master_palawija_id = korluhMasterPalawija?.id ?? korluhPalawijaList.korluhMasterPalawijaId;
-            } else {
-                korluh_master_palawija_id = korluhPalawijaList.korluhMasterPalawijaId;
-            }
-
-            const korluhPalawijaListExists = await KorluhPalawijaList.findOne({
-                where: {
-                    korluhPalawijaId: korluhPalawijaList.korluhPalawijaId,
-                    korluhMasterPalawijaId: korluh_master_palawija_id,
-                    id: { [Op.not]: korluhPalawijaList.id },
-                }
-            });
-
-            if (korluhPalawijaListExists) {
-                res.status(400).json(response(400, 'Bad Request', [
-                    {
-                        type: 'duplicate',
-                        message: "Cannot updated korluh palawija, please use another master",
-                        field: 'korluh_master_palawija_id',
-                    },
-                ]));
-                return;
-            }
-
             let obj = {
-                korluhMasterPalawijaId: korluh_master_palawija_id,
+                korluhMasterPalawijaId: korluhPalawijaList.korluhMasterPalawijaId,
+                korluhPalawijaId: korluhPalawijaList.korluhPalawijaId,
                 lahanSawahPanen: lahan_sawah_panen,
                 lahanSawahPanenMuda: lahan_sawah_panen_muda,
                 lahanSawahPanenHijauanPakanTernak: lahan_sawah_panen_hijauan_pakan_ternak,
