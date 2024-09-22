@@ -12,6 +12,13 @@ module.exports = (sequelize, DataTypes) => {
                 timestamps: false,
                 as: 'roles',
             });
+            User.belongsToMany(models.Kecamatan, {
+                through: 'user_kecamatan_desa',
+                foreignKey: 'user_id',
+                otherKey: 'kecamatan_id',
+                timestamps: false,
+                as: 'kecamatans',
+            });
         }
     }
 
