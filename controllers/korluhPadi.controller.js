@@ -564,11 +564,6 @@ module.exports = {
             });
 
             const schema = {
-                tanggal: {
-                    type: "date",
-                    optional: true,
-                    convert: true,
-                },
                 ...coreSchema,
             };
 
@@ -585,7 +580,6 @@ module.exports = {
             }
 
             let {
-                tanggal,
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
                 hibrida_bantuan_pemerintah_lahan_sawah_puso,
@@ -623,48 +617,6 @@ module.exports = {
                 sawah_rawa_lebak_lahan_sawah_tanam,
                 sawah_rawa_lebak_lahan_sawah_puso,
             } = req.body;
-
-            if (tanggal) {
-                tanggal = dateGenerate(tanggal);
-                const tanggalExists = await KorluhPadi.findOne({
-                    where: { tanggal: { [Op.eq]: tanggal }, desaId: korluhPadi.desaId }
-                });
-                if (tanggalExists !== null && tanggalExists?.id !== korluhPadi.id) {
-                    res.status(400).json(response(400, 'Bad Request', [
-                        {
-                            type: 'duplicate',
-                            message: "Cannot updated korluh padi, please use another tanggal",
-                            field: 'tanggal',
-                        },
-                    ]));
-                    return;
-                }
-            } else {
-                tanggal = new Date(korluhPadi.tanggal);
-                tanggal = dateGenerate(tanggal);
-            }
-
-            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
-                where: {
-                    statusTkKecamatan: 'terima',
-                    kecamatanId: korluhPadi.kecamatanId,
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
-                    ]
-                }
-            });
-
-            if (validasiKorluhPadi) {
-                res.status(400).json(response(400, 'Bad Request', [
-                    {
-                        type: 'error',
-                        message: "Cannot updated korluh padi because kecamatan has validated",
-                        field: 'tanggal',
-                    },
-                ]));
-                return;
-            }
 
             let hibrida_lahan_sawah_panen = getSum([hibrida_bantuan_pemerintah_lahan_sawah_panen, hibrida_non_bantuan_pemerintah_lahan_sawah_panen]);
             let hibrida_lahan_sawah_tanam = getSum([hibrida_bantuan_pemerintah_lahan_sawah_tanam, hibrida_non_bantuan_pemerintah_lahan_sawah_tanam]);
@@ -737,10 +689,7 @@ module.exports = {
                 jumlah_padi_lahan_bukan_sawah_puso,
             });
 
-            await korluhPadi.update({
-                tanggal,
-                ...obj,
-            });
+            await korluhPadi.update(obj);
 
             await transaction.commit();
 
