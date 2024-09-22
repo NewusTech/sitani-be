@@ -1,7 +1,7 @@
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
+const { Desa, User } = require('../models');
 const { response } = require('../helpers');
-const { Desa } = require('../models');
 
 const v = new Validator();
 
@@ -10,15 +10,32 @@ module.exports = {
         try {
             let { kecamatan } = req.query;
 
+            kecamatan = !isNaN(parseInt(kecamatan)) ? parseInt(kecamatan) : null;
+
             let where = {};
 
-            if (kecamatan && !isNaN(parseInt(kecamatan))) {
+            if (kecamatan) {
                 where.kecamatanId = parseInt(kecamatan);
             }
 
+            if (req?.root?.userId) {
+                const user = await User.findByPk(req.root.userId, {
+                    include: [
+                        {
+                            model: Desa,
+                            as: 'desas'
+                        }
+                    ]
+                });
+
+                if (user?.desas?.length) {
+                    where.id = user.desas[0].id;
+                }
+            }
+
             const desa = await Desa.findAll({
+                order: [['nama', 'ASC']],
                 where,
-                order: [['nama', 'ASC']]
             });
 
             res.status(200).json(response(200, 'Get desa successfully', desa));
