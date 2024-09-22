@@ -52,19 +52,28 @@ const checkPermissionAndLogout = (allowPermission) => async (req, res, next) => 
     });
 };
 
-const checkRoles = () => async (req, res, next) => {
-    let token;
+const checkUserOrPass = () => async (req, res, next) => {
+    let token = null;
     try {
         token = req.headers.authorization.split(' ')[1];
     } catch (err) {
     }
 
-    jwt.verify(token, baseConfig.auth_secret, async (err, decoded) => {
-        data = decoded;
-        next();
-    });
+    if (token?.length) {
+        jwt.verify(token, baseConfig.auth_secret, async (err, decoded) => {
+            if (decoded?.sub && !err) {
+                const user = await User.findOne({ where: { id: decoded.sub } });
+
+                if (user?.id) {
+                    req.root = { userId: user.id };
+                }
+            }
+        });
+    }
+    next();
 };
 
 module.exports = {
-    checkPermissionAndLogout, checkRoles
+    checkPermissionAndLogout,
+    checkUserOrPass,
 };
