@@ -66,7 +66,7 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
         ]) {
             sum[index] = sum[index] !== undefined ? sum[index] : null;
             if (item[index]) {
-                sum[index] = sum[index] ? sum[index] + item[index] : item[index];
+                sum[index] = sum[index] ? Number(sum[index]) + Number(item[index]) : Number(item[index]);
             }
         }
     });
@@ -211,6 +211,8 @@ const getSum = async (bulan, kecamatan = undefined) => {
 }
 
 module.exports = {
+    dataMap, combineData, getSum,
+
     kecVal: async (req, res) => {
         const transaction = await sequelize.transaction();
 

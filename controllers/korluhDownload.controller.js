@@ -1,4 +1,5 @@
 const { KorluhPadi, Kecamatan, Desa, sequelize } = require('../models');
+const PADI = require('./validasiKorluhPadi.controller');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
@@ -6,199 +7,6 @@ const { Op } = require('sequelize');
 const exceljs = require('exceljs');
 
 const v = new Validator();
-
-const dataMap = (data, date = undefined, kecamatan = undefined) => {
-    let sum = {};
-
-    data.forEach(item => {
-        for (let index of [
-            "hibrida_bantuan_pemerintah_lahan_sawah_panen",
-            "hibrida_bantuan_pemerintah_lahan_sawah_tanam",
-            "hibrida_bantuan_pemerintah_lahan_sawah_puso",
-            "hibrida_non_bantuan_pemerintah_lahan_sawah_panen",
-            "hibrida_non_bantuan_pemerintah_lahan_sawah_tanam",
-            "hibrida_non_bantuan_pemerintah_lahan_sawah_puso",
-            "unggul_bantuan_pemerintah_lahan_sawah_panen",
-            "unggul_bantuan_pemerintah_lahan_sawah_tanam",
-            "unggul_bantuan_pemerintah_lahan_sawah_puso",
-            "unggul_bantuan_pemerintah_lahan_bukan_sawah_panen",
-            "unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam",
-            "unggul_bantuan_pemerintah_lahan_bukan_sawah_puso",
-            "unggul_non_bantuan_pemerintah_lahan_sawah_panen",
-            "unggul_non_bantuan_pemerintah_lahan_sawah_tanam",
-            "unggul_non_bantuan_pemerintah_lahan_sawah_puso",
-            "unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen",
-            "unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam",
-            "unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso",
-            "lokal_lahan_sawah_panen",
-            "lokal_lahan_sawah_tanam",
-            "lokal_lahan_sawah_puso",
-            "lokal_lahan_bukan_sawah_panen",
-            "lokal_lahan_bukan_sawah_tanam",
-            "lokal_lahan_bukan_sawah_puso",
-            "sawah_irigasi_lahan_sawah_panen",
-            "sawah_irigasi_lahan_sawah_tanam",
-            "sawah_irigasi_lahan_sawah_puso",
-            "sawah_tadah_hujan_lahan_sawah_panen",
-            "sawah_tadah_hujan_lahan_sawah_tanam",
-            "sawah_tadah_hujan_lahan_sawah_puso",
-            "sawah_rawa_pasang_surut_lahan_sawah_panen",
-            "sawah_rawa_pasang_surut_lahan_sawah_tanam",
-            "sawah_rawa_pasang_surut_lahan_sawah_puso",
-            "sawah_rawa_lebak_lahan_sawah_panen",
-            "sawah_rawa_lebak_lahan_sawah_tanam",
-            "sawah_rawa_lebak_lahan_sawah_puso",
-
-            "hibrida_lahan_sawah_panen",
-            "hibrida_lahan_sawah_tanam",
-            "hibrida_lahan_sawah_puso",
-            "unggul_lahan_sawah_panen",
-            "unggul_lahan_sawah_tanam",
-            "unggul_lahan_sawah_puso",
-            "unggul_lahan_bukan_sawah_panen",
-            "unggul_lahan_bukan_sawah_tanam",
-            "unggul_lahan_bukan_sawah_puso",
-            "jumlah_padi_lahan_sawah_panen",
-            "jumlah_padi_lahan_sawah_tanam",
-            "jumlah_padi_lahan_sawah_puso",
-            "jumlah_padi_lahan_bukan_sawah_panen",
-            "jumlah_padi_lahan_bukan_sawah_tanam",
-            "jumlah_padi_lahan_bukan_sawah_puso",
-        ]) {
-            sum[index] = sum[index] !== undefined ? sum[index] : null;
-            if (item[index]) {
-                sum[index] = sum[index] ? sum[index] + item[index] : item[index];
-            }
-        }
-    });
-
-    if (date !== undefined) {
-        return {
-            bulan: date.getMonth() + 1,
-            tahun: date.getFullYear(),
-            kecamatanId: kecamatan?.id,
-            kecamatan: kecamatan?.nama,
-            ...sum,
-        }
-    }
-    return sum;
-}
-
-const combineData = (current, before) => {
-    if (before === 0) {
-        return {
-            bulan_lalu_hibrida_bantuan_pemerintah_lahan_sawah: 0,
-            bulan_lalu_hibrida_non_bantuan_pemerintah_lahan_sawah: 0,
-            bulan_lalu_unggul_bantuan_pemerintah_lahan_sawah: 0,
-            bulan_lalu_unggul_bantuan_pemerintah_lahan_bukan_sawah: 0,
-            bulan_lalu_unggul_non_bantuan_pemerintah_lahan_sawah: 0,
-            bulan_lalu_unggul_non_bantuan_pemerintah_lahan_bukan_sawah: 0,
-            bulan_lalu_lokal_lahan_sawah: 0,
-            bulan_lalu_lokal_lahan_bukan_sawah: 0,
-            bulan_lalu_sawah_irigasi_lahan_sawah: 0,
-            bulan_lalu_sawah_tadah_hujan_lahan_sawah: 0,
-            bulan_lalu_sawah_rawa_pasang_surut_lahan_sawah: 0,
-            bulan_lalu_sawah_rawa_lebak_lahan_sawah: 0,
-
-            bulan_lalu_hibrida_lahan_sawah: 0,
-            bulan_lalu_unggul_lahan_sawah: 0,
-            bulan_lalu_unggul_lahan_bukan_sawah: 0,
-            bulan_lalu_jumlah_padi_lahan_sawah: 0,
-            bulan_lalu_jumlah_padi_lahan_bukan_sawah: 0,
-
-            akhir_hibrida_bantuan_pemerintah_lahan_sawah: current.hibrida_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_bantuan_pemerintah_lahan_sawah_puso,
-            akhir_hibrida_non_bantuan_pemerintah_lahan_sawah: current.hibrida_non_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_non_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_non_bantuan_pemerintah_lahan_sawah_puso,
-            akhir_unggul_bantuan_pemerintah_lahan_sawah: current.unggul_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_sawah_puso,
-            akhir_unggul_bantuan_pemerintah_lahan_bukan_sawah: current.unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_bukan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_bukan_sawah_puso,
-            akhir_unggul_non_bantuan_pemerintah_lahan_sawah: current.unggul_non_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_non_bantuan_pemerintah_lahan_sawah_panen - current.unggul_non_bantuan_pemerintah_lahan_sawah_puso,
-            akhir_unggul_non_bantuan_pemerintah_lahan_bukan_sawah: current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam - current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen - current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso,
-            akhir_lokal_lahan_sawah: current.lokal_lahan_sawah_tanam - current.lokal_lahan_sawah_panen - current.lokal_lahan_sawah_puso,
-            akhir_lokal_lahan_bukan_sawah: current.lokal_lahan_bukan_sawah_tanam - current.lokal_lahan_bukan_sawah_panen - current.lokal_lahan_bukan_sawah_puso,
-            akhir_sawah_irigasi_lahan_sawah: current.sawah_irigasi_lahan_sawah_tanam - current.sawah_irigasi_lahan_sawah_panen - current.sawah_irigasi_lahan_sawah_puso,
-            akhir_sawah_tadah_hujan_lahan_sawah: current.sawah_tadah_hujan_lahan_sawah_tanam - current.sawah_tadah_hujan_lahan_sawah_panen - current.sawah_tadah_hujan_lahan_sawah_puso,
-            akhir_sawah_rawa_pasang_surut_lahan_sawah: current.sawah_rawa_pasang_surut_lahan_sawah_tanam - current.sawah_rawa_pasang_surut_lahan_sawah_panen - current.sawah_rawa_pasang_surut_lahan_sawah_puso,
-            akhir_sawah_rawa_lebak_lahan_sawah: current.sawah_rawa_lebak_lahan_sawah_tanam - current.sawah_rawa_lebak_lahan_sawah_panen - current.sawah_rawa_lebak_lahan_sawah_puso,
-
-            akhir_hibrida_lahan_sawah: current.hibrida_lahan_sawah_tanam - current.hibrida_lahan_sawah_panen - current.hibrida_lahan_sawah_puso,
-            akhir_unggul_lahan_sawah: current.unggul_lahan_sawah_tanam - current.unggul_lahan_sawah_panen - current.unggul_lahan_sawah_puso,
-            akhir_unggul_lahan_bukan_sawah: current.unggul_lahan_bukan_sawah_tanam - current.unggul_lahan_bukan_sawah_panen - current.unggul_lahan_bukan_sawah_puso,
-            akhir_jumlah_padi_lahan_sawah: current.jumlah_padi_lahan_sawah_tanam - current.jumlah_padi_lahan_sawah_panen - current.jumlah_padi_lahan_sawah_puso,
-            akhir_jumlah_padi_lahan_bukan_sawah: current.jumlah_padi_lahan_bukan_sawah_tanam - current.jumlah_padi_lahan_bukan_sawah_panen - current.jumlah_padi_lahan_bukan_sawah_puso,
-
-            ...current,
-        };
-    }
-    return {
-        bulan_lalu_hibrida_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_bantuan_pemerintah_lahan_sawah,
-        bulan_lalu_hibrida_non_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_non_bantuan_pemerintah_lahan_sawah,
-        bulan_lalu_unggul_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_sawah,
-        bulan_lalu_unggul_bantuan_pemerintah_lahan_bukan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_bukan_sawah,
-        bulan_lalu_unggul_non_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_non_bantuan_pemerintah_lahan_sawah,
-        bulan_lalu_unggul_non_bantuan_pemerintah_lahan_bukan_sawah: before.akhir_unggul_non_bantuan_pemerintah_lahan_bukan_sawah,
-        bulan_lalu_lokal_lahan_sawah: before.akhir_lokal_lahan_sawah,
-        bulan_lalu_lokal_lahan_bukan_sawah: before.akhir_lokal_lahan_bukan_sawah,
-        bulan_lalu_sawah_irigasi_lahan_sawah: before.akhir_sawah_irigasi_lahan_sawah,
-        bulan_lalu_sawah_tadah_hujan_lahan_sawah: before.akhir_sawah_tadah_hujan_lahan_sawah,
-        bulan_lalu_sawah_rawa_pasang_surut_lahan_sawah: before.akhir_sawah_rawa_pasang_surut_lahan_sawah,
-        bulan_lalu_sawah_rawa_lebak_lahan_sawah: before.akhir_sawah_rawa_lebak_lahan_sawah,
-
-        bulan_lalu_hibrida_lahan_sawah: before.akhir_hibrida_lahan_sawah,
-        bulan_lalu_unggul_lahan_sawah: before.akhir_unggul_lahan_sawah,
-        bulan_lalu_unggul_lahan_bukan_sawah: before.akhir_unggul_lahan_bukan_sawah,
-        bulan_lalu_jumlah_padi_lahan_sawah: before.akhir_jumlah_padi_lahan_sawah,
-        bulan_lalu_jumlah_padi_lahan_bukan_sawah: before.akhir_jumlah_padi_lahan_bukan_sawah,
-
-        akhir_hibrida_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_bantuan_pemerintah_lahan_sawah + current.hibrida_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_bantuan_pemerintah_lahan_sawah_puso,
-        akhir_hibrida_non_bantuan_pemerintah_lahan_sawah: before.akhir_hibrida_non_bantuan_pemerintah_lahan_sawah + current.hibrida_non_bantuan_pemerintah_lahan_sawah_tanam - current.hibrida_non_bantuan_pemerintah_lahan_sawah_panen - current.hibrida_non_bantuan_pemerintah_lahan_sawah_puso,
-        akhir_unggul_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_sawah + current.unggul_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_sawah_puso,
-        akhir_unggul_bantuan_pemerintah_lahan_bukan_sawah: before.akhir_unggul_bantuan_pemerintah_lahan_bukan_sawah + current.unggul_bantuan_pemerintah_lahan_bukan_sawah_tanam - current.unggul_bantuan_pemerintah_lahan_bukan_sawah_panen - current.unggul_bantuan_pemerintah_lahan_bukan_sawah_puso,
-        akhir_unggul_non_bantuan_pemerintah_lahan_sawah: before.akhir_unggul_non_bantuan_pemerintah_lahan_sawah + current.unggul_non_bantuan_pemerintah_lahan_sawah_tanam - current.unggul_non_bantuan_pemerintah_lahan_sawah_panen - current.unggul_non_bantuan_pemerintah_lahan_sawah_puso,
-        akhir_unggul_non_bantuan_pemerintah_lahan_bukan_sawah: before.akhir_unggul_non_bantuan_pemerintah_lahan_bukan_sawah + current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_tanam - current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_panen - current.unggul_non_bantuan_pemerintah_lahan_bukan_sawah_puso,
-        akhir_lokal_lahan_sawah: before.akhir_lokal_lahan_sawah + current.lokal_lahan_sawah_tanam - current.lokal_lahan_sawah_panen - current.lokal_lahan_sawah_puso,
-        akhir_lokal_lahan_bukan_sawah: before.akhir_lokal_lahan_bukan_sawah + current.lokal_lahan_bukan_sawah_tanam - current.lokal_lahan_bukan_sawah_panen - current.lokal_lahan_bukan_sawah_puso,
-        akhir_sawah_irigasi_lahan_sawah: before.akhir_sawah_irigasi_lahan_sawah + current.sawah_irigasi_lahan_sawah_tanam - current.sawah_irigasi_lahan_sawah_panen - current.sawah_irigasi_lahan_sawah_puso,
-        akhir_sawah_tadah_hujan_lahan_sawah: before.akhir_sawah_tadah_hujan_lahan_sawah + current.sawah_tadah_hujan_lahan_sawah_tanam - current.sawah_tadah_hujan_lahan_sawah_panen - current.sawah_tadah_hujan_lahan_sawah_puso,
-        akhir_sawah_rawa_pasang_surut_lahan_sawah: before.akhir_sawah_rawa_pasang_surut_lahan_sawah + current.sawah_rawa_pasang_surut_lahan_sawah_tanam - current.sawah_rawa_pasang_surut_lahan_sawah_panen - current.sawah_rawa_pasang_surut_lahan_sawah_puso,
-        akhir_sawah_rawa_lebak_lahan_sawah: before.akhir_sawah_rawa_lebak_lahan_sawah + current.sawah_rawa_lebak_lahan_sawah_tanam - current.sawah_rawa_lebak_lahan_sawah_panen - current.sawah_rawa_lebak_lahan_sawah_puso,
-
-        akhir_hibrida_lahan_sawah: before.akhir_hibrida_lahan_sawah + current.hibrida_lahan_sawah_tanam - current.hibrida_lahan_sawah_panen - current.hibrida_lahan_sawah_puso,
-        akhir_unggul_lahan_sawah: before.akhir_unggul_lahan_sawah + current.unggul_lahan_sawah_tanam - current.unggul_lahan_sawah_panen - current.unggul_lahan_sawah_puso,
-        akhir_unggul_lahan_bukan_sawah: before.akhir_unggul_lahan_bukan_sawah + current.unggul_lahan_bukan_sawah_tanam - current.unggul_lahan_bukan_sawah_panen - current.unggul_lahan_bukan_sawah_puso,
-        akhir_jumlah_padi_lahan_sawah: before.akhir_jumlah_padi_lahan_sawah + current.jumlah_padi_lahan_sawah_tanam - current.jumlah_padi_lahan_sawah_panen - current.jumlah_padi_lahan_sawah_puso,
-        akhir_jumlah_padi_lahan_bukan_sawah: before.akhir_jumlah_padi_lahan_bukan_sawah + current.jumlah_padi_lahan_bukan_sawah_tanam - current.jumlah_padi_lahan_bukan_sawah_panen - current.jumlah_padi_lahan_bukan_sawah_puso,
-
-        ...current,
-    };
-}
-
-const getSum = async (bulan, kecamatan = undefined) => {
-    let where = {};
-
-    if (kecamatan !== undefined) {
-        where.kecamatanId = kecamatan;
-    }
-
-    let data = await KorluhPadi.findAll({
-        where: {
-            ...where,
-            [Op.and]: [
-                sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
-                sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
-            ]
-        }
-    });
-
-    if (data.length > 0) {
-        bulan.setMonth(bulan.getMonth() - 1);
-
-        before = await getSum(bulan, kecamatan);
-        data = dataMap(data);
-
-        return combineData(data, before);
-    }
-
-    return 0;
-}
 
 module.exports = {
     padi: async (req, res) => {
@@ -226,13 +34,13 @@ module.exports = {
             if (current.length) {
                 let temp = [];
 
-                current = dataMap(current, bulan, kec);
+                current = PADI.dataMap(current, bulan, kec);
 
                 bulan.setMonth(bulan.getMonth() - 1);
 
-                before = await getSum(bulan, kecamatan);
+                before = await PADI.getSum(bulan, kecamatan);
 
-                current = combineData(current, before);
+                current = PADI.combineData(current, before);
 
                 const workbook = new exceljs.Workbook();
                 const worksheet = workbook.addWorksheet("Laporan Luas Tanaman Padi");
