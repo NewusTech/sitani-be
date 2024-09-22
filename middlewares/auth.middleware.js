@@ -59,18 +59,16 @@ const checkUserOrPass = () => async (req, res, next) => {
     } catch (err) {
     }
 
-    if (token?.length) {
-        jwt.verify(token, baseConfig.auth_secret, async (err, decoded) => {
-            if (decoded?.sub && !err) {
-                const user = await User.findOne({ where: { id: decoded.sub } });
+    jwt.verify(token, baseConfig.auth_secret, async (err, decoded) => {
+        if (decoded?.sub && !err) {
+            const user = await User.findOne({ where: { id: decoded.sub } });
 
-                if (user?.id) {
-                    req.root = { userId: user.id };
-                }
+            if (user?.id) {
+                req.root = { userId: user.id };
             }
-        });
-    }
-    next();
+        }
+        next();
+    });
 };
 
 module.exports = {
