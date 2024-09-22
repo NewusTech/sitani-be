@@ -59,16 +59,23 @@ const checkUserOrPass = () => async (req, res, next) => {
     } catch (err) {
     }
 
-    jwt.verify(token, baseConfig.auth_secret, async (err, decoded) => {
-        if (decoded?.sub && !err) {
+    if (token?.length) {
+        jwt.verify(token, baseConfig.auth_secret, async (err, decoded) => {
+            if (err) {
+                res.status(403).json(response(403, 'Unauthorized: token expired or invalid'));
+                return;
+            }
+
             const user = await User.findOne({ where: { id: decoded.sub } });
 
             if (user?.id) {
                 req.root = { userId: user.id };
             }
-        }
+            next();
+        });
+    } else {
         next();
-    });
+    }
 };
 
 module.exports = {
