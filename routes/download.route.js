@@ -22,6 +22,7 @@ route.get(prefix + '/kepang-produsen-eceran', kepangDownloadController.produsenE
 route.get(prefix + '/kepang-cv-produksi', kepangDownloadController.cvProduksi);
 route.get(prefix + '/kepang-cv-produsen', kepangDownloadController.cvProdusen);
 
+route.get(prefix + '/korluh-palawija', korluhDownloadController.palawija);
 route.get(prefix + '/korluh-padi', korluhDownloadController.padi);
 
 route.get(prefix + '/psp-penerima-uppo', pspDownloadController.penerimaUppo);

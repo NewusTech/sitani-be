@@ -1,8 +1,16 @@
-const { KorluhPadi, Kecamatan, Desa, sequelize } = require('../models');
+const {
+    KorluhMasterPalawija,
+    KorluhPalawijaList,
+    KorluhPalawija,
+    KorluhPadi,
+    Kecamatan,
+    sequelize
+} = require('../models');
+const PALAWIJA = require('./validasiKorluhPalawija.controller');
 const PADI = require('./validasiKorluhPadi.controller');
+const { response, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 const exceljs = require('exceljs');
 
@@ -388,6 +396,337 @@ module.exports = {
             }
 
             res.status(404).json(response(404, 'Data korluh padi not found'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    palawija: async (req, res) => {
+        try {
+            let { kecamatan, bulan } = req.query;
+
+            monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+            kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
+            bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
+
+            const kec = await Kecamatan.findByPk(kecamatan);
+
+            let current = await KorluhPalawija.findAll({
+                include: [
+                    {
+                        model: KorluhPalawijaList,
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterPalawija,
+                                as: 'master'
+                            }
+                        ]
+                    }
+                ],
+                where: {
+                    kecamatanId: kecamatan,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
+                    ]
+                }
+            });
+
+            if (current.length) {
+                let temp = [];
+
+                current = PALAWIJA.dataMap(current, bulan, kec);
+
+                bulan.setMonth(bulan.getMonth() - 1);
+
+                before = await PALAWIJA.getSum(bulan, kecamatan);
+
+                current = PALAWIJA.combineData(current, before);
+
+                const workbook = new exceljs.Workbook();
+                const worksheet = workbook.addWorksheet("Laporan Luas Tanaman Palawija");
+
+                const bulans = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+                for (let i = 1; i <= 51; i++) {
+                    temp.push({ width: 5 });
+                }
+                worksheet.columns = temp;
+
+                worksheet.getCell('A1').value = `BADAN PUSAT STATISTIK`;
+                worksheet.getCell('A2').value = `DAN`;
+                worksheet.getCell('A3').value = `KEMENTRIAN PERTANIAN`;
+
+                ['1', '2', '3'].forEach(i => {
+                    worksheet.mergeCells(`A${i}:E${i}`);
+                    worksheet.getCell(`A${i}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                })
+
+                worksheet.getCell('F3').value = `LAPORAN LUAS TANAMAN PALAWIJA`;
+
+                worksheet.getCell('F3').font = {
+                    bold: true,
+                };
+                ['3'].forEach(i => {
+                    worksheet.mergeCells(`F${i}:AT${i}`);
+                    worksheet.getCell(`F${i}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                })
+
+                worksheet.getCell('AU3').value = `SP-PALAWIJA`;
+
+                worksheet.getCell('AU3').font = {
+                    bold: true,
+                };
+                worksheet.mergeCells(`AU3:AY3`);
+                worksheet.getCell(`AU3`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+                worksheet.getCell('A5').value = `PROVINSI`;
+                worksheet.getCell('A6').value = `KAB/KOTA`;
+                worksheet.getCell('A7').value = `KECAMATAN`;
+
+                worksheet.getCell('D5').value = `LAMPUNG`;
+                worksheet.getCell('D6').value = `LAMPUNG TIMUR`;
+                worksheet.getCell('D7').value = `${kec?.nama || ''}`;
+
+                ['I7', 'J5', 'J6', 'J7', 'K5', 'K6', 'K7'].forEach(cell => {
+                    worksheet.getCell(cell).border = {
+                        bottom: { style: 'thin', color: { argb: '00000000' } },
+                        right: { style: 'thin', color: { argb: '00000000' } },
+                        left: { style: 'thin', color: { argb: '00000000' } },
+                        top: { style: 'thin', color: { argb: '00000000' } },
+                    };
+                })
+
+                worksheet.getCell('AT6').value = `Bulan : ${bulans[bulan.getMonth()]}`;
+                worksheet.getCell('AT7').value = `Tahun : ${bulan.getFullYear()}`;
+
+                ['AX6', 'AX7', 'AY6', 'AY7'].forEach(cell => {
+                    worksheet.getCell(cell).border = {
+                        bottom: { style: 'thin', color: { argb: '00000000' } },
+                        right: { style: 'thin', color: { argb: '00000000' } },
+                        left: { style: 'thin', color: { argb: '00000000' } },
+                        top: { style: 'thin', color: { argb: '00000000' } },
+                    };
+                })
+
+                worksheet.getCell('A8').value = `No`;
+                worksheet.getCell('B8').value = `Uraian`;
+
+                worksheet.mergeCells(`A8:A9`);
+                worksheet.mergeCells(`B8:F9`);
+
+                worksheet.getCell('G8').value = `LAHAN SAWAH (Isian dalam hektar bilangan desimal satu angka di belakang koma)`;
+
+                worksheet.getCell('G9').value = `Tanaman Akhir Bulan Yang Lalu`;
+                worksheet.getCell('J9').value = `Panen *)`;
+                worksheet.getCell('M9').value = `Panen Muda **)`;
+                worksheet.getCell('P9').value = `Panen Untuk Hijauan Pakan Ternak ***)`;
+                worksheet.getCell('S9').value = `Tanam`;
+                worksheet.getCell('V9').value = `Puso/rusak`;
+                worksheet.getCell('Y9').value = `Tanaman Akhir Bulan Laporan ((3)-(4)-(5)-(6)+(7)-(8))`;
+
+                worksheet.mergeCells(`G8:AA8`);
+
+                worksheet.mergeCells(`G9:I9`);
+                worksheet.mergeCells(`J9:L9`);
+                worksheet.mergeCells(`M9:O9`);
+                worksheet.mergeCells(`P9:R9`);
+                worksheet.mergeCells(`S9:U9`);
+                worksheet.mergeCells(`V9:X9`);
+                worksheet.mergeCells(`Y9:AA9`);
+
+                worksheet.getCell('AB8').value = `LAHAN BUKAN SAWAH (Isian dalam hektar bilangan desimal satu angka di belakang koma)`;
+
+                worksheet.getCell('AB9').value = `Tanaman Akhir Bulan Yang Lalu`;
+                worksheet.getCell('AE9').value = `Panen *)`;
+                worksheet.getCell('AH9').value = `Panen Muda **)`;
+                worksheet.getCell('AK9').value = `Panen Untuk Hijauan Pakan Ternak ***)`;
+                worksheet.getCell('AN9').value = `Tanam`;
+                worksheet.getCell('AQ9').value = `Puso/rusak`;
+                worksheet.getCell('AT9').value = `Tanaman Akhir Bulan Laporan ((3)-(4)-(5)-(6)+(7)-(8))`;
+
+                worksheet.mergeCells(`AB8:AV8`);
+
+                worksheet.mergeCells(`AB9:AD9`);
+                worksheet.mergeCells(`AE9:AG9`);
+                worksheet.mergeCells(`AH9:AJ9`);
+                worksheet.mergeCells(`AK9:AM9`);
+                worksheet.mergeCells(`AN9:AP9`);
+                worksheet.mergeCells(`AQ9:AS9`);
+                worksheet.mergeCells(`AT9:AV9`);
+
+                worksheet.getCell('AW8').value = `Produksi di Lahan Sawah dan Lahan Bukan Sawah (Ton)`;
+
+                worksheet.mergeCells(`AW8:AY9`);
+
+                worksheet.getCell('A10').value = `(1)`;
+                worksheet.getCell('B10').value = `(2)`;
+
+                worksheet.getCell('G10').value = `(3)`;
+                worksheet.getCell('J10').value = `(4)`;
+                worksheet.getCell('M10').value = `(5)`;
+                worksheet.getCell('P10').value = `(6)`;
+                worksheet.getCell('S10').value = `(7)`;
+                worksheet.getCell('V10').value = `(8)`;
+                worksheet.getCell('Y10').value = `(9)`;
+
+                worksheet.getCell('AB10').value = `(10)`;
+                worksheet.getCell('AE10').value = `(11)`;
+                worksheet.getCell('AH10').value = `(12)`;
+                worksheet.getCell('AK10').value = `(13)`;
+                worksheet.getCell('AN10').value = `(14)`;
+                worksheet.getCell('AQ10').value = `(15)`;
+                worksheet.getCell('AT10').value = `(16)`;
+
+                worksheet.getCell('AW10').value = `(17)`;
+
+                [11, 17, 20, 21, 24, 25, 26, 27, 28, 29, 30].forEach((item, index) => {
+                    worksheet.getCell(`A${item}`).value = `${index + 1}.`;
+                })
+
+                temp = 11;
+                for (let x of [
+                    'JUMLAH JAGUNG',
+                    'a. Hibrida',
+                    '1). Bantuan Pemerintah',
+                    '2). Non Bantuan Pemerintah',
+                    'b. Komposit',
+                    'c. Lokal',
+                    'KEDELAI',
+                    'a. Bantuan Pemerintah',
+                    'b. Non Bantuan Pemerintah',
+                    'KACANG TANAH',
+                    'JUMLAH UBI KAYU/SINGKONG',
+                    'a. Bantuan Pemerintah',
+                    'b. Non Bantuan Pemerintah',
+                    'UBI JALAR/KETELA RAMBAT',
+                    'KACANG HIJAU',
+                    'SORGUM/CANTEL',
+                    'GANDUM',
+                    'TALAS',
+                    'GANYONG',
+                    'UMBI LAINNYA',
+                ]) {
+                    worksheet.getCell(`B${temp}`).value = `${x}`;
+                    temp++;
+                }
+
+                temp = 11;
+                columns = ['G', 'J', 'M', 'P', 'S', 'V', 'Y', 'AB', 'AE', 'AH', 'AK', 'AN', 'AQ', 'AT', 'AW'];
+                [17, 18, 1, 2, 3, 4, 19, 5, 6, 7, 20, 8, 9, 10, 11, 12, 13, 14, 15, 16].forEach(i => {
+                    if (current[i]) {
+                        const newCurrent = fixedNumber(current[i], 1);
+                        [
+                            "bulanLaluLahanSawah",
+                            "lahanSawahPanen",
+                            "lahanSawahPanenMuda",
+                            "lahanSawahPanenHijauanPakanTernak",
+                            "lahanSawahTanam",
+                            "lahanSawahPuso",
+                            "akhirLahanSawah",
+
+                            "bulanLaluLahanBukanSawah",
+                            "lahanBukanSawahPanen",
+                            "lahanBukanSawahPanenMuda",
+                            "lahanBukanSawahPanenHijauanPakanTernak",
+                            "lahanBukanSawahTanam",
+                            "lahanBukanSawahPuso",
+                            "akhirLahanBukanSawah",
+
+                            "produksi",
+                        ].forEach((j, idx) => {
+                            worksheet.getCell(`${columns[idx]}${temp}`).value = newCurrent[j] ? `${newCurrent[j]}` : '';
+                        });
+                    }
+                    temp++;
+                });
+
+                worksheet.getCell(`A${temp}`).value = `Keterangan :`;
+                worksheet.getCell(`AK${temp}`).value = `${kec?.nama || ''}, __ ${bulans[bulan.getMonth()]} ${bulan.getFullYear()}`;
+                temp++;
+                worksheet.getCell(`A${temp}`).value = `Bantuan pemerintah pada satu musim tanam/panen tahun berjalan`;
+                worksheet.getCell(`AK${temp}`).value = `Petugas Pengumpulan Data :`;
+                temp++;
+                worksheet.getCell(`A${temp}`).value = `*)`;
+                worksheet.getCell(`B${temp}`).value = `Panen untuk jagung adalah yang menghasilkan pipilan kering; untuk kedelai menghasilkan biji kering.`;
+                worksheet.getCell(`AK${temp}`).value = `1. Nama Lengkap  :`;
+                temp++;
+                worksheet.getCell(`B${temp}`).value = `Khusus untuk kacang hijau adalah luas panen yang telah dibongkar habis.`;
+                worksheet.getCell(`AK${temp}`).value = `2. Jabatan       :`;
+                temp++;
+                worksheet.getCell(`A${temp}`).value = `**)`;
+                worksheet.getCell(`B${temp}`).value = `Panen muda untuk jagung adalah yang tidak menghasilkan pipilan kering; kedelai tidak menghasilkan biji kering.`;
+                worksheet.getCell(`AK${temp}`).value = `3. NIP           :`;
+                temp++;
+                worksheet.getCell(`A${temp}`).value = `***)`;
+                worksheet.getCell(`B${temp}`).value = `Seluruh bagian tanaman jagung (daun, batang dan buah) dipanen/digunakan untuk pakan ternak`;
+                worksheet.getCell(`AK${temp}`).value = `4. No. Telp/HP   :`;
+                temp += 2;
+                worksheet.getCell(`AK${temp}`).value = `5. Tanda Tangan  :`;
+
+                for (let i = 8; i <= 30; i++) {
+                    for (let j = 'A'.charCodeAt(0); j <= 'Z'.charCodeAt(0); j++) {
+                        let cell = `${String.fromCharCode(j)}${i}`;
+                        worksheet.getCell(cell).border = {
+                            bottom: { style: 'thin', color: { argb: '00000000' } },
+                            right: { style: 'thin', color: { argb: '00000000' } },
+                            left: { style: 'thin', color: { argb: '00000000' } },
+                            top: { style: 'thin', color: { argb: '00000000' } },
+                        };
+                        if ((j < 'B'.charCodeAt(0) || j > 'F'.charCodeAt(0)) || i <= 10) {
+                            worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
+                        }
+                    }
+                    for (let j = 'A'.charCodeAt(0); j <= 'W'.charCodeAt(0); j++) {
+                        let cell = `A${String.fromCharCode(j)}${i}`;
+                        worksheet.getCell(cell).border = {
+                            bottom: { style: 'thin', color: { argb: '00000000' } },
+                            right: { style: 'thin', color: { argb: '00000000' } },
+                            left: { style: 'thin', color: { argb: '00000000' } },
+                            top: { style: 'thin', color: { argb: '00000000' } },
+                        };
+                        worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
+                    if (i >= 10) {
+                        worksheet.mergeCells(`B${i}:F${i}`);
+
+                        worksheet.mergeCells(`G${i}:I${i}`);
+                        worksheet.mergeCells(`J${i}:L${i}`);
+                        worksheet.mergeCells(`M${i}:O${i}`);
+                        worksheet.mergeCells(`P${i}:R${i}`);
+                        worksheet.mergeCells(`S${i}:U${i}`);
+                        worksheet.mergeCells(`V${i}:X${i}`);
+                        worksheet.mergeCells(`Y${i}:AA${i}`);
+
+                        worksheet.mergeCells(`AB${i}:AD${i}`);
+                        worksheet.mergeCells(`AE${i}:AG${i}`);
+                        worksheet.mergeCells(`AH${i}:AJ${i}`);
+                        worksheet.mergeCells(`AK${i}:AM${i}`);
+                        worksheet.mergeCells(`AN${i}:AP${i}`);
+                        worksheet.mergeCells(`AQ${i}:AS${i}`);
+                        worksheet.mergeCells(`AT${i}:AV${i}`);
+
+                        worksheet.mergeCells(`AW${i}:AY${i}`);
+                    }
+                }
+
+                res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                res.setHeader("Content-Disposition", "attachment; filename=" + "laporan-luas-tanaman-palawija.xlsx");
+
+                workbook.xlsx.write(res).then(() => res.end());
+                return;
+            }
+
+            res.status(404).json(response(404, 'Data korluh palawija not found'));
         } catch (err) {
             console.log(err);
 
