@@ -1,15 +1,38 @@
+const { Kecamatan, User } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
-const { Kecamatan } = require('../models');
 
 const v = new Validator();
 
 module.exports = {
     getAll: async (req, res) => {
         try {
+            let userKecId = null;
+            let where = {};
+
+            if (req?.root?.userId) {
+                const user = await User.findByPk(req.root.userId, {
+                    include: [
+                        {
+                            model: Kecamatan,
+                            as: 'kecamatans'
+                        }
+                    ]
+                });
+
+                if (user?.kecamatans?.length) {
+                    userKecId = user.kecamatans[0].id;
+                }
+            }
+
+            if (userKecId) {
+                where.id = userKecId;
+            }
+
             const kecamatan = await Kecamatan.findAll({
-                order: [['nama', 'ASC']]
+                order: [['nama', 'ASC']],
+                where,
             });
 
             res.status(200).json(response(200, 'Get kecamatan successfully', kecamatan));
