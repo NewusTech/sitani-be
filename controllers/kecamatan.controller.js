@@ -8,7 +8,6 @@ const v = new Validator();
 module.exports = {
     getAll: async (req, res) => {
         try {
-            let userKecId = null;
             let where = {};
 
             if (req?.root?.userId) {
@@ -22,12 +21,8 @@ module.exports = {
                 });
 
                 if (user?.kecamatans?.length) {
-                    userKecId = user.kecamatans[0].id;
+                    where.id = user.kecamatans[0].id;
                 }
-            }
-
-            if (userKecId) {
-                where.id = userKecId;
             }
 
             const kecamatan = await Kecamatan.findAll({
@@ -49,7 +44,25 @@ module.exports = {
 
     getOne: async (req, res) => {
         try {
-            const { id } = req.params;
+            let { id } = req.params;
+
+            if (req?.root?.userId) {
+                const user = await User.findByPk(req.root.userId, {
+                    include: [
+                        {
+                            model: Kecamatan,
+                            as: 'kecamatans'
+                        }
+                    ]
+                });
+
+                if (user?.kecamatans?.length) {
+                    if (id !== String(user.kecamatans[0].id)) {
+                        res.status(404).json(response(404, 'Kecamatan not found'));
+                        return;
+                    }
+                }
+            }
 
             const kecamatan = await Kecamatan.findByPk(id);
 

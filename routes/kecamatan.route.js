@@ -6,8 +6,8 @@ const route = express.Router();
 
 let prefix = '/kecamatan';
 /* -- ROUTE -- */
-route.get(prefix + '/get', [mid.checkUserOrPass([])], kecamatanController.getAll);
-route.get(prefix + '/get/:id', kecamatanController.getOne);
+route.get(prefix + '/get', [mid.checkUserOrPass()], kecamatanController.getAll);
+route.get(prefix + '/get/:id', [mid.checkUserOrPass()], kecamatanController.getOne);
 /* -- ROUTE -- */
 
 module.exports = route;
