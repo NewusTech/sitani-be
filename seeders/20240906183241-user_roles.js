@@ -20,6 +20,7 @@ module.exports = {
                 user_id: i,
             })
         }
+        dataList.push({ role_id: 9, user_id: 12 }, { role_id: 9, user_id: 13 }, { role_id: 10, user_id: 14 }, { role_id: 10, user_id: 15 });
 
         await queryInterface.bulkInsert({ tableName: "user_roles" }, dataList, {});
     },

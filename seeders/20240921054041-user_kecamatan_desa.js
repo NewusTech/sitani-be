@@ -20,8 +20,28 @@ module.exports = {
             },
             {
                 user_id: 10,
-                desa_id: 1,
+                desa_id: null,
                 kecamatan_id: 1,
+            },
+            {
+                user_id: 12,
+                desa_id: 8,
+                kecamatan_id: 2,
+            },
+            {
+                user_id: 13,
+                desa_id: 25,
+                kecamatan_id: 3,
+            },
+            {
+                user_id: 14,
+                desa_id: null,
+                kecamatan_id: 2,
+            },
+            {
+                user_id: 15,
+                desa_id: null,
+                kecamatan_id: 3,
             },
         ];
 
