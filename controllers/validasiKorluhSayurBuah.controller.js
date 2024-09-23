@@ -339,11 +339,11 @@ module.exports = {
                 }
             });
 
-            if (validasiKorluhSayurBuahCount < count(kecamatanIds)) {
+            if (validasiKorluhSayurBuahCount < kecamatanIds.length) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'invalid',
-                        message: `Action failed because ${count(kecamatanIds) - validasiKorluhSayurBuahCount} kecamatan had not validated`,
+                        message: `Action failed because ${kecamatanIds.length - validasiKorluhSayurBuahCount} kecamatan had not validated`,
                         field: 'bulan',
                     },
                 ]));
