@@ -138,6 +138,8 @@ const getSum = async (bulan, kecamatan = undefined) => {
 }
 
 module.exports = {
+    dataMap, combineData, getSum,
+
     kecVal: async (req, res) => {
         const transaction = await sequelize.transaction();
 

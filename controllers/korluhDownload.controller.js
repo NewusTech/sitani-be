@@ -1,11 +1,15 @@
 const {
+    KorluhMasterSayurBuah,
     KorluhMasterPalawija,
+    KorluhSayurBuahList,
     KorluhPalawijaList,
+    KorluhSayurBuah,
     KorluhPalawija,
     KorluhPadi,
     Kecamatan,
     sequelize
 } = require('../models');
+const SAYURBUAH = require('./validasiKorluhSayurBuah.controller');
 const PALAWIJA = require('./validasiKorluhPalawija.controller');
 const PADI = require('./validasiKorluhPadi.controller');
 const { response, fixedNumber } = require('../helpers');
@@ -729,6 +733,335 @@ module.exports = {
             }
 
             res.status(404).json(response(404, 'Data korluh palawija not found'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    sayurBuah: async (req, res) => {
+        try {
+            let { kecamatan, bulan } = req.query;
+
+            monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+            kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
+            bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
+
+            const kec = await Kecamatan.findByPk(kecamatan);
+
+            let current = await KorluhSayurBuah.findAll({
+                include: [
+                    {
+                        model: KorluhSayurBuahList,
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterSayurBuah,
+                                as: 'master'
+                            }
+                        ]
+                    }
+                ],
+                where: {
+                    kecamatanId: kecamatan,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
+                    ]
+                }
+            });
+
+            if (current.length) {
+                let temp = [];
+
+                current = SAYURBUAH.dataMap(current, bulan, kec);
+
+                bulan.setMonth(bulan.getMonth() - 1);
+
+                before = await SAYURBUAH.getSum(bulan, kecamatan);
+
+                current = SAYURBUAH.combineData(current, before);
+
+                const workbook = new exceljs.Workbook();
+                const worksheet = workbook.addWorksheet("Laporan Luas Tanaman Sayur Dan Buah");
+
+                const bulans = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                bulan.setMonth(bulan.getMonth() + 1);
+
+                for (let i = 1; i <= 41; i++) {
+                    temp.push({ width: 5 });
+                }
+                worksheet.columns = temp;
+
+                worksheet.getCell('A1').value = `BADAN PUSAT STATISTIK`;
+                worksheet.getCell('A2').value = `DAN`;
+                worksheet.getCell('A3').value = `KEMENTRIAN PERTANIAN`;
+
+                ['1', '2', '3'].forEach(i => {
+                    worksheet.mergeCells(`A${i}:E${i}`);
+                    worksheet.getCell(`A${i}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                })
+
+                worksheet.getCell('F3').value = `LAPORAN TANAMAN SAYURAN DAN BUAH-BUAHAN SEMUSIM`;
+                worksheet.getCell('F4').value = `(Isian dalam bilangan desimal dengan 2 angka di belakang koma)`;
+
+                worksheet.getCell('F3').font = {
+                    bold: true,
+                };
+                [3, 4].forEach(i => {
+                    worksheet.mergeCells(`F${i}:AJ${i}`);
+                    worksheet.getCell(`F${i}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                })
+
+                worksheet.getCell('AK3').value = `SPH-SBS`;
+
+                worksheet.getCell('AK3').font = {
+                    bold: true,
+                };
+                worksheet.mergeCells(`AK3:AO3`);
+                worksheet.getCell(`AK3`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+                worksheet.getCell('A5').value = `PROVINSI`;
+                worksheet.getCell('A6').value = `KAB/KOTA`;
+                worksheet.getCell('A7').value = `KECAMATAN`;
+
+                worksheet.getCell('D5').value = `LAMPUNG`;
+                worksheet.getCell('D6').value = `LAMPUNG TIMUR`;
+                worksheet.getCell('D7').value = `${kec?.nama || ''}`;
+
+                ['I7', 'J5', 'J6', 'J7', 'K5', 'K6', 'K7'].forEach(cell => {
+                    worksheet.getCell(cell).border = {
+                        bottom: { style: 'thin', color: { argb: '00000000' } },
+                        right: { style: 'thin', color: { argb: '00000000' } },
+                        left: { style: 'thin', color: { argb: '00000000' } },
+                        top: { style: 'thin', color: { argb: '00000000' } },
+                    };
+                })
+
+                worksheet.getCell('AJ6').value = `Bulan : ${bulans[bulan.getMonth()]}`;
+                worksheet.getCell('AJ7').value = `Tahun : ${bulan.getFullYear()}`;
+
+                ['AN6', 'AN7', 'AO6', 'AO7'].forEach(cell => {
+                    worksheet.getCell(cell).border = {
+                        bottom: { style: 'thin', color: { argb: '00000000' } },
+                        right: { style: 'thin', color: { argb: '00000000' } },
+                        left: { style: 'thin', color: { argb: '00000000' } },
+                        top: { style: 'thin', color: { argb: '00000000' } },
+                    };
+                })
+
+                worksheet.getCell('A8').value = `No`;
+                worksheet.getCell('B8').value = `Nama Tanaman`;
+
+                worksheet.mergeCells(`A8:A9`);
+                worksheet.mergeCells(`B8:F9`);
+
+                worksheet.getCell('G8').value = `Hasil Produksi yang dicatat`;
+
+                worksheet.mergeCells(`G8:I9`);
+
+                worksheet.getCell('J8').value = `Luas Tanaman Akhir Bulan yang Lalu (Hektar)`;
+
+                worksheet.mergeCells(`J8:L9`);
+
+                worksheet.getCell('M8').value = `Luas Panen (Hektar)`;
+
+                worksheet.getCell('M9').value = `Habis / Dibongkar`;
+                worksheet.getCell('P9').value = `Belum Habis`;
+
+                worksheet.mergeCells(`M8:R8`);
+
+                worksheet.mergeCells(`M9:O9`);
+                worksheet.mergeCells(`P9:R9`);
+
+                worksheet.getCell('S8').value = `Luas Rusak / Tidak Berhasil / Puso (Hektar)`;
+
+                worksheet.mergeCells(`S8:U9`);
+
+                worksheet.getCell('V8').value = `Luas Penanaman Baru / Tambah Tanam (Hektar)`;
+
+                worksheet.mergeCells(`V8:X9`);
+
+                worksheet.getCell('Y8').value = `Luas Tanaman Akhir Bulan Laporan (Hektar) (4)-(5)-(7)+(8)`;
+
+                worksheet.mergeCells(`Y8:AA9`);
+
+                worksheet.getCell('AB8').value = `Produksi (Kuintal)`;
+
+                worksheet.getCell('AB9').value = `Dipanen Habis / Dibongkar`;
+                worksheet.getCell('AE9').value = `Belum Habis`;
+
+                worksheet.mergeCells(`AB8:AG8`);
+
+                worksheet.mergeCells(`AB9:AD9`);
+                worksheet.mergeCells(`AE9:AG9`);
+
+                worksheet.getCell('AH8').value = `Rata rata Harga Jual di petani per Kilogram (Rupiah)`;
+
+                worksheet.mergeCells(`AH8:AJ9`);
+
+                worksheet.getCell('AK8').value = `Keterangan`;
+
+                worksheet.mergeCells(`AK8:AO9`);
+
+                worksheet.getCell('A10').value = `(1)`;
+                worksheet.getCell('B10').value = `(2)`;
+
+                worksheet.getCell('G10').value = `(3)`;
+                worksheet.getCell('J10').value = `(4)`;
+
+                worksheet.getCell('M10').value = `(5)`;
+                worksheet.getCell('P10').value = `(6)`;
+
+                worksheet.getCell('S10').value = `(7)`;
+                worksheet.getCell('V10').value = `(8)`;
+                worksheet.getCell('Y10').value = `(9)`;
+
+                worksheet.getCell('AB10').value = `(10)`;
+                worksheet.getCell('AE10').value = `(11)`;
+
+                worksheet.getCell('AH10').value = `(12)`;
+                worksheet.getCell('AK10').value = `(13)`;
+
+                temp = 11;
+                [
+                    "Bawang Daun",
+                    "Bawang Merah",
+                    "Bawang Putih",
+                    "Kembang Kol",
+                    "Kentang",
+                    "Kubis",
+                    "Petsai/Sawi",
+                    "Wortel",
+                    "Bayam",
+                    "Buncis",
+                    "Cabai Besar/TW/Teropong",
+                    "Cabai Keriting",
+                    "Cabai Rawit",
+                    "Jamur Tiram*)",
+                    "Jamur Merang*)",
+                    "Jamur Lainnya*)",
+                    "Kacang Panjang",
+                    "Kangkung",
+                    "Mentimun",
+                    "Labu Siam",
+                    "Paprika",
+                    "Terung",
+                    "Tomat",
+                    "Melon",
+                    "Semangka",
+                    "Stroberi",
+                ].forEach((x, idx) => {
+                    worksheet.getCell(`A${temp}`).value = `${idx + 1}`;
+                    worksheet.getCell(`B${temp}`).value = `${x}`;
+                    temp++;
+                })
+
+                temp = 11;
+                columns = ['G', 'J', 'M', 'P', 'S', 'V', 'Y', 'AB', 'AE', 'AH', 'AK'];
+                for (let i = 1; i <= 26; i++) {
+                    if (current[i]) {
+                        const newCurrent = fixedNumber(current[i]);
+                        [
+                            "hasilProduksi",
+                            "bulanLalu",
+                            "luasPanenHabis",
+                            "luasPanenBelumHabis",
+                            "luasRusak",
+                            "luasPenanamanBaru",
+                            "akhir",
+                            "produksiHabis",
+                            "produksiBelumHabis",
+                            "rerataHarga",
+                            "keterangan",
+                        ].forEach((j, idx) => {
+                            worksheet.getCell(`${columns[idx]}${temp}`).value = newCurrent[j] ? `${newCurrent[j]}` : '';
+                        });
+                    }
+                    temp++;
+                }
+
+                worksheet.getCell(`A${temp}`).value = `Catatan`;
+                worksheet.getCell(`C${temp}`).value = `: *) Data luasan jamur diisi dengan satuan m2 (bilangan bulat), produksi dalam satuan kuintal (bilangan desimal dengan 2 angka di belakang koma)`;
+                worksheet.getCell(`AH${temp}`).value = `Petugas Pengumpul Data`;
+
+                worksheet.mergeCells(`AH${temp}:AO${temp}`);
+                worksheet.getCell(`AH${temp}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                temp++;
+
+                worksheet.getCell(`A${temp}`).value = `Tanggal`;
+                worksheet.getCell(`J${temp}`).value = `${bulans[bulan.getMonth()]} ${bulan.getFullYear()}`;
+                temp++;
+
+                worksheet.getCell(`AH${temp}`).value = `(....................)`;
+
+                worksheet.mergeCells(`AH${temp}:AO${temp}`);
+                worksheet.getCell(`AH${temp}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                temp++;
+
+                worksheet.getCell(`AH${temp}`).value = `Jabatan : ....................`;
+
+                worksheet.mergeCells(`AH${temp}:AO${temp}`);
+                worksheet.getCell(`AH${temp}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+                for (let i = 8; i <= 36; i++) {
+                    for (let j = 'A'.charCodeAt(0); j <= 'Z'.charCodeAt(0); j++) {
+                        let cell = `${String.fromCharCode(j)}${i}`;
+                        worksheet.getCell(cell).border = {
+                            bottom: { style: 'thin', color: { argb: '00000000' } },
+                            right: { style: 'thin', color: { argb: '00000000' } },
+                            left: { style: 'thin', color: { argb: '00000000' } },
+                            top: { style: 'thin', color: { argb: '00000000' } },
+                        };
+                        if ((j < 'B'.charCodeAt(0) || j > 'I'.charCodeAt(0)) || i <= 10) {
+                            worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
+                        }
+                    }
+                    for (let j = 'A'.charCodeAt(0); j <= 'O'.charCodeAt(0); j++) {
+                        let cell = `A${String.fromCharCode(j)}${i}`;
+                        worksheet.getCell(cell).border = {
+                            bottom: { style: 'thin', color: { argb: '00000000' } },
+                            right: { style: 'thin', color: { argb: '00000000' } },
+                            left: { style: 'thin', color: { argb: '00000000' } },
+                            top: { style: 'thin', color: { argb: '00000000' } },
+                        };
+                        worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
+                    if (i >= 10) {
+                        worksheet.mergeCells(`B${i}:F${i}`);
+                        worksheet.mergeCells(`G${i}:I${i}`);
+
+                        worksheet.mergeCells(`J${i}:L${i}`);
+                        worksheet.mergeCells(`M${i}:O${i}`);
+
+                        worksheet.mergeCells(`P${i}:R${i}`);
+                        worksheet.mergeCells(`S${i}:U${i}`);
+
+                        worksheet.mergeCells(`V${i}:X${i}`);
+                        worksheet.mergeCells(`Y${i}:AA${i}`);
+                        worksheet.mergeCells(`AB${i}:AD${i}`);
+
+                        worksheet.mergeCells(`AE${i}:AG${i}`);
+                        worksheet.mergeCells(`AH${i}:AJ${i}`);
+                        worksheet.mergeCells(`AK${i}:AO${i}`);
+                    }
+                }
+
+                res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                res.setHeader("Content-Disposition", "attachment; filename=" + "laporan-luas-tanaman-sayur-buah.xlsx");
+
+                workbook.xlsx.write(res).then(() => res.end());
+                return;
+            }
+
+            res.status(404).json(response(404, 'Data korluh sayur dan buah not found'));
         } catch (err) {
             console.log(err);
 
