@@ -5,6 +5,7 @@ const {
     KorluhTanamanBiofarmaka,
     Kecamatan,
     Desa,
+    User,
     sequelize
 } = require('../models');
 const { dateGenerate, fixedNumber, response } = require('../helpers');
@@ -240,6 +241,28 @@ module.exports = {
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
             const offset = (page - 1) * limit;
+
+            if (req?.root?.userId) {
+                const user = await User.findByPk(req.root.userId, {
+                    include: [
+                        {
+                            model: Kecamatan,
+                            as: 'kecamatans'
+                        },
+                        {
+                            model: Desa,
+                            as: 'desas'
+                        },
+                    ]
+                });
+
+                if (user?.kecamatans?.length) {
+                    kecamatan = user.kecamatans[0].id;
+                }
+                if (user?.desas?.length) {
+                    desa = user.desas[0].id;
+                }
+            }
 
             let where = {};
 
