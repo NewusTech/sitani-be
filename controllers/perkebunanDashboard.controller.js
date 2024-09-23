@@ -27,7 +27,7 @@ module.exports = {
                 where.kecamatanId = kecamatan;
             }
 
-            let jumlahProduksi = 0, jumlahProduktivitas = 0, list = {};
+            let jumlahProduksi = 0, jumlahProduktivitas = 0, list = { kategoriIds: [] };
 
             let perkebunanKecamatan = await PerkebunanKecamatan.findAll({
                 include: [
@@ -54,8 +54,16 @@ module.exports = {
                     const kategoriId = i.masterKategoriKomoditasId;
                     const komoditasId = i.masterKomoditasId;
 
-                    list[kategoriId] = list[kategoriId] || {};
-                    list[kategoriId][komoditasId] = list[kategoriId][komoditasId] || { nama: i.komoditas.nama, produksi: 0, produktivitas: 0 };
+                    if (!list.kategoriIds.includes(kategoriId)) {
+                        list.kategoriIds.push(kategoriId);
+                    }
+                    list[kategoriId] = list[kategoriId] || { kategori: i.kategoriKomoditas, masterIds: [] };
+
+                    if (!list[kategoriId].masterIds.includes(komoditasId)) {
+                        list[kategoriId].masterIds.push(komoditasId);
+                    }
+
+                    list[kategoriId][komoditasId] = list[kategoriId][komoditasId] || { komoditas: i.komoditas, produksi: 0, produktivitas: 0 };
 
                     if (i.produksi) {
                         jumlahProduksi += i.produksi;
