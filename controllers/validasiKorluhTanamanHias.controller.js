@@ -1,4 +1,4 @@
-const { ValidasiKorluhTanamanHias, KorluhMasterTanamanHias, KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, sequelize } = require('../models');
+const { ValidasiKorluhTanamanHias, KorluhMasterTanamanHias, KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, User, sequelize } = require('../models');
 const { dateGenerate, response, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -389,6 +389,21 @@ module.exports = {
 
             kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
             bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
+
+            if (req?.root?.userId) {
+                const user = await User.findByPk(req.root.userId, {
+                    include: [
+                        {
+                            model: Kecamatan,
+                            as: 'kecamatans'
+                        },
+                    ]
+                });
+
+                if (user?.kecamatans?.length) {
+                    kecamatan = user.kecamatans[0].id;
+                }
+            }
 
             const kec = await Kecamatan.findByPk(kecamatan);
 
