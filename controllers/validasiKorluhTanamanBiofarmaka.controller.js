@@ -337,11 +337,11 @@ module.exports = {
                 }
             });
 
-            if (validasiKorluhTanamanBiofarmakaCount < count(kecamatanIds)) {
+            if (validasiKorluhTanamanBiofarmakaCount < kecamatanIds.length) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'invalid',
-                        message: `Action failed because ${count(kecamatanIds) - validasiKorluhTanamanBiofarmakaCount} kecamatan had not validated`,
+                        message: `Action failed because ${kecamatanIds.length - validasiKorluhTanamanBiofarmakaCount} kecamatan had not validated`,
                         field: 'bulan',
                     },
                 ]));
