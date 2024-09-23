@@ -454,6 +454,28 @@ module.exports = {
 
             const offset = (page - 1) * limit;
 
+            if (req?.root?.userId) {
+                const user = await User.findByPk(req.root.userId, {
+                    include: [
+                        {
+                            model: Kecamatan,
+                            as: 'kecamatans'
+                        },
+                        {
+                            model: Desa,
+                            as: 'desas'
+                        },
+                    ]
+                });
+
+                if (user?.kecamatans?.length) {
+                    kecamatan = user.kecamatans[0].id;
+                }
+                if (user?.desas?.length) {
+                    desa = user.desas[0].id;
+                }
+            }
+
             let where = {};
 
             if (!isNaN(parseInt(kecamatan))) {
