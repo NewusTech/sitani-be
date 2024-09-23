@@ -466,7 +466,13 @@ module.exports = {
                 include: [
                     {
                         model: KorluhTanamanBiofarmakaList,
-                        as: 'list'
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterTanamanBiofarmaka,
+                                as: 'master'
+                            }
+                        ]
                     }
                 ],
                 where: {
