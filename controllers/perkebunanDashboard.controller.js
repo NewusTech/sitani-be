@@ -5,7 +5,7 @@ const {
     PerkebunanKecamatan,
     sequelize
 } = require('../models');
-const { response, dateGenerate, getFirstLastDate } = require('../helpers');
+const { response, dateGenerate, getFirstLastDate, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -66,12 +66,14 @@ module.exports = {
                     list[kategoriId][komoditasId] = list[kategoriId][komoditasId] || { komoditas: i.komoditas, produksi: 0, produktivitas: 0 };
 
                     if (i.produksi) {
-                        jumlahProduksi += i.produksi;
-                        list[kategoriId][komoditasId].produksi += i.produksi;
+                        const temp = fixedNumber({ jml: jumlahProduksi + i.produksi, produksi: list[kategoriId][komoditasId].produksi + i.produksi });
+                        jumlahProduksi = temp.jml;
+                        list[kategoriId][komoditasId].produksi = temp.produksi;
                     }
                     if (i.produktivitas) {
-                        jumlahProduktivitas += i.produktivitas;
-                        list[kategoriId][komoditasId].produktivitas += i.produktivitas;
+                        const temp = fixedNumber({ jml: jumlahProduktivitas + i.produktivitas, produktivitas: list[kategoriId][komoditasId].produktivitas + i.produktivitas });
+                        jumlahProduktivitas = temp.jml;
+                        list[kategoriId][komoditasId].produktivitas = temp.produktivitas;
                     }
                 });
             });

@@ -105,9 +105,16 @@ module.exports = {
                         }
                     });
 
+                    if (count) {
+                        harga /= count;
+                        harga = Number.isInteger(harga) ? harga : Number(harga).toFixed(2);
+                    } else {
+                        harga = 0;
+                    }
+
                     kepangProdusenEceran.push({
                         komoditas: kom.nama,
-                        harga: count ? harga / count : 0,
+                        harga,
                         satuan,
                     });
                 }
@@ -126,7 +133,7 @@ module.exports = {
                         }
                     });
 
-                    harga = count = 0;
+                    let harga = count = 0;
                     temp.forEach(i => {
                         let countTemp = sumTemp = 0;
                         for (let idx of ['minggu1', 'minggu2', 'minggu3', 'minggu4', 'minggu5']) {
@@ -141,9 +148,16 @@ module.exports = {
                         }
                     });
 
+                    if (count) {
+                        harga /= count;
+                        harga = Number.isInteger(harga) ? harga : Number(harga).toFixed(2);
+                    } else {
+                        harga = 0;
+                    }
+
                     kepangPedagangEceran.push({
                         komoditas: kom.nama,
-                        harga: count ? harga / count : 0,
+                        harga,
                     })
                 }
 
@@ -175,9 +189,16 @@ module.exports = {
                         }
                     })
 
+                    if (countData) {
+                        sumData /= countData;
+                        sumData = Number.isInteger(sumData) ? sumData : Number(sumData).toFixed(2);
+                    } else {
+                        sumData = 0;
+                    }
+
                     kepangCvProdusen.push({
                         komoditas: kom.nama,
-                        mean: countData ? sumData / countData : 0,
+                        mean: sumData,
                         max: maxData,
                         min: minData,
                     })

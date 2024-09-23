@@ -16,7 +16,7 @@ const {
 } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
+const { response, fixedNumber } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -173,22 +173,32 @@ module.exports = {
                 padiPusoCount += item.sawah_rawa_lebak_lahan_sawah_puso;
             });
 
+            let countTemp = fixedNumber({ padiPanenCount, padiTanamCount, padiPusoCount });
+
+            padiPanenCount = countTemp.padiPanenCount;
+            padiTanamCount = countTemp.padiTanamCount;
+            padiPusoCount = countTemp.padiPusoCount;
+
             let master = [];
             let temp = [];
             korluhPalawija.map((item) => {
                 let nama = item.master.nama;
+                let obj = fixedNumber({
+                    panen: item.lahanSawahPanen + item.lahanBukanSawahPanen,
+                    tanam: item.lahanSawahTanam + item.lahanBukanSawahTanam,
+                    puso: item.lahanSawahPuso + item.lahanBukanSawahPuso,
+                })
                 if (master.includes(nama)) {
                     const index = master.indexOf(nama);
-                    temp[index].panen += item.lahanSawahPanen + item.lahanBukanSawahPanen;
-                    temp[index].tanam += item.lahanSawahTanam + item.lahanBukanSawahTanam;
-                    temp[index].puso += item.lahanSawahPuso + item.lahanBukanSawahPuso;
+
+                    temp[index].panen = obj.panen;
+                    temp[index].tanam = obj.tanam;
+                    temp[index].puso = obj.puso;
                 } else {
                     master.push(nama);
                     temp.push(
                         {
-                            panen: item.lahanSawahPanen + item.lahanBukanSawahPanen,
-                            tanam: item.lahanSawahTanam + item.lahanBukanSawahTanam,
-                            puso: item.lahanSawahPuso + item.lahanBukanSawahPuso,
+                            ...obj,
                             nama,
                         }
                     );
@@ -196,19 +206,19 @@ module.exports = {
             });
 
             korluhSayurBuah = korluhSayurBuah.map((item) => ({
-                luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru,
+                ...fixedNumber({ luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru }),
                 hasilProduksi: item.hasilProduksi,
                 namaTanaman: item.master.nama,
             }));
 
             korluhTanamanHias = korluhTanamanHias.map((item) => ({
-                luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru,
+                ...fixedNumber({ luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru }),
                 namaTanaman: item.master.nama,
                 harga: item.rerataHarga,
             }));
 
             korluhTanamanBiofarmaka = korluhTanamanBiofarmaka.map((item) => ({
-                luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru,
+                ...fixedNumber({ luas: item.luasPanenHabis + item.luasPanenBelumHabis + item.luasRusak + item.luasPenanamanBaru }),
                 namaTanaman: item.master.nama,
                 harga: item.rerataHarga,
             }));

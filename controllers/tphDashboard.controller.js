@@ -11,7 +11,7 @@ const {
     TphLahanSawah,
     sequelize
 } = require('../models');
-const { response, dateGenerate, getFirstLastDate } = require('../helpers');
+const { response, dateGenerate, getFirstLastDate, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -120,7 +120,7 @@ module.exports = {
                     ]) {
                         temp[idx] = temp[idx] || 0;
                         if (i[idx]) {
-                            temp[idx] += i[idx];
+                            temp[idx] = (fixedNumber({ x: temp[idx] + i[idx] })).x;
                         }
                     }
                 })
@@ -144,7 +144,7 @@ module.exports = {
                     ]) {
                         temp[idx] = temp[idx] || 0;
                         if (i[idx]) {
-                            temp[idx] += i[idx];
+                            temp[idx] = (fixedNumber({ x: temp[idx] + i[idx] })).x;
                         }
                     }
                 })
@@ -168,7 +168,7 @@ module.exports = {
                     ]) {
                         temp[idx] = temp[idx] || 0;
                         if (i[idx]) {
-                            temp[idx] += i[idx];
+                            temp[idx] = (fixedNumber({ x: temp[idx] + i[idx] })).x;
                         }
                     }
                 })
@@ -178,8 +178,10 @@ module.exports = {
             temp = {};
 
             res.status(200).json(response(200, 'Get TPH dashboard data successfully', {
-                lahanBukanSawahSum,
-                lahanSawahSum,
+                ...fixedNumber({
+                    lahanBukanSawahSum,
+                    lahanSawahSum,
+                }),
 
                 tphRealisasiPalawija1,
                 tphRealisasiPalawija2,
