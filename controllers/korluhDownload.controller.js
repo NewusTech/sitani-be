@@ -54,6 +54,7 @@ module.exports = {
                 const worksheet = workbook.addWorksheet("Laporan Luas Tanaman Padi");
 
                 const bulans = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                bulan.setMonth(bulan.getMonth() + 1);
 
                 for (let i = 1; i <= 36; i++) {
                     temp.push({ width: 5 });
@@ -456,6 +457,7 @@ module.exports = {
                 const worksheet = workbook.addWorksheet("Laporan Luas Tanaman Palawija");
 
                 const bulans = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                bulan.setMonth(bulan.getMonth() + 1);
 
                 for (let i = 1; i <= 51; i++) {
                     temp.push({ width: 5 });
