@@ -23,13 +23,6 @@ module.exports = {
                     key: 'id'
                 }
             },
-            desa_id: {
-                type: Sequelize.BIGINT,
-                references: {
-                    model: 'master_desa',
-                    key: 'id'
-                }
-            },
             tanggal: {
                 type: Sequelize.DATE,
                 allowNull: false,

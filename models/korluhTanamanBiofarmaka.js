@@ -9,10 +9,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'kecamatanId',
                 as: 'kecamatan',
             });
-            KorluhTanamanBiofarmaka.belongsTo(models.Desa, {
-                foreignKey: 'desaId',
-                as: 'desa'
-            });
             KorluhTanamanBiofarmaka.hasMany(models.KorluhTanamanBiofarmakaList, {
                 foreignKey: 'korluhTanamanBiofarmakaId',
                 as: 'list'
@@ -24,10 +20,6 @@ module.exports = (sequelize, DataTypes) => {
         kecamatanId: {
             type: DataTypes.BIGINT,
             field: 'kecamatan_id',
-        },
-        desaId: {
-            type: DataTypes.BIGINT,
-            field: 'desa_id',
         },
         tanggal: {
             type: DataTypes.DATE,
