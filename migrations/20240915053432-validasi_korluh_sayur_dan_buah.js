@@ -27,20 +27,12 @@ module.exports = {
                 type: Sequelize.DATEONLY,
                 allowNull: false,
             },
-            status_tk_kecamatan: {
+            status: {
                 type: Sequelize.ENUM('belum', 'tolak', 'terima'),
                 defaultValue: 'belum',
                 allowNull: false,
             },
-            status_tk_kabupaten: {
-                type: Sequelize.ENUM('belum', 'tolak', 'terima'),
-                defaultValue: 'belum',
-                allowNull: false,
-            },
-            keterangan_kecamatan: {
-                type: Sequelize.STRING,
-            },
-            keterangan_kabupaten: {
+            keterangan: {
                 type: Sequelize.STRING,
             },
             created_at: {
