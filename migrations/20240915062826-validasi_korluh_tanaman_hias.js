@@ -23,6 +23,10 @@ module.exports = {
                     key: 'id'
                 }
             },
+            tahun: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+            },
             triwulan: {
                 type: Sequelize.CHAR,
                 allowNull: false,

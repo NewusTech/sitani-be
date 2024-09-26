@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BIGINT,
             field: 'kecamatan_id'
         },
+        tahun: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
         triwulan: {
             type: DataTypes.CHAR,
             allowNull: false,
