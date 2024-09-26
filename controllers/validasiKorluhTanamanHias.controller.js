@@ -6,7 +6,17 @@ const { Op } = require('sequelize');
 
 const v = new Validator();
 
-const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undefined) => {
+const getInterval = (triwulan) => {
+    const interval = {
+        1: { start: 1, end: 3, value: 1 },
+        2: { start: 4, end: 6, value: 2 },
+        3: { start: 7, end: 9, value: 3 },
+        4: { start: 10, end: 12, value: 4 },
+    }
+    return interval[triwulan];
+}
+
+const dataMap = (data, triwulan = undefined, tahun = undefined, kecamatan = undefined, validasi = undefined) => {
     let sum = {
         masterIds: []
     };
@@ -53,10 +63,10 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
         });
     });
 
-    if (date !== undefined) {
+    if (triwulan !== undefined) {
         return {
-            bulan: date.getMonth() + 1,
-            tahun: date.getFullYear(),
+            triwulan: triwulan.value,
+            tahun: tahun,
             kecamatanId: kecamatan?.id,
             kecamatan: kecamatan?.nama,
             status: validasi?.status || 'belum',
@@ -73,7 +83,7 @@ const combineData = (current, before) => {
             current[nt] = {
                 ...current[nt],
                 ...fixedNumber({
-                    bulanLalu: 0,
+                    triwulanLalu: 0,
                     akhir: Number(current[nt]["luasPenanamanBaru"]) - Number(current[nt]["luasPanenHabis"]) - Number(current[nt]["luasRusak"]),
                 }),
             }
@@ -84,15 +94,15 @@ const combineData = (current, before) => {
         current[nt] = {
             ...current[nt],
             ...fixedNumber({
-                bulanLalu: before[nt] ? before[nt]['akhir'] || 0 : 0,
-                akhir: Number(current[nt]['bulanLalu']) + Number(current[nt]["luasPenanamanBaru"]) - Number(current[nt]["luasPanenHabis"]) - Number(current[nt]["luasRusak"]),
+                triwulanLalu: before[nt] ? before[nt]['akhir'] || 0 : 0,
+                akhir: Number(current[nt]['triwulanLalu']) + Number(current[nt]["luasPenanamanBaru"]) - Number(current[nt]["luasPanenHabis"]) - Number(current[nt]["luasRusak"]),
             }),
         }
     });
     return current;
 }
 
-const getSum = async (bulan, kecamatan = undefined) => {
+const getSum = async (triwulan, tahun, kecamatan = undefined) => {
     let where = {};
 
     if (kecamatan !== undefined) {
@@ -115,16 +125,20 @@ const getSum = async (bulan, kecamatan = undefined) => {
         where: {
             ...where,
             [Op.and]: [
-                sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
-                sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
+                sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', triwulan.start),
+                sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', triwulan.end),
+                sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
             ]
         }
     });
 
     if (data.length > 0) {
-        bulan.setMonth(bulan.getMonth() - 1);
+        const triwulanAgo = triwulan.value - 1 === 0 ? 4 : triwulan.value - 1;
+        const tahunTriwulanAgo = triwulanAgo > triwulan.value ? tahun - 1 : tahun;
 
-        before = await getSum(bulan, kecamatan);
+        triwulanAgo = getInterval(triwulanAgo);
+
+        before = await getSum(triwulanAgo, tahunTriwulanAgo, kecamatan);
         data = dataMap(data);
 
         return combineData(data, before);
@@ -145,9 +159,19 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
-                bulan: {
-                    type: "date",
+                tahun: {
+                    type: "number",
+                    integer: true,
                     convert: true,
+                    min: 1111,
+                    max: 9999,
+                },
+                triwulan: {
+                    type: "number",
+                    integer: true,
+                    convert: true,
+                    min: 1,
+                    max: 4,
                 },
                 status: {
                     type: "enum",
@@ -168,7 +192,8 @@ module.exports = {
 
             let {
                 kecamatan_id,
-                bulan,
+                tahun,
+                triwulan,
                 status,
                 keterangan,
             } = req.body;
@@ -186,31 +211,32 @@ module.exports = {
                 return;
             }
 
-            bulan = dateGenerate(bulan);
-            currentDate = new Date();
+            triwulan = getInterval(triwulan);
+            currentDate = dateGenerate(new Date());
 
             const korluhTanamanHiasCount = await KorluhTanamanHias.count({
                 where: {
                     kecamatanId: kecamatan.id,
                     [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', triwulan.start),
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', triwulan.end),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
                     ]
                 }
             });
 
             if (
-                (bulan.getMonth() >= currentDate.getMonth() && bulan.getFullYear() === currentDate.getFullYear())
+                (triwulan.start >= currentDate.getMonth() + 1 && tahun === currentDate.getFullYear())
                 ||
-                bulan.getFullYear() > currentDate.getFullYear()
+                tahun > currentDate.getFullYear()
                 ||
                 korluhTanamanHiasCount === 0
             ) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'invalid',
-                        message: "Action failed with the following bulan",
-                        field: 'bulan',
+                        message: "Action failed with the following triwulan",
+                        field: 'triwulan',
                     },
                 ]));
                 return;
@@ -219,14 +245,13 @@ module.exports = {
             const validasiKorluhTanamanHias = await ValidasiKorluhTanamanHias.findOrCreate({
                 where: {
                     kecamatanId: kecamatan.id,
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
-                    ]
+                    triwulan: triwulan.value,
+                    tahun
                 },
                 defaults: {
                     kecamatanId: kecamatan.id,
-                    bulan,
+                    triwulan: triwulan.value,
+                    tahun
                 }
             });
 
@@ -257,23 +282,42 @@ module.exports = {
 
     data: async (req, res) => {
         try {
-            let { kecamatan, bulan } = req.query;
+            let { kecamatan, triwulan, tahun } = req.query;
 
-            monthAgo = new Date();
-            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            const currentDate = dateGenerate(new Date());
 
             kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
-            bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
+            tahun = isNaN(parseInt(tahun)) ? 0 : parseInt(tahun);
+
+            if (tahun < 1111 || tahun > 9999) {
+                tahun = dateGenerate(new Date()).getFullYear();
+            }
+
+            if (!isNaN(parseInt(triwulan))) {
+                triwulan = parseInt(triwulan);
+                if (triwulan < 1 || triwulan > 4) {
+                    triwulan = null;
+                }
+            }
+
+            if (isNaN(parseInt(triwulan))) {
+                const currentMonth = currentDate.getMonth() + 1;
+                triwulan = parseInt((currentMonth + ((3 - (currentMonth % 3)) % 3)) / 3);
+            }
+
+            const triwulanAgo = triwulan - 1 === 0 ? 4 : triwulan - 1;
+            const tahunTriwulanAgo = triwulanAgo > triwulan ? tahun - 1 : tahun;
+
+            triwulanAgo = getInterval(triwulanAgo);
+            triwulan = getInterval(triwulan);
 
             const kec = await Kecamatan.findByPk(kecamatan);
 
             const validasiKorluhTanamanHias = await ValidasiKorluhTanamanHias.findOne({
                 where: {
                     kecamatanId: kecamatan,
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
-                    ]
+                    triwulan: triwulan.value,
+                    tahun,
                 },
             });
 
@@ -293,17 +337,18 @@ module.exports = {
                 where: {
                     kecamatanId: kecamatan,
                     [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', triwulan.start),
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', triwulan.end),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
                     ]
                 }
             });
 
-            current = dataMap(current, bulan, kec, validasiKorluhTanamanHias);
+            current = dataMap(current, triwulan, tahun, kec, validasiKorluhTanamanHias);
 
             bulan.setMonth(bulan.getMonth() - 1);
 
-            before = await getSum(bulan, kecamatan);
+            before = await getSum(triwulanAgo, tahunTriwulanAgo, kecamatan);
 
             current = combineData(current, before);
 
