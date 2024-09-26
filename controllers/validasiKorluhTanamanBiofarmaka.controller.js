@@ -68,10 +68,8 @@ const dataMap = (data, date = undefined, kecamatan = undefined, validasi = undef
             tahun: date.getFullYear(),
             kecamatanId: kecamatan?.id,
             kecamatan: kecamatan?.nama,
-            validasiKecamatan: validasi?.statusTkKecamatan || 'belum',
-            validasiKabupaten: validasi?.statusTkKabupaten || 'belum',
-            keteranganKecamatan: validasi?.keteranganKecamatan,
-            keteranganKabupaten: validasi?.keteranganKabupaten,
+            status: validasi?.status || 'belum',
+            keterangan: validasi?.keterangan,
             ...sum,
         }
     }
@@ -137,7 +135,7 @@ const getSum = async (bulan, kecamatan = undefined) => {
 }
 
 module.exports = {
-    kecVal: async (req, res) => {
+    validate: async (req, res) => {
         const transaction = await sequelize.transaction();
 
         try {
@@ -202,6 +200,23 @@ module.exports = {
                 }
             });
 
+            if (
+                (bulan.getMonth() >= currentDate.getMonth() && bulan.getFullYear() === currentDate.getFullYear())
+                ||
+                bulan.getFullYear() > currentDate.getFullYear()
+                ||
+                korluhTanamanBiofarmakaCount === 0
+            ) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'invalid',
+                        message: "Action failed with the following bulan",
+                        field: 'bulan',
+                    },
+                ]));
+                return;
+            }
+
             const validasiKorluhTanamanBiofarmaka = await ValidasiKorluhTanamanBiofarmaka.findOrCreate({
                 where: {
                     kecamatanId: kecamatan.id,
@@ -216,151 +231,11 @@ module.exports = {
                 }
             });
 
-            if (
-                (bulan.getMonth() >= currentDate.getMonth() && bulan.getFullYear() === currentDate.getFullYear())
-                ||
-                bulan.getFullYear() > currentDate.getFullYear()
-                ||
-                validasiKorluhTanamanBiofarmaka[0]?.statusTkKabupaten === 'terima'
-                ||
-                korluhTanamanBiofarmakaCount === 0
-            ) {
-                res.status(400).json(response(400, 'Bad Request', [
-                    {
-                        type: 'invalid',
-                        message: "Action failed with the following bulan",
-                        field: 'bulan',
-                    },
-                ]));
-                return;
-            }
-
             keterangan = keterangan || null;
 
             await validasiKorluhTanamanBiofarmaka[0].update({
-                statusTkKecamatan: status,
-                keteranganKecamatan: keterangan,
-            });
-
-            // VALIDATOR CREATE
-
-            await transaction.commit();
-
-            res.status(200).json(response(200, 'Status validation updated'));
-        } catch (err) {
-            console.log(err);
-
-            logger.error(`Error : ${err}`);
-            logger.error(`Error message: ${err.message}`);
-
-            await transaction.rollback();
-
-            // res.status(500).json(response(500, 'Internal server error'));
-            res.status(500).json(response(500, err.message));
-        }
-    },
-
-    kabVal: async (req, res) => {
-        const transaction = await sequelize.transaction();
-
-        try {
-            const schema = {
-                bulan: {
-                    type: "date",
-                    convert: true,
-                },
-                status: {
-                    type: "enum",
-                    values: ["terima", "tolak"]
-                },
-                keterangan: {
-                    type: "string",
-                    optional: true,
-                }
-            };
-
-            const validate = v.validate(req.body, schema);
-
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
-                return;
-            }
-
-            let {
-                bulan,
-                status,
                 keterangan,
-            } = req.body;
-
-            bulan = dateGenerate(bulan);
-            currentDate = new Date();
-
-            const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findAll({
-                where: {
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
-                    ]
-                }
-            });
-
-            const validasiKorluhTanamanBiofarmakaCount = await ValidasiKorluhTanamanBiofarmaka.count({
-                where: {
-                    statusTkKecamatan: 'terima',
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
-                    ]
-                },
-            });
-
-            if (
-                (bulan.getMonth() >= currentDate.getMonth() && bulan.getFullYear() === currentDate.getFullYear())
-                ||
-                bulan.getFullYear() > currentDate.getFullYear()
-                ||
-                korluhTanamanBiofarmaka.length === 0
-            ) {
-                res.status(400).json(response(400, 'Bad Request', [
-                    {
-                        type: 'invalid',
-                        message: "Action failed with the following bulan",
-                        field: 'bulan',
-                    },
-                ]));
-                return;
-            }
-
-            let kecamatanIds = [];
-            korluhTanamanBiofarmaka.forEach(item => {
-                if (!kecamatanIds.includes(item.kecamatanId)) {
-                    kecamatanIds.push(item.kecamatanId);
-                }
-            });
-
-            if (validasiKorluhTanamanBiofarmakaCount < kecamatanIds.length) {
-                res.status(400).json(response(400, 'Bad Request', [
-                    {
-                        type: 'invalid',
-                        message: `Action failed because ${kecamatanIds.length - validasiKorluhTanamanBiofarmakaCount} kecamatan had not validated`,
-                        field: 'bulan',
-                    },
-                ]));
-                return;
-            }
-
-            keterangan = keterangan || '';
-
-            await ValidasiKorluhTanamanBiofarmaka.update({
-                statusTkKabupaten: status,
-                keteranganKabupaten: keterangan,
-            }, {
-                where: {
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
-                    ]
-                }
+                status,
             });
 
             // VALIDATOR CREATE
@@ -381,7 +256,7 @@ module.exports = {
         }
     },
 
-    kecData: async (req, res) => {
+    data: async (req, res) => {
         try {
             let { kecamatan, bulan } = req.query;
 
@@ -390,21 +265,6 @@ module.exports = {
 
             kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
             bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
-
-            if (req?.root?.userId) {
-                const user = await User.findByPk(req.root.userId, {
-                    include: [
-                        {
-                            model: Kecamatan,
-                            as: 'kecamatans'
-                        },
-                    ]
-                });
-
-                if (user?.kecamatans?.length) {
-                    kecamatan = user.kecamatans[0].id;
-                }
-            }
 
             const kec = await Kecamatan.findByPk(kecamatan);
 
@@ -445,65 +305,6 @@ module.exports = {
             bulan.setMonth(bulan.getMonth() - 1);
 
             before = await getSum(bulan, kecamatan);
-
-            current = combineData(current, before);
-
-            res.status(200).json(response(200, 'Get korluh tanaman biofarmaka successfully', current));
-        } catch (err) {
-            console.log(err);
-
-            logger.error(`Error : ${err}`);
-            logger.error(`Error message: ${err.message}`);
-
-            // res.status(500).json(response(500, 'Internal server error'));
-            res.status(500).json(response(500, err.message));
-        }
-    },
-
-    kabData: async (req, res) => {
-        try {
-            let { bulan } = req.query;
-
-            monthAgo = new Date();
-            monthAgo.setMonth(monthAgo.getMonth() - 1);
-
-            bulan = isNaN(new Date(bulan)) ? monthAgo : new Date(bulan);
-
-            const validasiKorluhTanamanBiofarmaka = await ValidasiKorluhTanamanBiofarmaka.findOne({
-                where: {
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), bulan.getFullYear()),
-                    ]
-                },
-            });
-
-            let current = await KorluhTanamanBiofarmaka.findAll({
-                include: [
-                    {
-                        model: KorluhTanamanBiofarmakaList,
-                        as: 'list',
-                        include: [
-                            {
-                                model: KorluhMasterTanamanBiofarmaka,
-                                as: 'master'
-                            }
-                        ]
-                    }
-                ],
-                where: {
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), bulan.getFullYear()),
-                    ]
-                }
-            });
-
-            current = dataMap(current, bulan, undefined, validasiKorluhTanamanBiofarmaka);
-
-            bulan.setMonth(bulan.getMonth() - 1);
-
-            before = await getSum(bulan);
 
             current = combineData(current, before);
 
