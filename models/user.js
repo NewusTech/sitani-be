@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'kecamatans',
             });
             User.belongsToMany(models.Desa, {
-                through: 'user_kecamatan_desa',
+                through: 'user_desa',
                 foreignKey: 'user_id',
                 otherKey: 'desa_id',
                 timestamps: false,

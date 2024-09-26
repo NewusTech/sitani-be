@@ -9,19 +9,12 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('user_kecamatan_desa', {
+        await queryInterface.createTable('user_desa', {
             user_id: {
                 type: Sequelize.BIGINT,
                 primaryKey: true,
                 references: {
                     model: 'users',
-                    key: 'id'
-                }
-            },
-            kecamatan_id: {
-                type: Sequelize.BIGINT,
-                references: {
-                    model: 'master_kecamatan',
                     key: 'id'
                 }
             },
@@ -42,6 +35,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
         */
-        await queryInterface.dropTable('user_kecamatan_desa');
+        await queryInterface.dropTable('user_desa');
     }
 };
