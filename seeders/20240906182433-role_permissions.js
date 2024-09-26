@@ -23,8 +23,6 @@ module.exports = {
             { role: 7, min: 70, max: 81 },
             { role: 8, min: 82, max: 85 },
             { role: 9, min: 86, max: 105 },
-            { role: 10, min: 106, max: 125 },
-            { role: 11, min: 126, max: 145 },
         ];
 
         mapRole.forEach(item => {

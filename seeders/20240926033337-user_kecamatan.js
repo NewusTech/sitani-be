@@ -12,16 +12,14 @@ module.exports = {
          *   isBetaMember: false
          * }], {});
         */
-        const dataList = [];
+        const dataList = [
+            {
+                user_id: 9,
+                kecamatan_id: 1,
+            },
+        ];
 
-        for (let i = 1; i <= 9; i++) {
-            dataList.push({
-                role_id: i,
-                user_id: i,
-            })
-        }
-
-        await queryInterface.bulkInsert({ tableName: "user_roles" }, dataList, {});
+        await queryInterface.bulkInsert({ tableName: "user_kecamatan" }, dataList, {});
     },
 
     async down(queryInterface, Sequelize) {
@@ -31,6 +29,6 @@ module.exports = {
          * Example:
          * await queryInterface.bulkDelete('People', null, {});
          */
-        await queryInterface.bulkDelete({ tableName: "user_roles" }, null, {});
+        await queryInterface.bulkDelete({ tableName: "user_kecamatan" }, null, {});
     }
 };

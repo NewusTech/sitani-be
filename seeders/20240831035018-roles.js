@@ -25,8 +25,6 @@ module.exports = {
             'bidang psp',
             'bidang kepegawaian',
             'korluh',
-            'validasi kecamatan',
-            'validasi kabupaten',
         ]) {
             roles.push({
                 id: i,
