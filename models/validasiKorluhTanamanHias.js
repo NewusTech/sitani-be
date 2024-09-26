@@ -21,25 +21,13 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATEONLY,
             allowNull: false,
         },
-        statusTkKecamatan: {
+        status: {
             type: DataTypes.ENUM('belum', 'tolak', 'terima'),
-            field: 'status_tk_kecamatan',
             defaultValue: 'belum',
             allowNull: false,
         },
-        statusTkKabupaten: {
-            type: DataTypes.ENUM('belum', 'tolak', 'terima'),
-            field: 'status_tk_kabupaten',
-            defaultValue: 'belum',
-            allowNull: false,
-        },
-        keteranganKecamatan: {
+        keterangan: {
             type: DataTypes.STRING,
-            field: 'keterangan_kecamatan',
-        },
-        keteranganKabupaten: {
-            type: DataTypes.STRING,
-            field: 'keterangan_kabupaten'
         },
         createdAt: {
             type: DataTypes.DATE,
