@@ -24,7 +24,7 @@ const v = new Validator();
 module.exports = {
     get: async (req, res) => {
         try {
-            let { kecamatan, desa, year, month, limit } = req.query;
+            let { kecamatan, year, month, limit } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
 
@@ -34,11 +34,6 @@ module.exports = {
                 kecamatan = parseInt(kecamatan);
 
                 where.kecamatanId = kecamatan;
-            }
-            if (!isNaN(parseInt(desa))) {
-                desa = parseInt(desa);
-
-                where.desaId = desa;
             }
             if (!isNaN(parseInt(year))) {
                 year = parseInt(year);
