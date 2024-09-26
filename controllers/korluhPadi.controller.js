@@ -223,12 +223,6 @@ module.exports = {
                     integer: true,
                     convert: true,
                 },
-                desa_id: {
-                    type: "number",
-                    positive: true,
-                    integer: true,
-                    convert: true,
-                },
                 tanggal: {
                     type: "date",
                     convert: true,
@@ -245,7 +239,6 @@ module.exports = {
 
             let {
                 kecamatan_id,
-                desa_id,
                 tanggal,
                 hibrida_bantuan_pemerintah_lahan_sawah_panen,
                 hibrida_bantuan_pemerintah_lahan_sawah_tanam,
@@ -286,7 +279,6 @@ module.exports = {
             } = req.body;
 
             const kecamatan = await Kecamatan.findByPk(kecamatan_id);
-            const desa = await Desa.findByPk(desa_id);
 
             if (!kecamatan) {
                 res.status(400).json(response(400, 'Bad Request', [
@@ -298,45 +290,13 @@ module.exports = {
                 ]));
                 return;
             }
-            if (!desa) {
-                res.status(400).json(response(400, 'Bad Request', [
-                    {
-                        type: 'notFound',
-                        message: "Desa doesn't exists",
-                        field: 'desa_id',
-                    },
-                ]));
-                return;
-            }
 
             tanggal = dateGenerate(tanggal);
-
-            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
-                where: {
-                    statusTkKecamatan: 'terima',
-                    kecamatanId: kecamatan.id,
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), tanggal.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), tanggal.getFullYear()),
-                    ]
-                }
-            });
-
-            if (validasiKorluhPadi) {
-                res.status(400).json(response(400, 'Bad Request', [
-                    {
-                        type: 'error',
-                        message: "Cannot created korluh padi because kecamatan has validated",
-                        field: 'tanggal',
-                    },
-                ]));
-                return;
-            }
 
             const korluhPadiExists = await KorluhPadi.findOne({
                 where: {
                     tanggal: { [Op.eq]: tanggal },
-                    desaId: desa_id,
+                    kecamatanId: kecamatan.id,
                 }
             });
 
@@ -424,7 +384,6 @@ module.exports = {
 
             await KorluhPadi.create({
                 kecamatanId: kecamatan.id,
-                desaId: desa.id,
                 tanggal,
                 ...obj,
             });
@@ -447,7 +406,7 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { kecamatan, equalDate, startDate, endDate, limit, page, desa } = req.query;
+            let { kecamatan, equalDate, startDate, endDate, limit, page } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
@@ -461,18 +420,11 @@ module.exports = {
                             model: Kecamatan,
                             as: 'kecamatans'
                         },
-                        {
-                            model: Desa,
-                            as: 'desas'
-                        },
                     ]
                 });
 
                 if (user?.kecamatans?.length) {
                     kecamatan = user.kecamatans[0].id;
-                }
-                if (user?.desas?.length) {
-                    desa = user.desas[0].id;
                 }
             }
 
@@ -480,9 +432,6 @@ module.exports = {
 
             if (!isNaN(parseInt(kecamatan))) {
                 where.kecamatanId = parseInt(kecamatan);
-            }
-            if (!isNaN(parseInt(desa))) {
-                where.desaId = parseInt(desa);
             }
             if (equalDate) {
                 equalDate = new Date(equalDate);
@@ -512,10 +461,6 @@ module.exports = {
                     {
                         model: Kecamatan,
                         as: 'kecamatan',
-                    },
-                    {
-                        model: Desa,
-                        as: 'desa',
                     },
                 ],
                 offset,
@@ -550,10 +495,6 @@ module.exports = {
                     {
                         model: Kecamatan,
                         as: 'kecamatan',
-                    },
-                    {
-                        model: Desa,
-                        as: 'desa',
                     },
                 ],
             });
@@ -591,13 +532,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!korluhPadi) {
+                res.status(404).json(response(404, 'Korluh padi not found'));
                 return;
             }
 
-            if (!korluhPadi) {
-                res.status(404).json(response(404, 'Korluh padi not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -741,24 +682,6 @@ module.exports = {
 
             if (!korluhPadi) {
                 res.status(404).json(response(404, 'Korluh padi not found'));
-                return;
-            }
-
-            const temp = new Date(korluhPadi.tanggal);
-
-            const validasiKorluhPadi = await ValidasiKorluhPadi.findOne({
-                where: {
-                    statusTkKecamatan: 'terima',
-                    kecamatanId: korluhPadi.kecamatanId,
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('bulan')), temp.getMonth() + 1),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('bulan')), temp.getFullYear()),
-                    ]
-                }
-            });
-
-            if (validasiKorluhPadi) {
-                res.status(403).json(response(403, 'Korluh padi deleted failed because kacamatan has validated'));
                 return;
             }
 
