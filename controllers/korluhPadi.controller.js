@@ -1,4 +1,4 @@
-const { ValidasiKorluhPadi, KorluhPadi, Kecamatan, Desa, User, sequelize } = require('../models');
+const { KorluhPadi, Kecamatan, User, sequelize } = require('../models');
 const { dateGenerate, fixedNumber, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
