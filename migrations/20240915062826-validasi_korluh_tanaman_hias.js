@@ -23,8 +23,8 @@ module.exports = {
                     key: 'id'
                 }
             },
-            bulan: {
-                type: Sequelize.DATEONLY,
+            triwulan: {
+                type: Sequelize.CHAR,
                 allowNull: false,
             },
             status: {
