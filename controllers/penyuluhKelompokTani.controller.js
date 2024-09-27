@@ -11,27 +11,27 @@ const coreSchema = {
     nama: {
         type: "string",
         max: 255,
-        max: 1,
+        min: 1,
     },
     ketua: {
         type: "string",
         max: 255,
-        max: 1,
+        min: 1,
     },
     sekretaris: {
         type: "string",
         max: 255,
-        max: 1,
+        min: 1,
     },
     bendahara: {
         type: "string",
         max: 255,
-        max: 1,
+        min: 1,
     },
     alamat: {
         type: "string",
         max: 255,
-        max: 1,
+        min: 1,
     },
     dibent: {
         type: "number",
