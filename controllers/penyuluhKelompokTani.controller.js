@@ -276,4 +276,131 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const penyuluhKelompokTani = await PenyuluhKelompokTani.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                id_poktan: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                kecamatan_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                desa_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                tahun: {
+                    type: "number",
+                    integer: true,
+                    convert: true,
+                    min: 1111,
+                    max: 9999,
+                },
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (!penyuluhKelompokTani) {
+                res.status(404).json(response(404, 'Penyuluh kelompok tani not found'));
+                return;
+            }
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            let {
+                id_poktan,
+                kecamatan_id,
+                desa_id,
+                tahun,
+                nama,
+                ketua,
+                sekretaris,
+                bendahara,
+                alamat,
+                dibent,
+                l,
+                p,
+                kelas,
+            } = req.body;
+
+            if (kecamatan_id) {
+                const kecamatan = await Kecamatan.findByPk(kecamatan_id);
+
+                kecamatan_id = kecamatan?.id ?? penyuluhKelompokTani.kecamatanId;
+            } else {
+                kecamatan_id = penyuluhKelompokTani.kecamatanId;
+            }
+
+            if (desa_id) {
+                const desa = await Desa.findByPk(desa_id);
+
+                desa_id = desa?.id ?? penyuluhKelompokTani.desaId;
+            } else {
+                desa_id = penyuluhKelompokTani.desaId;
+            }
+
+            id_poktan = id_poktan ?? penyuluhKelompokTani.idPoktan;
+            tahun = tahun ?? penyuluhKelompokTani.tahun;
+            nama = nama ?? penyuluhKelompokTani.nama;
+            ketua = ketua ?? penyuluhKelompokTani.ketua;
+            sekretaris = sekretaris ?? penyuluhKelompokTani.sekretaris;
+            bendahara = bendahara ?? penyuluhKelompokTani.bendahara;
+            alamat = alamat ?? penyuluhKelompokTani.alamat;
+            dibent = dibent ?? penyuluhKelompokTani.dibent;
+            l = l ?? penyuluhKelompokTani.l;
+            p = p ?? penyuluhKelompokTani.p;
+            kelas = kelas ?? penyuluhKelompokTani.kelas;
+
+            await penyuluhKelompokTani.update({
+                kecamatanId: kecamatan_id,
+                idPoktan: id_poktan,
+                desaId: desa_id,
+                sekretaris,
+                bendahara,
+                alamat,
+                dibent,
+                kelas,
+                ketua,
+                tahun,
+                nama,
+                l,
+                p,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update penyuluh kelompok tani successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
