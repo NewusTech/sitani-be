@@ -133,7 +133,7 @@ const getSum = async (triwulan, tahun, kecamatan = undefined) => {
     });
 
     if (data.length > 0) {
-        const triwulanAgo = triwulan.value - 1 === 0 ? 4 : triwulan.value - 1;
+        let triwulanAgo = triwulan.value - 1 === 0 ? 4 : triwulan.value - 1;
         const tahunTriwulanAgo = triwulanAgo > triwulan.value ? tahun - 1 : tahun;
 
         triwulanAgo = getInterval(triwulanAgo);
@@ -305,7 +305,7 @@ module.exports = {
                 triwulan = parseInt((currentMonth + ((3 - (currentMonth % 3)) % 3)) / 3);
             }
 
-            const triwulanAgo = triwulan - 1 === 0 ? 4 : triwulan - 1;
+            let triwulanAgo = triwulan - 1 === 0 ? 4 : triwulan - 1;
             const tahunTriwulanAgo = triwulanAgo > triwulan ? tahun - 1 : tahun;
 
             triwulanAgo = getInterval(triwulanAgo);
