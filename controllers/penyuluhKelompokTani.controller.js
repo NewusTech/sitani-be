@@ -168,4 +168,77 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getAll: async (req, res) => {
+        try {
+            let { kecamatan, search, limit, tahun, page, desa } = req.query;
+
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+            kecamatan = isNaN(parseInt(kecamatan)) ? null : parseInt(kecamatan);
+            tahun = isNaN(parseInt(tahun)) ? null : parseInt(tahun);
+            desa = isNaN(parseInt(desa)) ? null : parseInt(desa);
+
+            const offset = (page - 1) * limit;
+
+            let where = {};
+            if (search) {
+                where = {
+                    [Op.or]: {
+                        sekretaris: { [Op.like]: `%${search}%` },
+                        id_poktan: { [Op.like]: `%${search}%` },
+                        bendahara: { [Op.like]: `%${search}%` },
+                        alamat: { [Op.like]: `%${search}%` },
+                        dibent: { [Op.like]: `%${search}%` },
+                        kelas: { [Op.like]: `%${search}%` },
+                        ketua: { [Op.like]: `%${search}%` },
+                        tahun: { [Op.like]: `%${search}%` },
+                        nama: { [Op.like]: `%${search}%` },
+                        l: { [Op.like]: `%${search}%` },
+                        p: { [Op.like]: `%${search}%` },
+                    }
+                };
+            }
+            if (kecamatan) {
+                where.kecamatanId = kecamatan;
+            }
+            if (desa) {
+                where.desaId = desa;
+            }
+            if (tahun) {
+                where.tahun = tahun;
+            }
+
+            const penyuluhKelompokTani = await PenyuluhKelompokTani.findAll({
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatan',
+                    },
+                    {
+                        model: Desa,
+                        as: 'desa',
+                    },
+                ],
+                offset,
+                limit,
+                where,
+            });
+
+            const count = await PenyuluhKelompokTani.count({ where });
+
+            const pagination = generatePagination(count, page, limit, '/api/penyuluh-kelompok-tani/get');
+
+            res.status(200).json(response(200, 'Get penyuluh kelompok tani successfully', { data: penyuluhKelompokTani, pagination }));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
