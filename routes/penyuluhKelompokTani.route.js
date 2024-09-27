@@ -7,6 +7,7 @@ let prefix = '/penyuluh-kelompok-tani';
 /* -- ROUTE -- */
 route.post(prefix + '/create', penyuluhKelompokTaniController.create);
 route.get(prefix + '/get', penyuluhKelompokTaniController.getAll);
+route.get(prefix + '/get/:id', penyuluhKelompokTaniController.getOne);
 /* -- ROUTE -- */
 
 module.exports = route;
