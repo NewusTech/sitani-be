@@ -63,6 +63,14 @@ module.exports = {
             kelas: {
                 type: Sequelize.ENUM('p', 'l', 'm', 'u'),
             },
+            created_at: {
+                type: Sequelize.DATE,
+                allowNull: false,
+            },
+            updated_at: {
+                type: Sequelize.DATE,
+                allowNull: false,
+            },
         });
     },
 
