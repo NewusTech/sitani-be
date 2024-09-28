@@ -9,10 +9,9 @@ const {
     User,
     sequelize
 } = require('../models');
-const { dateGenerate, fixedNumber, response } = require('../helpers');
-const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
+const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
