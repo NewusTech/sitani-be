@@ -8,33 +8,46 @@ const { Op } = require('sequelize');
 const v = new Validator();
 
 const coreSchema = {
+    id_poktan: {
+        type: "number",
+        optional: true,
+        positive: true,
+        integer: true,
+        convert: true,
+    },
     nama: {
         type: "string",
+        optional: true,
         max: 255,
         min: 1,
     },
     ketua: {
         type: "string",
+        optional: true,
         max: 255,
         min: 1,
     },
     sekretaris: {
         type: "string",
+        optional: true,
         max: 255,
         min: 1,
     },
     bendahara: {
         type: "string",
+        optional: true,
         max: 255,
         min: 1,
     },
     alamat: {
         type: "string",
+        optional: true,
         max: 255,
         min: 1,
     },
     dibent: {
         type: "number",
+        optional: true,
         integer: true,
         convert: true,
         min: 1111,
@@ -42,17 +55,20 @@ const coreSchema = {
     },
     l: {
         type: "number",
+        optional: true,
         integer: true,
         convert: true,
     },
     p: {
         type: "number",
+        optional: true,
         integer: true,
         convert: true,
     },
     kelas: {
         type: "enum",
-        values: ['p', 'l', 'm', 'u']
+        values: ['p', 'l', 'm', 'u'],
+        optional: true,
     },
 };
 
@@ -62,12 +78,6 @@ module.exports = {
 
         try {
             const schema = {
-                id_poktan: {
-                    type: "number",
-                    positive: true,
-                    integer: true,
-                    convert: true,
-                },
                 kecamatan_id: {
                     type: "number",
                     positive: true,
@@ -288,26 +298,23 @@ module.exports = {
             });
 
             const schema = {
-                id_poktan: {
-                    type: "number",
-                    positive: true,
-                    integer: true,
-                    convert: true,
-                },
                 kecamatan_id: {
                     type: "number",
+                    optional: true,
                     positive: true,
                     integer: true,
                     convert: true,
                 },
                 desa_id: {
                     type: "number",
+                    optional: true,
                     positive: true,
                     integer: true,
                     convert: true,
                 },
                 tahun: {
                     type: "number",
+                    optional: true,
                     integer: true,
                     convert: true,
                     min: 1111,
