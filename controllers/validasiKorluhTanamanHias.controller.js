@@ -280,6 +280,60 @@ module.exports = {
         }
     },
 
+    reqValidation: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const validasiKorluhTanamanHias = await ValidasiKorluhTanamanHias.findByPk(id);
+
+            const schema = {
+                status: {
+                    type: "enum",
+                    values: ["tunggu", "tolak"]
+                },
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (!validasiKorluhTanamanHias) {
+                res.status(404).json(response(404, 'Validasi korluh tanaman hias not found'));
+                return;
+            }
+
+            if (validasiKorluhTanamanHias.status === 'terima') {
+                res.status(403).json(response(403, 'Korluh tanaman hias have been validation'));
+                return;
+            }
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            let { status } = req.body;
+
+            await validasiKorluhTanamanHias.update({
+                status,
+            })
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Status validation updated'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
     data: async (req, res) => {
         try {
             let { kecamatan, triwulan, tahun } = req.query;
