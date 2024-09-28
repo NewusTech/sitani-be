@@ -32,7 +32,7 @@ module.exports = {
                 allowNull: false,
             },
             status: {
-                type: Sequelize.ENUM('belum', 'tolak', 'terima'),
+                type: Sequelize.ENUM('belum', 'tolak', 'tunggu', 'terima'),
                 defaultValue: 'belum',
                 allowNull: false,
             },
