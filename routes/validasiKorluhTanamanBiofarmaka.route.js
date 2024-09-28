@@ -5,6 +5,7 @@ const route = express.Router();
 
 let prefix = '/validasi/korluh-tanaman-biofarmaka';
 /* -- ROUTE -- */
+route.post(prefix + '/update/:id', validasiKorluhTanamanBiofarmakaController.reqValidation);
 route.post(prefix + '/set', validasiKorluhTanamanBiofarmakaController.validate);
 route.get(prefix + '/data', validasiKorluhTanamanBiofarmakaController.data);
 /* -- ROUTE -- */
