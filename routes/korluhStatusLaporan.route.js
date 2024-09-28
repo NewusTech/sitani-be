@@ -6,6 +6,7 @@ const route = express.Router();
 
 let prefix = '/status-laporan';
 /* -- ROUTE -- */
+route.get(prefix + '/hias', [mid.checkUserOrPass()], korluhStatusLaporanController.statusHias);
 route.get(prefix + '/padi', [mid.checkUserOrPass()], korluhStatusLaporanController.statusPadi);
 route.get(prefix + '/palawija', [mid.checkUserOrPass()], korluhStatusLaporanController.statusPalawija);
 route.get(prefix + '/sayur-buah', [mid.checkUserOrPass()], korluhStatusLaporanController.statusSayurBuah);

@@ -1,9 +1,11 @@
 const {
     ValidasiKorluhTanamanBiofarmaka,
+    ValidasiKorluhTanamanHias,
     KorluhTanamanBiofarmaka,
     ValidasiKorluhSayurBuah,
     ValidasiKorluhPalawija,
     ValidasiKorluhPadi,
+    KorluhTanamanHias,
     KorluhSayurBuah,
     KorluhPalawija,
     KorluhPadi,
@@ -459,6 +461,117 @@ module.exports = {
             }
 
             res.status(200).json(response(200, 'Get status laporan korluh tanaman biofarmaka successfully', data));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    statusHias: async (req, res) => {
+        try {
+            let { kecamatan, triwulan, tahun, status } = req.query;
+
+            if (req?.root?.userId) {
+                const user = await User.findByPk(req.root.userId, {
+                    include: [
+                        {
+                            model: Kecamatan,
+                            as: 'kecamatans'
+                        },
+                    ]
+                });
+
+                if (user?.kecamatans?.length) {
+                    kecamatan = user.kecamatans[0].id;
+                }
+            }
+
+            kecamatan = !isNaN(parseInt(kecamatan)) ? parseInt(kecamatan) : null;
+            triwulan = !isNaN(parseInt(triwulan)) ? parseInt(triwulan) : null;
+            tahun = !isNaN(parseInt(tahun)) ? parseInt(tahun) : null;
+
+            let where = {};
+
+            if (kecamatan) {
+                where.id = kecamatan;
+            }
+
+            const kecamatanList = await Kecamatan.findAll({
+                where,
+            });
+
+            let data = {
+                ids: [],
+            };
+
+            for (let kec of kecamatanList) {
+                const years = await KorluhTanamanHias.findAll({
+                    attributes: [
+                        [sequelize.fn('DISTINCT', sequelize.fn('YEAR', sequelize.col('tanggal'))), 'tahun'],
+                    ],
+                    order: [['tahun', 'DESC']],
+                    raw: true,
+                    where: {
+                        kecamatanId: kec.id
+                    },
+                });
+
+                for (let itemYear of years) {
+                    if (itemYear.tahun === tahun || !tahun) {
+                        for (let m = 1; m <= 4; m++) {
+                            if (m === triwulan || !triwulan) {
+                                const temp = getInterval(m);
+
+                                const korluhTanamanHias = await KorluhTanamanHias.count({
+                                    where: {
+                                        kecamatanId: kecamatan.id,
+                                        [Op.and]: [
+                                            sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', temp.start),
+                                            sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', temp.end),
+                                            sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), itemYear.tahun),
+                                        ]
+                                    }
+                                });
+
+                                if (korluhTanamanHias) {
+                                    const validasiKorluhTanamanHias = await ValidasiKorluhTanamanHias.findOne({
+                                        where: {
+                                            kecamatanId: kec.id,
+                                            tahun: itemYear.tahun,
+                                            triwulan: m,
+                                        },
+                                    });
+
+                                    const obj = {
+                                        kecamatan: kec.nama,
+                                        tahun: itemYear.tahun,
+                                        triwulan: m,
+                                        status: validasiKorluhTanamanHias?.status || 'belum',
+                                        keterangan: validasiKorluhTanamanHias?.keterangan || null,
+                                        id: validasiKorluhTanamanHias?.id || null,
+                                    }
+
+                                    if (status === obj.status || !status) {
+                                        if (!data.ids.includes(kec.id)) {
+                                            data.ids.push(kec.id);
+                                        }
+
+                                        data[kec.id] = data[kec.id] || [];
+                                        data[kec.id].push(obj);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            res.status(200).json(response(200, 'Get status laporan korluh tanaman hias successfully', data));
         } catch (err) {
             console.log(err);
 
