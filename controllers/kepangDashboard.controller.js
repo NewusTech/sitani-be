@@ -108,15 +108,13 @@ module.exports = {
                     if (count) {
                         harga /= count;
                         harga = Number.isInteger(harga) ? harga : Number(harga).toFixed(2);
-                    } else {
-                        harga = 0;
-                    }
 
-                    kepangProdusenEceran.push({
-                        komoditas: kom.nama,
-                        harga,
-                        satuan,
-                    });
+                        kepangProdusenEceran.push({
+                            komoditas: kom.nama,
+                            harga,
+                            satuan,
+                        });
+                    }
                 }
 
                 if (kepangPedagangEceran.length < limit && limit > 0) {
@@ -151,14 +149,12 @@ module.exports = {
                     if (count) {
                         harga /= count;
                         harga = Number.isInteger(harga) ? harga : Number(harga).toFixed(2);
-                    } else {
-                        harga = 0;
-                    }
 
-                    kepangPedagangEceran.push({
-                        komoditas: kom.nama,
-                        harga,
-                    })
+                        kepangPedagangEceran.push({
+                            komoditas: kom.nama,
+                            harga,
+                        })
+                    }
                 }
 
                 if (kepangCvProdusen.length < limit && limit > 0) {
@@ -192,16 +188,14 @@ module.exports = {
                     if (countData) {
                         sumData /= countData;
                         sumData = Number.isInteger(sumData) ? sumData : Number(sumData).toFixed(2);
-                    } else {
-                        sumData = 0;
-                    }
 
-                    kepangCvProdusen.push({
-                        komoditas: kom.nama,
-                        mean: sumData,
-                        max: maxData,
-                        min: minData,
-                    })
+                        kepangCvProdusen.push({
+                            komoditas: kom.nama,
+                            mean: sumData,
+                            max: maxData,
+                            min: minData,
+                        });
+                    }
                 }
             }
 
