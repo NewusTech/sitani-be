@@ -346,8 +346,6 @@ module.exports = {
 
             current = dataMap(current, triwulan, tahun, kec, validasiKorluhTanamanHias);
 
-            bulan.setMonth(bulan.getMonth() - 1);
-
             before = await getSum(triwulanAgo, tahunTriwulanAgo, kecamatan);
 
             current = combineData(current, before);
