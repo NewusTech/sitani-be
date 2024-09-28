@@ -300,4 +300,129 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const penyuluhGabunganKelompokTani = await PenyuluhGabunganKelompokTani.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                kecamatan_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                desa_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                tahun: {
+                    type: "number",
+                    optional: true,
+                    integer: true,
+                    convert: true,
+                    min: 1111,
+                    max: 9999,
+                },
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (!penyuluhGabunganKelompokTani) {
+                res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani not found'));
+                return;
+            }
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            let {
+                kecamatan_id,
+                desa_id,
+                tahun,
+                nama,
+                ketua,
+                sekretaris,
+                bendahara,
+                alamat,
+                lahan,
+                dibentuk,
+                poktan,
+                l,
+                p,
+            } = req.body;
+
+            if (kecamatan_id) {
+                const kecamatan = await Kecamatan.findByPk(kecamatan_id);
+
+                kecamatan_id = kecamatan?.id ?? penyuluhGabunganKelompokTani.kecamatanId;
+            } else {
+                kecamatan_id = penyuluhGabunganKelompokTani.kecamatanId;
+            }
+
+            if (desa_id) {
+                const desa = await Desa.findByPk(desa_id);
+
+                desa_id = desa?.id ?? penyuluhGabunganKelompokTani.desaId;
+            } else {
+                desa_id = penyuluhGabunganKelompokTani.desaId;
+            }
+
+            tahun = tahun ?? penyuluhGabunganKelompokTani.tahun;
+            sekretaris = sekretaris ?? penyuluhGabunganKelompokTani.sekretaris;
+            bendahara = bendahara ?? penyuluhGabunganKelompokTani.bendahara;
+            dibentuk = dibentuk ?? penyuluhGabunganKelompokTani.dibentuk;
+            alamat = alamat ?? penyuluhGabunganKelompokTani.alamat;
+            poktan = poktan ?? penyuluhGabunganKelompokTani.poktan;
+            ketua = ketua ?? penyuluhGabunganKelompokTani.ketua;
+            lahan = lahan ?? penyuluhGabunganKelompokTani.lahan;
+            nama = nama ?? penyuluhGabunganKelompokTani.nama;
+            l = l ?? penyuluhGabunganKelompokTani.l;
+            p = p ?? penyuluhGabunganKelompokTani.p;
+
+            await penyuluhGabunganKelompokTani.update({
+                kecamatanId: kecamatan_id,
+                desaId: desa_id,
+                tahun,
+                total: getSum([l, p]),
+                sekretaris,
+                bendahara,
+                dibentuk,
+                alamat,
+                poktan,
+                ketua,
+                lahan,
+                nama,
+                l,
+                p,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update penyuluh gabungan kelompok tani successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
