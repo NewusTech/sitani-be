@@ -41,6 +41,7 @@ const korluhDashboardRoute = require('./korluhDashboard.route');
 const korluhSayurBuahRoute = require('./korluhSayurBuah.route');
 const pspPenerimaUppoRoute = require('./pspPenerimaUppo.route');
 const korluhPalawijaRoute = require('./korluhPalawija.route');
+const pspMasterTahunRoute = require('./pspMasterTahun.route');
 const tphMasterTahunRoute = require('./tphMasterTahun.route');
 const tphLahanSawahRoute = require('./tphLahanSawah.route');
 const pspDashboardRoute = require('./pspDashboard.route');
@@ -106,6 +107,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, korluhSayurBuahRoute);
     app.use(urlApi, pspPenerimaUppoRoute);
     app.use(urlApi, korluhPalawijaRoute);
+    app.use(urlApi, pspMasterTahunRoute);
     app.use(urlApi, tphMasterTahunRoute);
     app.use(urlApi, tphLahanSawahRoute);
     app.use(urlApi, pspDashboardRoute);
