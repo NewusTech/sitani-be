@@ -348,7 +348,7 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { kecamatan, equalDate, startDate, endDate, limit, page } = req.query;
+            let { kecamatan, equalDate, startDate, endDate, limit, bulan, tahun, page } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
@@ -375,25 +375,38 @@ module.exports = {
             if (!isNaN(parseInt(kecamatan))) {
                 where.kecamatanId = parseInt(kecamatan);
             }
-            if (equalDate) {
-                equalDate = new Date(equalDate);
-                equalDate = dateGenerate(equalDate);
-                if (equalDate instanceof Date && !isNaN(equalDate)) {
-                    where.tanggal = { [Op.eq]: equalDate };
+            if (bulan || tahun) {
+                tahun = !isNaN(parseInt(tahun)) ? parseInt(tahun) : new Date().getFullYear();
+                bulan = !isNaN(parseInt(bulan)) ? parseInt(bulan) : new Date().getMonth() + 1;
+
+                where = {
+                    ...where,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
+                    ]
                 }
             } else {
-                if (startDate) {
-                    startDate = new Date(startDate);
-                    startDate = dateGenerate(startDate);
-                    if (startDate instanceof Date && !isNaN(startDate)) {
-                        where.tanggal = { [Op.gte]: startDate };
+                if (equalDate) {
+                    equalDate = new Date(equalDate);
+                    equalDate = dateGenerate(equalDate);
+                    if (equalDate instanceof Date && !isNaN(equalDate)) {
+                        where.tanggal = { [Op.eq]: equalDate };
                     }
-                }
-                if (endDate) {
-                    endDate = new Date(endDate);
-                    endDate = dateGenerate(endDate);
-                    if (endDate instanceof Date && !isNaN(endDate)) {
-                        where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
+                } else {
+                    if (startDate) {
+                        startDate = new Date(startDate);
+                        startDate = dateGenerate(startDate);
+                        if (startDate instanceof Date && !isNaN(startDate)) {
+                            where.tanggal = { [Op.gte]: startDate };
+                        }
+                    }
+                    if (endDate) {
+                        endDate = new Date(endDate);
+                        endDate = dateGenerate(endDate);
+                        if (endDate instanceof Date && !isNaN(endDate)) {
+                            where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
+                        }
                     }
                 }
             }
