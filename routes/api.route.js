@@ -11,6 +11,7 @@ const validasiKorluhSayurBuahRoute = require('./validasiKorluhSayurBuah.route');
 const validasiKorluhPalawijaRoute = require('./validasiKorluhPalawija.route');
 const kepangMasterKomoditasRoute = require('./kepangMasterKomoditas.route');
 const korluhMasterSayurBuahRoute = require('./korluhMasterSayurBuah.route');
+const perkebunanMasterTahunRoute = require('./perkebunanMasterTahun.route');
 const pspAlsintanPascapanenRoute = require('./pspAlsintanPascapanen.route');
 const tphRealisasiPalawija1Route = require('./tphRealisasiPalawija1.route');
 const tphRealisasiPalawija2Route = require('./tphRealisasiPalawija2.route');
@@ -74,6 +75,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, validasiKorluhPalawijaRoute);
     app.use(urlApi, kepangMasterKomoditasRoute);
     app.use(urlApi, korluhMasterSayurBuahRoute);
+    app.use(urlApi, perkebunanMasterTahunRoute);
     app.use(urlApi, pspAlsintanPascapanenRoute);
     app.use(urlApi, tphRealisasiPalawija1Route);
     app.use(urlApi, tphRealisasiPalawija2Route);
