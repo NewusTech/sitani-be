@@ -21,6 +21,10 @@ module.exports = {
                 defaultValue: 'pascapanen',
                 allowNull: false,
             },
+            kode: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
             nama: {
                 type: Sequelize.STRING,
                 allowNull: false,

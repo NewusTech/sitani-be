@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'pascapanen',
             allowNull: false,
         },
+        kode: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
         nama: {
             type: DataTypes.STRING,
             allowNull: false,
