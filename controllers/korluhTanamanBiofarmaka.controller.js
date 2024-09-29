@@ -331,9 +331,13 @@ module.exports = {
                 };
             });
 
-            if (triwulan || tahun) {
+            if ((triwulan || tahun) && Number.isInteger(where?.kecamatanId)) {
+                const kec = await Kecamatan.findByPk(where.kecamatanId);
+
                 let temp = {
-                    bulan: []
+                    kecamatan: kec,
+                    bulan: [],
+                    tahun,
                 };
 
                 for (let item of korluhTanamanBiofarmaka) {
