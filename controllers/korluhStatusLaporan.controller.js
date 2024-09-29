@@ -418,7 +418,7 @@ module.exports = {
 
                                 const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.count({
                                     where: {
-                                        kecamatanId: kecamatan.id,
+                                        kecamatanId: kec.id,
                                         [Op.and]: [
                                             sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', temp.start),
                                             sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', temp.end),
@@ -529,7 +529,7 @@ module.exports = {
 
                                 const korluhTanamanHias = await KorluhTanamanHias.count({
                                     where: {
-                                        kecamatanId: kecamatan.id,
+                                        kecamatanId: kec.id,
                                         [Op.and]: [
                                             sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', temp.start),
                                             sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', temp.end),
