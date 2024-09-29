@@ -7,6 +7,7 @@ let prefix = '/psp/alsintan-prapanen';
 /* -- ROUTE -- */
 route.post(prefix + '/create', pspAlsintanPrapanenController.create);
 route.get(prefix + '/get', pspAlsintanPrapanenController.getAll);
+route.get(prefix + '/get/:id', pspAlsintanPrapanenController.getOne);
 /* -- ROUTE -- */
 
 module.exports = route;
