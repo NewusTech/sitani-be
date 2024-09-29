@@ -9,6 +9,7 @@ route.post(prefix + '/create', pspAlsintanPrapanenController.create);
 route.get(prefix + '/get', pspAlsintanPrapanenController.getAll);
 route.get(prefix + '/get/:id', pspAlsintanPrapanenController.getOne);
 route.put(prefix + '/update/:id', pspAlsintanPrapanenController.update);
+route.delete(prefix + '/delete/:id', pspAlsintanPrapanenController.delete);
 /* -- ROUTE -- */
 
 module.exports = route;
