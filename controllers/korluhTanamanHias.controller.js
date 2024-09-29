@@ -1,4 +1,5 @@
 const { KorluhMasterTanamanHias, KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, User, sequelize } = require('../models');
+const { getInterval } = require('./validasiKorluhTanamanHias.controller');
 const { dateGenerate, response, fixedNumber } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
@@ -191,12 +192,12 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { kecamatan, equalDate, startDate, endDate, limit, page } = req.query;
+            let { kecamatan, equalDate, startDate, triwulan, endDate, limit, tahun, page } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
-            const offset = (page - 1) * limit;
+            let offset = (page - 1) * limit;
 
             if (req?.root?.userId) {
                 const user = await User.findByPk(req.root.userId, {
@@ -218,25 +219,49 @@ module.exports = {
             if (!isNaN(parseInt(kecamatan))) {
                 where.kecamatanId = parseInt(kecamatan);
             }
-            if (equalDate) {
-                equalDate = new Date(equalDate);
-                equalDate = dateGenerate(equalDate);
-                if (equalDate instanceof Date && !isNaN(equalDate)) {
-                    where.tanggal = { [Op.eq]: equalDate };
+            if (triwulan || tahun) {
+                offset = undefined;
+                limit = undefined;
+
+                tahun = !isNaN(parseInt(tahun)) ? parseInt(tahun) : new Date().getFullYear();
+                triwulan = !isNaN(parseInt(triwulan)) ? parseInt(triwulan) : 0;
+
+                if (triwulan < 1 || triwulan > 4) {
+                    const currentMonth = new Date().getMonth() + 1;
+                    triwulan = parseInt((currentMonth + ((3 - (currentMonth % 3)) % 3)) / 3);
+                }
+
+                triwulan = getInterval(triwulan);
+
+                where = {
+                    ...where,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', triwulan.start),
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', triwulan.end),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
+                    ]
                 }
             } else {
-                if (startDate) {
-                    startDate = new Date(startDate);
-                    startDate = dateGenerate(startDate);
-                    if (startDate instanceof Date && !isNaN(startDate)) {
-                        where.tanggal = { [Op.gte]: startDate };
+                if (equalDate) {
+                    equalDate = new Date(equalDate);
+                    equalDate = dateGenerate(equalDate);
+                    if (equalDate instanceof Date && !isNaN(equalDate)) {
+                        where.tanggal = { [Op.eq]: equalDate };
                     }
-                }
-                if (endDate) {
-                    endDate = new Date(endDate);
-                    endDate = dateGenerate(endDate);
-                    if (endDate instanceof Date && !isNaN(endDate)) {
-                        where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
+                } else {
+                    if (startDate) {
+                        startDate = new Date(startDate);
+                        startDate = dateGenerate(startDate);
+                        if (startDate instanceof Date && !isNaN(startDate)) {
+                            where.tanggal = { [Op.gte]: startDate };
+                        }
+                    }
+                    if (endDate) {
+                        endDate = new Date(endDate);
+                        endDate = dateGenerate(endDate);
+                        if (endDate instanceof Date && !isNaN(endDate)) {
+                            where.tanggal = { ...where.tanggal, [Op.lte]: endDate };
+                        }
                     }
                 }
             }
@@ -265,6 +290,8 @@ module.exports = {
             });
 
             const count = await KorluhTanamanHias.count({ where });
+
+            limit = limit || 1;
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/tanaman-hias/get');
 
@@ -303,6 +330,25 @@ module.exports = {
                     ...temp,
                 };
             });
+
+            if (triwulan || tahun) {
+                let temp = {
+                    bulan: []
+                };
+
+                for (let item of korluhTanamanHias) {
+                    const bln = new Date(item.tanggal).getMonth() + 1;
+
+                    temp[bln] = temp[bln] || [];
+                    if (!temp.bulan.includes(bln)) {
+                        temp.bulan.push(bln);
+                    }
+
+                    temp[bln].push(item);
+                }
+
+                korluhTanamanHias = temp;
+            }
 
             res.status(200).json(response(200, 'Get korluh tanaman hias successfully', { data: korluhTanamanHias, pagination }));
         } catch (err) {
