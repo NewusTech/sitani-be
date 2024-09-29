@@ -337,4 +337,126 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const pspAlsintanPascapanen = await PspAlsintanPascapanen.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                kecamatan_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                tahun: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                    min: 1111,
+                    max: 9999,
+                },
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (!pspAlsintanPascapanen) {
+                res.status(404).json(response(404, 'Psp alsintan pascapanen not found'));
+                return;
+            }
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            let {
+                kecamatan_id,
+                tahun,
+                chb_apbn,
+                chb_tp,
+                chb_apbd,
+                chk_apbn,
+                chk_tp,
+                chk_apbd,
+                power_thresher_apbn,
+                power_thresher_tp,
+                power_thresher_apbd,
+                corn_sheller_apbn,
+                corn_sheller_tp,
+                corn_sheller_apbd,
+                ptm_apbn,
+                ptm_tp,
+                ptm_apbd,
+                ptm_mobile_apbn,
+                ptm_mobile_tp,
+                ptm_mobile_apbd,
+                cs_mobile_apbn,
+                cs_mobile_tp,
+                cs_mobile_apbd,
+                keterangan,
+            } = req.body;
+
+            if (kecamatan_id) {
+                const kecamatan = await Kecamatan.findByPk(kecamatan_id);
+
+                kecamatan_id = kecamatan?.id ?? pspAlsintanPascapanen.kecamatanId;
+            } else {
+                kecamatan_id = pspAlsintanPascapanen.kecamatanId;
+            }
+
+            tahun = tahun ?? pspAlsintanPascapanen.tahun;
+
+            await pspAlsintanPascapanen.update({
+                kecamatanId: kecamatan_id,
+                tahun,
+                chb_apbn,
+                chb_tp,
+                chb_apbd,
+                chk_apbn,
+                chk_tp,
+                chk_apbd,
+                power_thresher_apbn,
+                power_thresher_tp,
+                power_thresher_apbd,
+                corn_sheller_apbn,
+                corn_sheller_tp,
+                corn_sheller_apbd,
+                ptm_apbn,
+                ptm_tp,
+                ptm_apbd,
+                ptm_mobile_apbn,
+                ptm_mobile_tp,
+                ptm_mobile_apbd,
+                cs_mobile_apbn,
+                cs_mobile_tp,
+                cs_mobile_apbd,
+                keterangan,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update PSP alsintan pascapanen successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
