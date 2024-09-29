@@ -340,15 +340,19 @@ module.exports = {
                     tahun,
                 };
 
+                for (let i = triwulan.start; i <= triwulan.end; i++) {
+                    temp[i] = temp[i] || [];
+                    if (!temp.bulan.includes(i)) {
+                        temp.bulan.push(i);
+                    }
+                }
+
                 for (let item of korluhTanamanBiofarmaka) {
                     const bln = new Date(item.tanggal).getMonth() + 1;
 
-                    temp[bln] = temp[bln] || [];
-                    if (!temp.bulan.includes(bln)) {
-                        temp.bulan.push(bln);
+                    if (temp.bulan.includes(bln)) {
+                        temp[bln].push(item);
                     }
-
-                    temp[bln].push(item);
                 }
 
                 korluhTanamanBiofarmaka = temp;
