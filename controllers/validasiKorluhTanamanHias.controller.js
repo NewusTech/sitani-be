@@ -148,6 +148,8 @@ const getSum = async (triwulan, tahun, kecamatan = undefined) => {
 }
 
 module.exports = {
+    getInterval, combineData, dataMap, getSum,
+
     validate: async (req, res) => {
         const transaction = await sequelize.transaction();
 

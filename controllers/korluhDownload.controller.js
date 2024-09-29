@@ -1,11 +1,14 @@
 const {
     KorluhMasterTanamanBiofarmaka,
     KorluhTanamanBiofarmakaList,
+    KorluhMasterTanamanHias,
     KorluhTanamanBiofarmaka,
     KorluhMasterSayurBuah,
+    KorluhTanamanHiasList,
     KorluhMasterPalawija,
     KorluhSayurBuahList,
     KorluhPalawijaList,
+    KorluhTanamanHias,
     KorluhSayurBuah,
     KorluhPalawija,
     KorluhPadi,
@@ -16,6 +19,7 @@ const BIOFARMAKA = require('./validasiKorluhTanamanBiofarmaka.controller');
 const { response, fixedNumber, dateGenerate } = require('../helpers');
 const SAYURBUAH = require('./validasiKorluhSayurBuah.controller');
 const PALAWIJA = require('./validasiKorluhPalawija.controller');
+const HIAS = require('./validasiKorluhTanamanHias.controller');
 const PADI = require('./validasiKorluhPadi.controller');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -1403,6 +1407,353 @@ module.exports = {
             }
 
             res.status(404).json(response(404, 'Data korluh biofarmaka not found'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    hias: async (req, res) => {
+        try {
+            let { kecamatan, triwulan, tahun } = req.query;
+
+            const currentDate = dateGenerate(new Date());
+
+            kecamatan = isNaN(parseInt(kecamatan)) ? 0 : parseInt(kecamatan);
+            tahun = isNaN(parseInt(tahun)) ? 0 : parseInt(tahun);
+
+            if (tahun < 1111 || tahun > 9999) {
+                tahun = dateGenerate(new Date()).getFullYear();
+            }
+
+            if (!isNaN(parseInt(triwulan))) {
+                triwulan = parseInt(triwulan);
+                if (triwulan < 1 || triwulan > 4) {
+                    triwulan = null;
+                }
+            }
+
+            if (isNaN(parseInt(triwulan))) {
+                const currentMonth = currentDate.getMonth() + 1;
+                triwulan = parseInt((currentMonth + ((3 - (currentMonth % 3)) % 3)) / 3);
+            }
+
+            let triwulanAgo = triwulan - 1 === 0 ? 4 : triwulan - 1;
+            const tahunTriwulanAgo = triwulanAgo > triwulan ? tahun - 1 : tahun;
+
+            triwulanAgo = HIAS.getInterval(triwulanAgo);
+            triwulan = HIAS.getInterval(triwulan);
+
+            const kec = await Kecamatan.findByPk(kecamatan);
+
+            let current = await KorluhTanamanHias.findAll({
+                include: [
+                    {
+                        model: KorluhTanamanHiasList,
+                        as: 'list',
+                        include: [
+                            {
+                                model: KorluhMasterTanamanHias,
+                                as: 'master'
+                            }
+                        ]
+                    }
+                ],
+                where: {
+                    kecamatanId: kecamatan,
+                    [Op.and]: [
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', triwulan.start),
+                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', triwulan.end),
+                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
+                    ]
+                }
+            });
+
+            if (current.length) {
+                let temp = [];
+
+                current = HIAS.dataMap(current, triwulan, tahun, kec);
+
+                before = await HIAS.getSum(triwulanAgo, tahunTriwulanAgo, kecamatan);
+
+                current = HIAS.combineData(current, before);
+
+                const workbook = new exceljs.Workbook();
+                const worksheet = workbook.addWorksheet("Laporan Tanaman Hias");
+
+                for (let i = 1; i <= 39; i++) {
+                    temp.push({ width: 5 });
+                }
+                worksheet.columns = temp;
+
+                worksheet.getCell('A1').value = `BADAN PUSAT STATISTIK`;
+                worksheet.getCell('A2').value = `DAN`;
+                worksheet.getCell('A3').value = `KEMENTRIAN PERTANIAN`;
+
+                ['1', '2', '3'].forEach(i => {
+                    worksheet.mergeCells(`A${i}:E${i}`);
+                    worksheet.getCell(`A${i}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                })
+
+                worksheet.getCell('F3').value = `LAPORAN TANAMAN HIAS`;
+                worksheet.getCell('F4').value = `(Isian dalam bilangan bulat)`;
+
+                worksheet.getCell('F3').font = {
+                    bold: true,
+                };
+                [3, 4].forEach(i => {
+                    worksheet.mergeCells(`F${i}:AE${i}`);
+                    worksheet.getCell(`F${i}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                })
+
+                worksheet.getCell('AI3').value = `SPH-TH`;
+
+                worksheet.getCell('AI3').font = {
+                    bold: true,
+                };
+                worksheet.mergeCells(`AI3:AM3`);
+                worksheet.getCell(`AI3`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+                worksheet.getCell('A5').value = `PROVINSI`;
+                worksheet.getCell('A6').value = `KAB/KOTA`;
+                worksheet.getCell('A7').value = `KECAMATAN`;
+
+                worksheet.getCell('D5').value = `LAMPUNG`;
+                worksheet.getCell('D6').value = `LAMPUNG TIMUR`;
+                worksheet.getCell('D7').value = `${kec?.nama || ''}`;
+
+                ['I7', 'J5', 'J6', 'J7', 'K5', 'K6', 'K7'].forEach(cell => {
+                    worksheet.getCell(cell).border = {
+                        bottom: { style: 'thin', color: { argb: '00000000' } },
+                        right: { style: 'thin', color: { argb: '00000000' } },
+                        left: { style: 'thin', color: { argb: '00000000' } },
+                        top: { style: 'thin', color: { argb: '00000000' } },
+                    };
+                })
+
+                worksheet.getCell('AH6').value = `Triwulan : ${triwulan.value}`;
+                worksheet.getCell('AH7').value = `Tahun : ${tahun}`;
+
+                ['AL6', 'AL7', 'AM6', 'AM7'].forEach(cell => {
+                    worksheet.getCell(cell).border = {
+                        bottom: { style: 'thin', color: { argb: '00000000' } },
+                        right: { style: 'thin', color: { argb: '00000000' } },
+                        left: { style: 'thin', color: { argb: '00000000' } },
+                        top: { style: 'thin', color: { argb: '00000000' } },
+                    };
+                })
+
+                worksheet.getCell('A8').value = `No`;
+                worksheet.getCell('B8').value = `Nama Tanaman`;
+
+                worksheet.mergeCells(`A8:A9`);
+                worksheet.mergeCells(`B8:F9`);
+
+                worksheet.getCell('G8').value = `Luas Tanaman Akhir Triwulan yang Lalu (m2)`;
+
+                worksheet.mergeCells(`G8:I9`);
+
+                worksheet.getCell('J8').value = `Luas Panen (m2)`;
+
+                worksheet.getCell('J9').value = `Habis / Dibongkar`;
+                worksheet.getCell('M9').value = `Belum Habis`;
+
+                worksheet.mergeCells(`J8:O8`);
+
+                worksheet.mergeCells(`J9:L9`);
+                worksheet.mergeCells(`M9:O9`);
+
+                worksheet.getCell('P8').value = `Luas Rusak / Tidak Berhasil / Puso (m2)`;
+
+                worksheet.mergeCells(`P8:R9`);
+
+                worksheet.getCell('S8').value = `Luas Penanaman Baru / Tambah Tanam (m2)`;
+
+                worksheet.mergeCells(`S8:U9`);
+
+                worksheet.getCell('V8').value = `Luas Tanaman Akhir Triwulan Laporan (Hektar) (3)-(4)-(6)+(7)`;
+
+                worksheet.mergeCells(`V8:X9`);
+
+                worksheet.getCell('Y8').value = `Produksi (Kilogram)`;
+
+                worksheet.getCell('Y9').value = `Dipanen Habis / Dibongkar`;
+                worksheet.getCell('AB9').value = `Belum Habis`;
+
+                worksheet.mergeCells(`Y8:AD8`);
+
+                worksheet.mergeCells(`Y9:AA9`);
+                worksheet.mergeCells(`AB9:AD9`);
+
+                worksheet.getCell('AE8').value = `Satuan Produksi`;
+
+                worksheet.mergeCells(`AE8:AG9`);
+
+                worksheet.getCell('AH8').value = `Rata rata Harga Jual di petani per Kilogram (Rupiah)`;
+
+                worksheet.mergeCells(`AH8:AJ9`);
+
+                worksheet.getCell('AK8').value = `Keterangan`;
+
+                worksheet.mergeCells(`AK8:AM9`);
+
+                worksheet.getCell('A10').value = `(1)`;
+                worksheet.getCell('B10').value = `(2)`;
+
+                worksheet.getCell('G10').value = `(3)`;
+
+                worksheet.getCell('J10').value = `(4)`;
+                worksheet.getCell('M10').value = `(5)`;
+
+                worksheet.getCell('P10').value = `(6)`;
+                worksheet.getCell('S10').value = `(7)`;
+                worksheet.getCell('V10').value = `(8)`;
+
+                worksheet.getCell('Y10').value = `(9)`;
+                worksheet.getCell('AB10').value = `(10)`;
+
+                worksheet.getCell('AE10').value = `(11)`;
+                worksheet.getCell('AH10').value = `(12)`;
+
+                worksheet.getCell('AK10').value = `(13)`;
+
+                temp = 11;
+                [
+                    "Anggrek Potong*",
+                    "Gerbera (Herbas)",
+                    "Krisan",
+                    "Mawar",
+                    "Sedap Malam",
+                    "Aglaonema",
+                    "Anggrek Pot**",
+                    "Anthurium Bunga",
+                    "Bromelia",
+                    "Bugenvil",
+                    "Cordyline",
+                    "Dracaena",
+                    "Heliconia (Pisang-pisangan)",
+                    "Ixora (Soka)",
+                    "Pakis",
+                    "Palem",
+                    "Phylodendron",
+                    "Puring",
+                    "Sansevieria (Lidah mertua)",
+                    "Melati",
+                ].forEach((x, idx) => {
+                    worksheet.getCell(`A${temp}`).value = `${idx + 1}`;
+                    worksheet.getCell(`B${temp}`).value = `${x}`;
+                    temp++;
+                })
+
+                temp = 11;
+                columns = ['G', 'J', 'M', 'P', 'S', 'V', 'Y', 'AB', 'AE', 'AH', 'AK'];
+                for (let i = 1; i <= 20; i++) {
+                    if (current[i]) {
+                        const newCurrent = fixedNumber(current[i], 0);
+                        [
+                            "triwulanLalu",
+                            "luasPanenHabis",
+                            "luasPanenBelumHabis",
+                            "luasRusak",
+                            "luasPenanamanBaru",
+                            "akhir",
+                            "produksiHabis",
+                            "produksiBelumHabis",
+                            "satuanProduksi",
+                            "rerataHarga",
+                            "keterangan",
+                        ].forEach((j, idx) => {
+                            let value = newCurrent[j];
+                            if (j === 'rerataHarga' && newCurrent['count']) {
+                                value /= newCurrent['count'];
+                            }
+                            worksheet.getCell(`${columns[idx]}${temp}`).value = value ? `${value}` : '';
+                        });
+                    }
+                    temp++;
+                }
+
+                worksheet.getCell(`A${temp}`).value = `Catatan`;
+                worksheet.getCell(`C${temp}`).value = `: * Anggrek Potong : tanaman anggrek yang bentuk hasil panen / dijual berupa bunga potong ( tangkai bunga )`;
+                worksheet.getCell(`AF${temp}`).value = `Petugas Pengumpul Data`;
+
+                worksheet.mergeCells(`AF${temp}:AM${temp}`);
+                worksheet.getCell(`AF${temp}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                temp++;
+
+                worksheet.getCell(`C${temp}`).value = `: ** Anggrek Potong : tanaman anggrek yang bentuk hasil panen / dijual berupa tanaman berbunga ( dalam pot )`;
+                temp++;
+
+                worksheet.getCell(`A${temp}`).value = `Tanggal`;
+                worksheet.getCell(`C${temp}`).value = `.....................`;
+                worksheet.getCell(`AF${temp}`).value = `(....................)`;
+
+                worksheet.mergeCells(`AF${temp}:AM${temp}`);
+                worksheet.getCell(`AF${temp}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                temp++;
+
+                worksheet.getCell(`AF${temp}`).value = `Jabatan : ....................`;
+
+                worksheet.mergeCells(`AF${temp}:AM${temp}`);
+                worksheet.getCell(`AF${temp}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+                for (let i = 8; i <= 30; i++) {
+                    for (let j = 'A'.charCodeAt(0); j <= 'Z'.charCodeAt(0); j++) {
+                        let cell = `${String.fromCharCode(j)}${i}`;
+                        worksheet.getCell(cell).border = {
+                            bottom: { style: 'thin', color: { argb: '00000000' } },
+                            right: { style: 'thin', color: { argb: '00000000' } },
+                            left: { style: 'thin', color: { argb: '00000000' } },
+                            top: { style: 'thin', color: { argb: '00000000' } },
+                        };
+                        if ((j < 'B'.charCodeAt(0) || j > 'F'.charCodeAt(0)) || i <= 10) {
+                            worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
+                        }
+                    }
+                    for (let j = 'A'.charCodeAt(0); j <= 'M'.charCodeAt(0); j++) {
+                        let cell = `A${String.fromCharCode(j)}${i}`;
+                        worksheet.getCell(cell).border = {
+                            bottom: { style: 'thin', color: { argb: '00000000' } },
+                            right: { style: 'thin', color: { argb: '00000000' } },
+                            left: { style: 'thin', color: { argb: '00000000' } },
+                            top: { style: 'thin', color: { argb: '00000000' } },
+                        };
+                        worksheet.getCell(cell).alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
+                    if (i >= 10) {
+                        worksheet.mergeCells(`B${i}:F${i}`);
+
+                        worksheet.mergeCells(`G${i}:I${i}`);
+
+                        worksheet.mergeCells(`J${i}:L${i}`);
+                        worksheet.mergeCells(`M${i}:O${i}`);
+                        worksheet.mergeCells(`P${i}:R${i}`);
+
+                        worksheet.mergeCells(`S${i}:U${i}`);
+                        worksheet.mergeCells(`V${i}:X${i}`);
+
+                        worksheet.mergeCells(`Y${i}:AA${i}`);
+                        worksheet.mergeCells(`AB${i}:AD${i}`);
+
+                        worksheet.mergeCells(`AE${i}:AG${i}`);
+                        worksheet.mergeCells(`AH${i}:AJ${i}`);
+                        worksheet.mergeCells(`AK${i}:AM${i}`);
+                    }
+                }
+
+                res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                res.setHeader("Content-Disposition", "attachment; filename=" + "laporan-tanaman-hias.xlsx");
+
+                workbook.xlsx.write(res).then(() => res.end());
+                return;
+            }
+
+            res.status(404).json(response(404, 'Data korluh hias not found'));
         } catch (err) {
             console.log(err);
 
