@@ -196,7 +196,7 @@ module.exports = {
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
-            const offset = (page - 1) * limit;
+            let offset = (page - 1) * limit;
 
             if (req?.root?.userId) {
                 const user = await User.findByPk(req.root.userId, {
