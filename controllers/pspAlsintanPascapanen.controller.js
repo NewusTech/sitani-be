@@ -253,4 +253,57 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    getAll: async (req, res) => {
+        try {
+            let { kecamatan, limit, page, year } = req.query;
+
+            limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
+            page = isNaN(parseInt(page)) ? 1 : parseInt(page);
+
+            const offset = (page - 1) * limit;
+
+            kecamatan = isNaN(parseInt(kecamatan)) ? null : parseInt(kecamatan);
+            year = isNaN(parseInt(year)) ? null : parseInt(year);
+
+            let where = {};
+
+            if (kecamatan) {
+                where.kecamatanId = kecamatan;
+            }
+            if (year) {
+                where.tahun = year;
+            }
+
+            const pspAlsintanPascapanen = await PspAlsintanPascapanen.findAll({
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatan',
+                    },
+                ],
+                order: [
+                    ['tahun', 'DESC'],
+                    ['createdAt', 'DESC']
+                ],
+                offset,
+                limit,
+                where,
+            });
+
+            const count = await PspAlsintanPascapanen.count({ where });
+
+            const pagination = generatePagination(count, page, limit, '/api/psp/alsintan-pascapanen/get');
+
+            res.status(200).json(response(200, 'Get PSP alsintan pascapanen successfully', { data: pspAlsintanPascapanen, pagination }));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
