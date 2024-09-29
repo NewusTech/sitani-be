@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     PspMasterAlsintan.init({
+        jenis: {
+            type: DataTypes.ENUM('prapanen', 'pascapanen'),
+            defaultValue: 'pascapanen',
+            allowNull: false,
+        },
         nama: {
             type: DataTypes.STRING,
             allowNull: false,

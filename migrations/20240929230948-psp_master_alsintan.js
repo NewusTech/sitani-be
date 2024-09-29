@@ -16,6 +16,11 @@ module.exports = {
                 primaryKey: true,
                 allowNull: false,
             },
+            jenis: {
+                type: Sequelize.ENUM('prapanen', 'pascapanen'),
+                defaultValue: 'pascapanen',
+                allowNull: false,
+            },
             nama: {
                 type: Sequelize.STRING,
                 allowNull: false,
