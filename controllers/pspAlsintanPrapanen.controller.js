@@ -158,6 +158,8 @@ module.exports = {
                     positive: true,
                     integer: true,
                     convert: true,
+                    min: 1111,
+                    max: 9999,
                 },
                 ...coreSchema,
             };
@@ -330,6 +332,128 @@ module.exports = {
 
             logger.error(`Error : ${err}`);
             logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    update: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const pspAlsintanPrapanen = await PspAlsintanPrapanen.findOne({
+                where: { id },
+            });
+
+            const schema = {
+                kecamatan_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                tahun: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                    min: 1111,
+                    max: 9999,
+                },
+                ...coreSchema,
+            };
+
+            const validate = v.validate(req.body, schema);
+
+            if (!pspAlsintanPrapanen) {
+                res.status(404).json(response(404, 'Psp alsintan prapanen not found'));
+                return;
+            }
+
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
+                return;
+            }
+
+            let {
+                kecamatan_id,
+                tahun,
+                tr_4_apbn,
+                tr_4_tp,
+                tr_4_apbd,
+                tr_2_apbn,
+                tr_2_tp,
+                tr_2_apbd,
+                rt_apbn,
+                rt_tp,
+                rt_apbd,
+                cornplanter_apbn,
+                cornplanter_tp,
+                cornplanter_apbd,
+                cultivator_apbn,
+                cultivator_tp,
+                cultivator_apbd,
+                hand_sprayer_apbn,
+                hand_sprayer_tp,
+                hand_sprayer_apbd,
+                pompa_air_apbn,
+                pompa_air_tp,
+                pompa_air_apbd,
+                keterangan,
+            } = req.body;
+
+            if (kecamatan_id) {
+                const kecamatan = await Kecamatan.findByPk(kecamatan_id);
+
+                kecamatan_id = kecamatan?.id ?? pspAlsintanPrapanen.kecamatanId;
+            } else {
+                kecamatan_id = pspAlsintanPrapanen.kecamatanId;
+            }
+
+            tahun = tahun ?? pspAlsintanPrapanen.tahun;
+
+            await pspAlsintanPrapanen.update({
+                kecamatanId: kecamatan_id,
+                tahun,
+                tr_4_apbn,
+                tr_4_tp,
+                tr_4_apbd,
+                tr_2_apbn,
+                tr_2_tp,
+                tr_2_apbd,
+                rt_apbn,
+                rt_tp,
+                rt_apbd,
+                cornplanter_apbn,
+                cornplanter_tp,
+                cornplanter_apbd,
+                cultivator_apbn,
+                cultivator_tp,
+                cultivator_apbd,
+                hand_sprayer_apbn,
+                hand_sprayer_tp,
+                hand_sprayer_apbd,
+                pompa_air_apbn,
+                pompa_air_tp,
+                pompa_air_apbd,
+                keterangan,
+            });
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Update PSP alsintan prapanen successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
 
             // res.status(500).json(response(500, 'Internal server error'));
             res.status(500).json(response(500, err.message));
