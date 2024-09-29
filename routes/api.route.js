@@ -21,6 +21,7 @@ const korluhStatusLaporanRoute = require('./korluhStatusLaporan.route');
 const perkebunanDashboardRoute = require('./perkebunanDashboard.route');
 const perkebunanKabupatenRoute = require('./perkebunanKabupaten.route');
 const perkebunanKecamatanRoute = require('./perkebunanKecamatan.route');
+const pspAlsintanPrapanenRoute = require('./pspAlsintanPrapanen.route');
 const tphLahanBukanSawahRoute = require('./tphLahanBukanSawah.route');
 const validasiKorluhPadiRoute = require('./validasiKorluhPadi.route');
 const kepangMasterTahunRoute = require('./kepangMasterTahun.route');
@@ -81,6 +82,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, perkebunanDashboardRoute);
     app.use(urlApi, perkebunanKabupatenRoute);
     app.use(urlApi, perkebunanKecamatanRoute);
+    app.use(urlApi, pspAlsintanPrapanenRoute);
     app.use(urlApi, tphLahanBukanSawahRoute);
     app.use(urlApi, validasiKorluhPadiRoute);
     app.use(urlApi, kepangMasterTahunRoute);
