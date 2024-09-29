@@ -459,4 +459,37 @@ module.exports = {
             res.status(500).json(response(500, err.message));
         }
     },
+
+    delete: async (req, res) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const { id } = req.params;
+
+            const pspAlsintanPascapanen = await PspAlsintanPascapanen.findOne({
+                where: { id },
+            });
+
+            if (!pspAlsintanPascapanen) {
+                res.status(404).json(response(404, 'PSP alsintan pascapanen not found'));
+                return;
+            }
+
+            await pspAlsintanPascapanen.destroy();
+
+            await transaction.commit();
+
+            res.status(200).json(response(200, 'Delete PSP alsintan pascapanen successfully'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            await transaction.rollback();
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
 }
