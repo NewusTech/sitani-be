@@ -434,6 +434,9 @@ module.exports = {
                 where.kecamatanId = parseInt(kecamatan);
             }
             if (bulan || tahun) {
+                offset = undefined;
+                limit = undefined;
+
                 tahun = !isNaN(parseInt(tahun)) ? parseInt(tahun) : new Date().getFullYear();
                 bulan = !isNaN(parseInt(bulan)) ? parseInt(bulan) : new Date().getMonth() + 1;
 
@@ -483,6 +486,8 @@ module.exports = {
             });
 
             const count = await KorluhPadi.count({ where });
+
+            limit = limit || 1;
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/padi/get');
 
