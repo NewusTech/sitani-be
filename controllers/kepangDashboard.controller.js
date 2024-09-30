@@ -204,7 +204,7 @@ module.exports = {
                 order: [['bulan', 'ASC']]
             });
 
-            res.status(200).json(response(200, 'Get katahanan pangan dashboard data successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan data dashboard katahanan pangan', {
                 kepangProdusenEceran,
                 kepangPedagangEceran,
                 kepangCvProduksi,
