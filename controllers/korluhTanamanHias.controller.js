@@ -192,12 +192,18 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            let { kecamatan, equalDate, startDate, triwulan, endDate, limit, tahun, page } = req.query;
+            let { kecamatan, equalDate, startDate, triwulan, endDate, bulan, limit, tahun, page } = req.query;
 
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
             page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
             let offset = (page - 1) * limit;
+
+            bulan = isNaN(parseInt(bulan)) ? 0 : parseInt(bulan);
+
+            if (bulan < 1 || bulan > 12) {
+                bulan = null;
+            }
 
             if (req?.root?.userId) {
                 const user = await User.findByPk(req.root.userId, {
@@ -233,13 +239,23 @@ module.exports = {
 
                 triwulan = getInterval(triwulan);
 
-                where = {
-                    ...where,
-                    [Op.and]: [
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', triwulan.start),
-                        sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', triwulan.end),
-                        sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
-                    ]
+                if (bulan) {
+                    where = {
+                        ...where,
+                        [Op.and]: [
+                            sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), bulan),
+                            sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
+                        ]
+                    };
+                } else {
+                    where = {
+                        ...where,
+                        [Op.and]: [
+                            sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '>=', triwulan.start),
+                            sequelize.where(sequelize.fn('MONTH', sequelize.col('tanggal')), '<=', triwulan.end),
+                            sequelize.where(sequelize.fn('YEAR', sequelize.col('tanggal')), tahun),
+                        ]
+                    };
                 }
             } else {
                 if (equalDate) {
@@ -330,33 +346,6 @@ module.exports = {
                     ...temp,
                 };
             });
-
-            if ((triwulan || tahun) && Number.isInteger(where?.kecamatanId)) {
-                const kec = await Kecamatan.findByPk(where.kecamatanId);
-
-                let temp = {
-                    kecamatan: kec,
-                    bulan: [],
-                    tahun,
-                };
-
-                for (let i = triwulan.start; i <= triwulan.end; i++) {
-                    temp[i] = temp[i] || [];
-                    if (!temp.bulan.includes(i)) {
-                        temp.bulan.push(i);
-                    }
-                }
-
-                for (let item of korluhTanamanHias) {
-                    const bln = new Date(item.tanggal).getMonth() + 1;
-
-                    if (temp.bulan.includes(bln)) {
-                        temp[bln].push(item);
-                    }
-                }
-
-                korluhTanamanHias = temp;
-            }
 
             res.status(200).json(response(200, 'Get korluh tanaman hias successfully', { data: korluhTanamanHias, pagination }));
         } catch (err) {

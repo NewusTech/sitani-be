@@ -200,7 +200,7 @@ module.exports = {
 
             let offset = (page - 1) * limit;
 
-            bulan = isNaN(parseInt(bulan)) ? null : parseInt(bulan);
+            bulan = isNaN(parseInt(bulan)) ? 0 : parseInt(bulan);
 
             if (bulan < 1 || bulan > 12) {
                 bulan = null;
