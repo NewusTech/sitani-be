@@ -1,12 +1,14 @@
 const { DeleteObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const { generatePagination } = require('../pagination/pagination');
+const { customMessages, response } = require('../helpers');
 const { Article, User, sequelize } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+	messages: customMessages
+});
 
 const s3Client = new S3Client({
 	region: process.env.AWS_REGION,
@@ -89,7 +91,7 @@ module.exports = {
 
 			await transaction.commit();
 
-			res.status(201).json(response(201, 'Article created'));
+			res.status(201).json(response(201, 'Artikel Berhasil dibuat'));
 		} catch (err) {
 			console.log(err);
 
@@ -102,7 +104,7 @@ module.exports = {
 				res.status(400).json(response(400, 'Bad Request', [
 					{
 						type: 'duplicate',
-						message: 'Cannot created article, please use another title',
+						message: 'Tidak dapat membuat artikel, judul sudah digunakan',
 						field: 'judul',
 					},
 				]));
@@ -120,7 +122,7 @@ module.exports = {
 			limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
 			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
-			const offset = (page - 1) * limit;
+			let offset = (page - 1) * limit;
 
 			const order = [['createdAt', 'DESC']];
 
@@ -139,39 +141,30 @@ module.exports = {
 
 			let pagination = null;
 			let articles = [];
-			let count = 0;
 
 			if (withPagination === 'false') {
-				articles = await Article.findAll({
-					include: [
-						{
-							model: User,
-							attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'id'] },
-							as: 'user',
-						},
-					],
-					order,
-					where,
-				});
+				offset = undefined;
+				limit = undefined;
 			} else {
-				articles = await Article.findAll({
-					include: [
-						{
-							model: User,
-							attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'id'] },
-							as: 'user',
-						},
-					],
-					offset: offset,
-					limit: limit,
-					order,
-					where,
-				});
-				count = await Article.count({ where });
+				const count = await Article.count({ where });
 				pagination = generatePagination(count, page, limit, '/api/article/get');
 			}
 
-			res.status(200).json(response(200, 'Get articles successfully', { data: articles, pagination }));
+			articles = await Article.findAll({
+				include: [
+					{
+						model: User,
+						attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'id'] },
+						as: 'user',
+					},
+				],
+				offset,
+				limit,
+				order,
+				where,
+			});
+
+			res.status(200).json(response(200, 'Berhasil mendapatkan daftar artikel', { data: articles, pagination }));
 		} catch (err) {
 			console.log(err);
 
@@ -199,11 +192,11 @@ module.exports = {
 			});
 
 			if (!article) {
-				res.status(404).json(response(404, 'Article not found'));
+				res.status(404).json(response(404, 'Artikel tidak dapat ditemukan'));
 				return;
 			}
 
-			res.status(200).json(response(200, 'Get article successfully', article));
+			res.status(200).json(response(200, 'Berhasil mendapatkan artikel', article));
 		} catch (err) {
 			console.log(err);
 
@@ -272,13 +265,13 @@ module.exports = {
 
 			const validate = v.validate(articleObj, schema);
 
-			if (validate.length > 0) {
-				res.status(400).json(response(400, 'Bad Request', validate));
+			if (!article) {
+				res.status(404).json(response(404, 'Artikel tidak dapat ditemukan'));
 				return;
 			}
 
-			if (!article) {
-				res.status(404).json(response(404, 'Article not found'));
+			if (validate.length > 0) {
+				res.status(400).json(response(400, 'Bad Request', validate));
 				return;
 			}
 
@@ -320,7 +313,7 @@ module.exports = {
 
 			await transaction.commit();
 
-			res.status(200).json(response(200, 'Update article successfully'));
+			res.status(200).json(response(200, 'Berhasil memperbaharui artikel'));
 		} catch (err) {
 			console.log(err);
 
@@ -333,7 +326,7 @@ module.exports = {
 				res.status(400).json(response(400, 'Bad Request', [
 					{
 						type: 'duplicate',
-						message: 'Cannot updated article, please use another title',
+						message: 'Tidak dapat memperbaharui artikel, judul sudah digunakan',
 						field: 'judul',
 					},
 				]));
@@ -355,7 +348,7 @@ module.exports = {
 			});
 
 			if (!article) {
-				res.status(404).json(response(404, 'Article not found'));
+				res.status(404).json(response(404, 'Artikel tidak dapat ditemukan'));
 				return;
 			}
 
@@ -377,7 +370,7 @@ module.exports = {
 
 			await transaction.commit();
 
-			res.status(200).json(response(200, 'Delete article successfully'));
+			res.status(200).json(response(200, 'Berhasil menghapus artikel'));
 		} catch (err) {
 			console.log(err);
 
