@@ -30,7 +30,7 @@ module.exports = {
                 where,
             });
 
-            res.status(200).json(response(200, 'Get kecamatan successfully', kecamatan));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar kecamatan', kecamatan));
         } catch (err) {
             console.log(err);
 
@@ -68,11 +68,11 @@ module.exports = {
             const kecamatan = await Kecamatan.findByPk(id);
 
             if (!kecamatan) {
-                res.status(404).json(response(404, 'Kecamatan not found'));
+                res.status(404).json(response(404, 'Kecamatan tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get kecamatan successfully', kecamatan));
+            res.status(200).json(response(200, 'Berhasil mendapatkan kecamatan', kecamatan));
         } catch (err) {
             console.log(err);
 
