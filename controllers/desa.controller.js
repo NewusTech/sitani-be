@@ -38,7 +38,7 @@ module.exports = {
                 where,
             });
 
-            res.status(200).json(response(200, 'Get desa successfully', desa));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar desa', desa));
         } catch (err) {
             console.log(err);
 
@@ -76,11 +76,11 @@ module.exports = {
             const desa = await Desa.findByPk(id);
 
             if (!desa) {
-                res.status(404).json(response(404, 'Desa not found'));
+                res.status(404).json(response(404, 'Desa tidak ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get desa successfully', desa));
+            res.status(200).json(response(200, 'Berhasil mendapatkan desa', desa));
         } catch (err) {
             console.log(err);
 
