@@ -1,11 +1,13 @@
+const { customMessages, jwtGenerate, response } = require('../helpers');
 const { Permission, Role, User } = require('../models');
-const { jwtGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const passwordHash = require('password-hash');
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+	messages: customMessages
+});
 
 module.exports = {
 	login: async (req, res) => {
@@ -64,7 +66,7 @@ module.exports = {
 				res.status(400).json(response(400, 'Bad Requests', [
 					{
 						type: 'unauthorized',
-						message: "Account doesn't complete",
+						message: "Akun anda tidak dapat digunakan",
 						field: 'email_or_nip',
 					},
 				]));
@@ -75,12 +77,12 @@ module.exports = {
 				res.status(400).json(response(400, 'Bad Requests', [
 					{
 						type: 'wrong',
-						message: 'Email or nip or password is wrong',
+						message: 'Email atau NIP atau kata sandi tidak sesuai',
 						field: 'email_or_nip',
 					},
 					{
 						type: 'wrong',
-						message: 'Email or nip or password is wrong',
+						message: 'Email atau NIP atau kata sandi tidak sesuai',
 						field: 'password',
 					}
 				]));
@@ -91,7 +93,7 @@ module.exports = {
 
 			let accessToken = jwtGenerate({ sub: user.id, permissions }, 60 * 60 * 24);
 
-			res.status(200).json(response(200, 'Login success', {
+			res.status(200).json(response(200, 'Berhasil melakukan login', {
 				access_token: accessToken,
 				user: {
 					role: user.roles[0].roleName,
@@ -130,13 +132,13 @@ module.exports = {
 					}
 				],
 				where: {
-					id: req?.root?.userId
+					id: req?.root?.userId || 0
 				},
 			});
 
 			let permissions = user?.roles[0]?.permissions?.map(permission => permission?.permissionName);
 
-			res.status(200).json(response(200, 'Success get user permissions', permissions));
+			res.status(200).json(response(200, 'Berhasil mendapatkan daftar perizinan pengguna', permissions));
 		} catch (err) {
 			console.log(err);
 
