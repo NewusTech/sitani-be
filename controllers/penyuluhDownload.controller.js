@@ -1,4 +1,4 @@
-const { PenyuluhKelompokTani, PenyuluhKecamatan, PenyuluhKabupaten, Kecamatan, Desa, sequelize } = require('../models');
+const { PenyuluhGabunganKelompokTani, PenyuluhKelompokTani, PenyuluhKecamatan, PenyuluhKabupaten, Kecamatan, Desa, sequelize } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { response } = require('../helpers');
@@ -351,6 +351,137 @@ module.exports = {
             }
 
             res.status(404).json(response(404, 'Penyuluh kelompok tani not found'));
+        } catch (err) {
+            console.log(err);
+
+            logger.error(`Error : ${err}`);
+            logger.error(`Error message: ${err.message}`);
+
+            // res.status(500).json(response(500, 'Internal server error'));
+            res.status(500).json(response(500, err.message));
+        }
+    },
+
+    gabunganKelompokTani: async (req, res) => {
+        try {
+            let { year } = req.query;
+
+            year = !isNaN(parseInt(year)) ? parseInt(year) : new Date().getFullYear();
+
+            const penyuluhGabunganKelompokTani = await PenyuluhGabunganKelompokTani.findAll({
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatan',
+                    },
+                    {
+                        model: Desa,
+                        as: 'desa',
+                    },
+                ],
+                where: {
+                    tahun: year,
+                },
+            });
+
+            if (penyuluhGabunganKelompokTani.length) {
+                const workbook = new exceljs.Workbook();
+                const worksheet = workbook.addWorksheet(`POKTAN ${year}`);
+
+                worksheet.columns = [
+                    { width: 5 },
+                    { width: 15 },
+                    { width: 15 },
+                    { width: 15 },
+                    { width: 15 },
+                    { width: 15 },
+                    { width: 15 },
+                    { width: 15 },
+                    { width: 10 },
+                    { width: 10 },
+                    { width: 10 },
+                    { width: 5 },
+                    { width: 5 },
+                    { width: 10 },
+                ];
+
+                worksheet.getCell('A3').value = `DATA GABUNGAN KELOMPOK TANI GAPOKTAN KABUPATEN LAMPUNG TIMUR`;
+
+                worksheet.mergeCells('A3:P3');
+                worksheet.getCell('A3').alignment = { vertical: 'middle', horizontal: 'center' };
+                worksheet.getCell('A3').font = {
+                    bold: true,
+                };
+
+                let columns = ['A', 'B', 'C', 'D', 'E', 'H', 'I', 'J', 'K', 'L', 'N'];
+                let row = 6;
+                [
+                    'No',
+                    'Nama UPTD BPP',
+                    'Nama Desa',
+                    'Nama Gabungan Kelompok Tani',
+                    'Pengurus Gabungan Kelompok Tani',
+                    'Alamat Sekretariat',
+                    'Luas Lahan (Ha)',
+                    'Tahun Dibentuk',
+                    'Jumlah Poktan',
+                    'Jumlah Anggota',
+                    'Total Anggota',
+                ].forEach((i, idx) => {
+                    worksheet.getCell(`${columns[idx]}${row}`).value = `${i}`;
+                });
+
+                columns = ['A', 'B', 'C', 'D', 'H', 'I', 'J', 'K', 'N'];
+                columns.forEach(col => {
+                    worksheet.getCell(`${col}${row}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                    worksheet.mergeCells(`${col}${row}:${col}${row + 1}`);
+                });
+
+                worksheet.mergeCells(`E${row}:G${row}`);
+                worksheet.getCell(`E${row}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                worksheet.mergeCells(`L${row}:M${row}`);
+                worksheet.getCell(`L${row}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+                row++;
+
+                worksheet.getCell(`E${row}`).value = `Ketua`;
+                worksheet.getCell(`E${row}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                worksheet.getCell(`F${row}`).value = `Sekretaris`;
+                worksheet.getCell(`F${row}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                worksheet.getCell(`G${row}`).value = `Bendahara`;
+                worksheet.getCell(`G${row}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+                worksheet.getCell(`L${row}`).value = `L`;
+                worksheet.getCell(`L${row}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                worksheet.getCell(`M${row}`).value = `P`;
+                worksheet.getCell(`M${row}`).alignment = { vertical: 'middle', horizontal: 'center' };
+
+                penyuluhGabunganKelompokTani.forEach((item, index) => {
+                    row++;
+                    worksheet.getRow(row).values = [index + 1, item?.kecamatan?.nama || '', item?.desa?.nama || '', item.nama, item.ketua, item.sekretaris, item.bendahara, item.alamat, item.lahan, item.dibentuk, item.poktan, item.l, item.p, item.total];
+                });
+
+
+                for (let i = 6; i <= row; i++) {
+                    for (let j = 'A'.charCodeAt(0); j <= 'N'.charCodeAt(0); j++) {
+                        let cell = `${String.fromCharCode(j)}${i}`;
+                        worksheet.getCell(cell).border = {
+                            bottom: { style: 'thin', color: { argb: '00000000' } },
+                            right: { style: 'thin', color: { argb: '00000000' } },
+                            left: { style: 'thin', color: { argb: '00000000' } },
+                            top: { style: 'thin', color: { argb: '00000000' } },
+                        };
+                    }
+                }
+
+                res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                res.setHeader("Content-Disposition", "attachment; filename=" + "penyuluh-gabungan-kelompok-tani.xlsx");
+
+                workbook.xlsx.write(res).then(() => res.end());
+                return;
+            }
+
+            res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani not found'));
         } catch (err) {
             console.log(err);
 
