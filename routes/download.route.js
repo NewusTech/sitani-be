@@ -13,6 +13,7 @@ let prefix = '/download';
 route.get(prefix + '/perkebunan-kabupaten', perkebunanDownloadController.kabupaten);
 route.get(prefix + '/perkebunan-kecamatan', perkebunanDownloadController.kecamatan);
 
+route.get(prefix + '/penyuluh-kelompok-tani', penyuluhDownloadController.kelompokTani);
 route.get(prefix + '/penyuluh-kabupaten', penyuluhDownloadController.kabupaten);
 route.get(prefix + '/penyuluh-kecamatan', penyuluhDownloadController.kecamatan);
 
