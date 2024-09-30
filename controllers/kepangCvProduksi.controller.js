@@ -1,10 +1,12 @@
+const { customMessages, dateGenerate, response } = require('../helpers');
 const { KepangCvProduksi, sequelize } = require('../models');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages,
+});
 
 const coreSchema = {
     panen: {
@@ -117,7 +119,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created kepang cv produksi, please use another bulan",
+                        message: "Tidak dapat membuat kepang cv produksi, bulan sudah digunakan",
                         field: 'bulan',
                     },
                 ]));
@@ -141,7 +143,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Kepang cv produksi created'));
+            res.status(201).json(response(201, 'Berhasil membuat kepang cv produksi'));
         } catch (err) {
             console.log(err);
 
@@ -168,7 +170,7 @@ module.exports = {
                 order: [['bulan', 'ASC']]
             });
 
-            res.status(200).json(response(200, 'Get kepang cv produksi successfully', kepangCvProduksi));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar kepang cv produksi', kepangCvProduksi));
         } catch (err) {
             console.log(err);
 
@@ -189,11 +191,11 @@ module.exports = {
             });
 
             if (!kepangCvProduksi) {
-                res.status(404).json(response(404, 'Kepang cv produksi not found'));
+                res.status(404).json(response(404, 'Kepang cv produksi tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get kepang cv produksi successfully', kepangCvProduksi));
+            res.status(200).json(response(200, 'Berhasil mendapatkan kepang cv produksi', kepangCvProduksi));
         } catch (err) {
             console.log(err);
 
@@ -221,13 +223,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!kepangCvProduksi) {
+                res.status(404).json(response(404, 'Kepang cv produksi tidak dapat ditemukan'));
                 return;
             }
 
-            if (!kepangCvProduksi) {
-                res.status(404).json(response(404, 'Kepang cv produksi not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -259,7 +261,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update kepang cv produksi successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui kepang cv produksi'));
         } catch (err) {
             console.log(err);
 
@@ -284,7 +286,7 @@ module.exports = {
             });
 
             if (!kepangCvProduksi) {
-                res.status(404).json(response(404, 'Kepang cv produksi not found'));
+                res.status(404).json(response(404, 'Kepang cv produksi tidak dapat ditemukan'));
                 return;
             }
 
@@ -292,7 +294,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete kepang cv produksi successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus kepang cv produksi'));
         } catch (err) {
             console.log(err);
 
