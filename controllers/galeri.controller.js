@@ -1,12 +1,14 @@
 const { DeleteObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const { generatePagination } = require('../pagination/pagination');
+const { customMessages, response } = require('../helpers');
 const { Galeri, sequelize } = require('../models');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+	messages: customMessages
+});
 
 const s3Client = new S3Client({
 	region: process.env.AWS_REGION,
@@ -80,7 +82,7 @@ module.exports = {
 
 			await transaction.commit();
 
-			res.status(201).json(response(201, 'Galeri created'));
+			res.status(201).json(response(201, 'Berhasil menambahkan galeri'));
 		} catch (err) {
 			console.log(err);
 
@@ -101,7 +103,7 @@ module.exports = {
 			limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
 			page = isNaN(parseInt(page)) ? 1 : parseInt(page);
 
-			const offset = (page - 1) * limit;
+			let offset = (page - 1) * limit;
 
 			const order = [['createdAt', 'DESC']];
 
@@ -117,22 +119,21 @@ module.exports = {
 			let count = 0;
 
 			if (withPagination === 'false') {
-				galeri = await Galeri.findAll({
-					order,
-					where,
-				});
+				offset = undefined;
+				limit = undefined;
 			} else {
-				galeri = await Galeri.findAll({
-					offset: offset,
-					limit: limit,
-					order,
-					where,
-				});
 				count = await Galeri.count({ where });
 				pagination = generatePagination(count, page, limit, '/api/galeri/get');
 			}
 
-			res.status(200).json(response(200, 'Get galeri successfully', { data: galeri, pagination }));
+			galeri = await Galeri.findAll({
+				offset: offset,
+				limit: limit,
+				order,
+				where,
+			});
+
+			res.status(200).json(response(200, 'Berhasil mendapatkan daftar galeri', { data: galeri, pagination }));
 		} catch (err) {
 			console.log(err);
 
@@ -153,11 +154,11 @@ module.exports = {
 			});
 
 			if (!galeri) {
-				res.status(404).json(response(404, 'Galeri not found'));
+				res.status(404).json(response(404, 'Galeri tidak dapat ditemukan'));
 				return;
 			}
 
-			res.status(200).json(response(200, 'Get galeri successfully', galeri));
+			res.status(200).json(response(200, 'Berhasil mendapatkan galeri', galeri));
 		} catch (err) {
 			console.log(err);
 
@@ -226,7 +227,7 @@ module.exports = {
 			}
 
 			if (!galeri) {
-				res.status(404).json(response(404, 'Galeri not found'));
+				res.status(404).json(response(404, 'Galeri tidak dapat ditemukan'));
 				return;
 			}
 
@@ -261,7 +262,7 @@ module.exports = {
 
 			await transaction.commit();
 
-			res.status(200).json(response(200, 'Update galeri successfully'));
+			res.status(200).json(response(200, 'Berhasil memperbaharui galeri'));
 		} catch (err) {
 			console.log(err);
 
@@ -286,7 +287,7 @@ module.exports = {
 			});
 
 			if (!galeri) {
-				res.status(404).json(response(404, 'Galeri not found'));
+				res.status(404).json(response(404, 'Galeri tidak dapat ditemukan'));
 				return;
 			}
 
@@ -308,7 +309,7 @@ module.exports = {
 
 			await transaction.commit();
 
-			res.status(200).json(response(200, 'Delete galeri successfully'));
+			res.status(200).json(response(200, 'Berhasil menghapus galeri'));
 		} catch (err) {
 			console.log(err);
 
