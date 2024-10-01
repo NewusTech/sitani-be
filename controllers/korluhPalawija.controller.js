@@ -1,11 +1,13 @@
 const { KorluhMasterPalawija, KorluhPalawijaList, KorluhPalawija, Kecamatan, User, sequelize } = require('../models');
-const { dateGenerate, response, fixedNumber } = require('../helpers');
+const { customMessages, dateGenerate, response, fixedNumber } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages,
+});
 
 const parentSync = async (id, obj, bef) => {
     obj.korluhMasterPalawijaId = id;
@@ -257,7 +259,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -267,7 +269,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Korluh master palawija doesn't exists",
+                        message: "Korluh master palawija tidak dapat ditemukan",
                         field: 'korluh_master_palawija_id',
                     },
                 ]));
@@ -298,7 +300,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh palawija, please use another master",
+                        message: "Tidak dapat menambahkan korluh palawija, master sudah digunakan",
                         field: 'korluh_master_palawija_id',
                     },
                 ]));
@@ -332,7 +334,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Korluh palawija created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan korluh palawija'));
         } catch (err) {
             console.log(err);
 
@@ -480,7 +482,7 @@ module.exports = {
                 };
             });
 
-            res.status(200).json(response(200, 'Get korluh palawija successfully', { data: korluhPalawija, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh palawija', { data: korluhPalawija, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -520,11 +522,11 @@ module.exports = {
             });
 
             if (!korluhPalawijaList) {
-                res.status(404).json(response(404, 'Korluh palawija not found'));
+                res.status(404).json(response(404, 'Korluh palawija tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get korluh palawija successfully', korluhPalawijaList));
+            res.status(200).json(response(200, 'Berhasil mendapatkan korluh palawija', korluhPalawijaList));
         } catch (err) {
             console.log(err);
 
@@ -562,7 +564,7 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!korluhPalawijaList) {
-                res.status(404).json(response(404, 'Korluh palawija not found'));
+                res.status(404).json(response(404, 'Korluh palawija tidak dapat ditemukan'));
                 return;
             }
 
@@ -574,7 +576,7 @@ module.exports = {
             const korluhPalawija = await KorluhPalawija.findByPk(korluhPalawijaList.korluhPalawijaId);
 
             if (!korluhPalawija) {
-                res.status(404).json(response(404, 'Korluh palawija error'));
+                res.status(404).json(response(404, 'Korluh palawija tidak sesuai'));
                 return;
             }
 
@@ -620,7 +622,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update korluh palawija successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui korluh palawija'));
         } catch (err) {
             console.log(err);
 
@@ -654,7 +656,7 @@ module.exports = {
             });
 
             if (!korluhPalawijaList) {
-                res.status(404).json(response(404, 'Korluh palawija not found'));
+                res.status(404).json(response(404, 'Korluh palawija tidak dapat ditemukan'));
                 return;
             }
 
@@ -663,7 +665,7 @@ module.exports = {
             const korluhPalawija = await KorluhPalawija.findByPk(korluhPalawijaId);
 
             if (!korluhPalawija) {
-                res.status(404).json(response(404, 'Korluh palawija error'));
+                res.status(404).json(response(404, 'Korluh palawija tidak sesuai'));
                 return;
             }
 
@@ -689,7 +691,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete korluh palawija successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus korluh palawija'));
         } catch (err) {
             console.log(err);
 
