@@ -15,7 +15,7 @@ module.exports = {
                 }
             });
 
-            res.status(200).json(response(200, 'Get korluh master palawija successfully', korluhMasterPalawija));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh master palawija', korluhMasterPalawija));
         } catch (err) {
             console.log(err);
 
