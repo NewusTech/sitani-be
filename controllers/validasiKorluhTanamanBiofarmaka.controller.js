@@ -6,12 +6,14 @@ const {
     Kecamatan,
     sequelize
 } = require('../models');
-const { dateGenerate, fixedNumber, response } = require('../helpers');
+const { customMessages, dateGenerate, fixedNumber, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 const getInterval = (triwulan) => {
     const interval = {
@@ -206,7 +208,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -231,13 +233,22 @@ module.exports = {
                 (triwulan.start >= currentDate.getMonth() + 1 && tahun === currentDate.getFullYear())
                 ||
                 tahun > currentDate.getFullYear()
-                ||
-                korluhTanamanBiofarmakaCount === 0
             ) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'invalid',
-                        message: "Action failed with the following triwulan",
+                        message: "Tidak dapat melakukan validasi diatas atau sama dengan triwulan berjalan",
+                        field: 'triwulan',
+                    },
+                ]));
+                return;
+            }
+
+            if (korluhTanamanBiofarmakaCount === 0) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'invalid',
+                        message: "Tidak dapat melakukan validasi saat data kosong",
                         field: 'triwulan',
                     },
                 ]));
@@ -268,7 +279,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Status validation updated'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui status'));
         } catch (err) {
             console.log(err);
 
@@ -300,12 +311,12 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!validasiKorluhTanamanBiofarmaka) {
-                res.status(404).json(response(404, 'Validasi korluh tanaman biofarmaka not found'));
+                res.status(404).json(response(404, 'Validasi korluh tanaman biofarmaka tidak dapat ditemukan'));
                 return;
             }
 
             if (validasiKorluhTanamanBiofarmaka.status === 'terima') {
-                res.status(403).json(response(403, 'Korluh tanaman biofarmaka have been validation'));
+                res.status(403).json(response(403, 'Korluh tanaman biofarmaka sudah divalidasi'));
                 return;
             }
 
@@ -322,7 +333,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Status validation updated'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui status'));
         } catch (err) {
             console.log(err);
 
@@ -406,7 +417,7 @@ module.exports = {
 
             current = combineData(current, before);
 
-            res.status(200).json(response(200, 'Get korluh tanaman biofarmaka successfully', current));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh tanaman biofarmaka', current));
         } catch (err) {
             console.log(err);
 
