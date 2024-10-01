@@ -109,7 +109,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data bantuan not found'));
+            res.status(404).json(response(404, 'Data bantuan tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -208,7 +208,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data penerima uppo not found'));
+            res.status(404).json(response(404, 'Data penerima uppo tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -292,7 +292,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data pupuk not found'));
+            res.status(404).json(response(404, 'Data pupuk tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
