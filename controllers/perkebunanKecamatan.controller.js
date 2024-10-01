@@ -7,12 +7,14 @@ const {
     sequelize
 } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
+const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 const coreSchema = {
     tbm: {
@@ -120,7 +122,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -131,7 +133,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Master komoditas doesn't exists",
+                        message: "Master komoditas tidak dapat ditemukan",
                         field: 'master_komoditas_id',
                     },
                 ]));
@@ -142,7 +144,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Master kategori komoditas doesn't exists",
+                        message: "Master kategori komoditas tidak dapat ditemukan",
                         field: 'master_kategori_komoditas_id',
                     },
                 ]));
@@ -153,7 +155,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Master komoditas doesn't exists in the following kategori",
+                        message: "Master komoditas tidak dapat ditemukan dari kategori yang dimasukkan",
                         field: 'master_komoditas_id',
                     },
                 ]));
@@ -183,7 +185,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created perkebunan, please use another master komoditas",
+                        message: "Tidak dapat menambahkan perkebunan, master komoditas sudah digunakan",
                         field: 'master_komoditas_id',
                     },
                 ]));
@@ -219,7 +221,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Perkebunan created'));
+            res.status(201).json(response(201, 'Perkebunan berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -334,7 +336,7 @@ module.exports = {
                 }
             });
 
-            res.status(200).json(response(200, 'Get perkebunan successfully', { data: perkebunanKecamatan, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar perkebunan', { data: perkebunanKecamatan, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -365,11 +367,11 @@ module.exports = {
             });
 
             if (!perkebunanKecamatanList) {
-                res.status(404).json(response(404, 'Perkebunan not found'));
+                res.status(404).json(response(404, 'Perkebunan tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get perkebunan successfully', perkebunanKecamatanList));
+            res.status(200).json(response(200, 'Berhasil mendapatkan perkebunan', perkebunanKecamatanList));
         } catch (err) {
             console.log(err);
 
@@ -417,7 +419,7 @@ module.exports = {
             }
 
             if (!perkebunanKecamatanList) {
-                res.status(404).json(response(404, 'Perkebunan not found'));
+                res.status(404).json(response(404, 'Perkebunan tidak dapat ditemukan'));
                 return;
             }
 
@@ -441,7 +443,7 @@ module.exports = {
                     res.status(400).json(response(400, 'Bad Request', [
                         {
                             type: 'notFound',
-                            message: "Master komoditas doesn't exists",
+                            message: "Master komoditas tidak dapat ditemukan",
                             field: 'master_komoditas_id',
                         },
                     ]));
@@ -458,7 +460,7 @@ module.exports = {
                     res.status(400).json(response(400, 'Bad Request', [
                         {
                             type: 'notFound',
-                            message: "Master kategori komoditas doesn't exists",
+                            message: "Master kategori komoditas tidak dapat ditemukan",
                             field: 'master_kategori_komoditas_id',
                         },
                     ]));
@@ -475,12 +477,12 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Master komoditas doesn't exists in the following kategori",
+                        message: "Master komoditas tidak dapat ditemukan dari kategori yang dimasukkan",
                         field: 'master_komoditas_id',
                     },
                     {
                         type: 'notFound',
-                        message: "Master komoditas doesn't exists in the following kategori",
+                        message: "Master komoditas tidak dapat ditemukan dari kategori yang dimasukkan",
                         field: 'master_kategori_komoditas_id',
                     },
                 ]));
@@ -514,7 +516,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update perkebunan successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui perkebunan'));
         } catch (err) {
             console.log(err);
 
@@ -539,7 +541,7 @@ module.exports = {
             });
 
             if (!perkebunanKecamatanList) {
-                res.status(404).json(response(404, 'Perkebunan not found'));
+                res.status(404).json(response(404, 'Perkebunan tidak dapat ditemukan'));
                 return;
             }
 
@@ -559,7 +561,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete perkebunan successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus perkebunan'));
         } catch (err) {
             console.log(err);
 
