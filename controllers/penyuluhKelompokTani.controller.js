@@ -1,11 +1,13 @@
 const { PenyuluhKelompokTani, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
+const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 const coreSchema = {
     id_poktan: {
@@ -130,7 +132,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -140,7 +142,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Desa doesn't exists",
+                        message: "Desa tidak dapat ditemukan",
                         field: 'desa_id',
                     },
                 ]));
@@ -165,7 +167,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Penyuluh kelompok tani created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan penyuluh kelompok tani'));
         } catch (err) {
             console.log(err);
 
@@ -240,7 +242,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/penyuluh-kelompok-tani/get');
 
-            res.status(200).json(response(200, 'Get penyuluh kelompok tani successfully', { data: penyuluhKelompokTani, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar penyuluh kelompok tani', { data: penyuluhKelompokTani, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -271,11 +273,11 @@ module.exports = {
             });
 
             if (!penyuluhKelompokTani) {
-                res.status(404).json(response(404, 'Penyuluh kelompok tani not found'));
+                res.status(404).json(response(404, 'Penyuluh kelompok tani tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get penyuluh kelompok tani successfully', penyuluhKelompokTani));
+            res.status(200).json(response(200, 'Berhasil mendapatkan penyuluh kelompok tani', penyuluhKelompokTani));
         } catch (err) {
             console.log(err);
 
@@ -326,7 +328,7 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!penyuluhKelompokTani) {
-                res.status(404).json(response(404, 'Penyuluh kelompok tani not found'));
+                res.status(404).json(response(404, 'Penyuluh kelompok tani tidak dapat ditemukan'));
                 return;
             }
 
@@ -397,7 +399,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update penyuluh kelompok tani successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui penyuluh kelompok tani'));
         } catch (err) {
             console.log(err);
 
@@ -422,7 +424,7 @@ module.exports = {
             });
 
             if (!penyuluhKelompokTani) {
-                res.status(404).json(response(404, 'Penyuluh kelompok tani not found'));
+                res.status(404).json(response(404, 'Penyuluh kelompok tani tidak dapat ditemukan'));
                 return;
             }
 
@@ -430,7 +432,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete penyuluh kelompok tani successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus penyuluh kelompok tani'));
         } catch (err) {
             console.log(err);
 
