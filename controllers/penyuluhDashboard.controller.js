@@ -39,7 +39,7 @@ module.exports = {
             const penyuluhKabupatenCount = await PenyuluhKabupaten.count();
             const penyuluhKecamatanCount = await PenyuluhKecamatan.count();
 
-            res.status(200).json(response(200, 'Get penyuluh kabupaten successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan data dashboard penyuluh', {
                 penyuluhKabupatenCount,
                 penyuluhKecamatanCount,
                 penyuluhKabupaten,
