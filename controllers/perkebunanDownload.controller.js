@@ -291,23 +291,6 @@ module.exports = {
                 });
                 worksheet.getCell(`C${row}`).value = `JUMLAH ${strTemp}`;
 
-                // worksheet.getCell(`D${row}`).formula = ;
-                // worksheet.getCell(`E${row}`).value = befTemp?.sumTm || null;
-                // worksheet.getCell(`F${row}`).value = befTemp?.sumTr || null;
-
-                // worksheet.getCell(`G${row}`).value = befTemp?.sumJumlah || null;
-                // worksheet.getCell(`H${row}`).value = befTemp?.sumProduksi || null;
-                // worksheet.getCell(`I${row}`).value = befTemp?.sumProduktivitas || null;
-                // worksheet.getCell(`J${row}`).value = befTemp?.sumJmlPetaniPekebun || null;
-
-                // worksheet.getCell(`K${row}`).value = item?.sumTbm || null;
-                // worksheet.getCell(`L${row}`).value = item?.sumTm || null;
-                // worksheet.getCell(`M${row}`).value = item?.sumTr || null;
-
-                // worksheet.getCell(`N${row}`).value = item?.sumJumlah || null;
-                // worksheet.getCell(`O${row}`).value = item?.sumProduksi || null;
-                // worksheet.getCell(`P${row}`).value = item?.sumProduktivitas || null;
-                // worksheet.getCell(`Q${row}`).value = item?.sumJmlPetaniPekebun || null;
                 row++;
             }
 
@@ -475,36 +458,6 @@ module.exports = {
                     worksheet.getCell(`I${row}`).value = item?.sumJmlPetaniPekebun || null;
                     row++;
                 });
-                // if (sumIndex.length) {
-                //     let strTemp = '';
-                //     sumIndex.forEach((item, index) => {
-                //         if (index !== sumIndex.length - 1) {
-                //             strTemp += `${index + 1} + `;
-                //         } else {
-                //             strTemp += `${index + 1}`;
-                //         }
-                //     });
-                //     worksheet.getCell(`C${row}`).value = `JUMLAH ${strTemp}`;
-
-                //     // worksheet.getCell(`D${row}`).formula = ;
-                //     // worksheet.getCell(`E${row}`).value = befTemp?.sumTm || null;
-                //     // worksheet.getCell(`F${row}`).value = befTemp?.sumTr || null;
-
-                //     // worksheet.getCell(`G${row}`).value = befTemp?.sumJumlah || null;
-                //     // worksheet.getCell(`H${row}`).value = befTemp?.sumProduksi || null;
-                //     // worksheet.getCell(`I${row}`).value = befTemp?.sumProduktivitas || null;
-                //     // worksheet.getCell(`J${row}`).value = befTemp?.sumJmlPetaniPekebun || null;
-
-                //     // worksheet.getCell(`K${row}`).value = item?.sumTbm || null;
-                //     // worksheet.getCell(`L${row}`).value = item?.sumTm || null;
-                //     // worksheet.getCell(`M${row}`).value = item?.sumTr || null;
-
-                //     // worksheet.getCell(`N${row}`).value = item?.sumJumlah || null;
-                //     // worksheet.getCell(`O${row}`).value = item?.sumProduksi || null;
-                //     // worksheet.getCell(`P${row}`).value = item?.sumProduktivitas || null;
-                //     // worksheet.getCell(`Q${row}`).value = item?.sumJmlPetaniPekebun || null;
-                //     row++;
-                // }
 
 
                 for (let i = startTable; i < row; i++) {
