@@ -1,5 +1,5 @@
 const { ValidasiKorluhSayurBuah, KorluhMasterSayurBuah, KorluhSayurBuahList, KorluhSayurBuah, Kecamatan, User, sequelize } = require('../models');
-const { dateGenerate, fixedNumber, response } = require('../helpers');
+const { customMessages, dateGenerate, fixedNumber, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -183,7 +183,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -207,13 +207,22 @@ module.exports = {
                 (bulan.getMonth() >= currentDate.getMonth() && bulan.getFullYear() === currentDate.getFullYear())
                 ||
                 bulan.getFullYear() > currentDate.getFullYear()
-                ||
-                korluhSayurBuahCount === 0
             ) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'invalid',
-                        message: "Action failed with the following bulan",
+                        message: "Tidak dapat melakukan validasi diatas atau sama dengan bulan berjalan",
+                        field: 'bulan',
+                    },
+                ]));
+                return;
+            }
+
+            if (korluhSayurBuahCount === 0) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'invalid',
+                        message: "Tidak dapat melakukan validasi saat data kosong",
                         field: 'bulan',
                     },
                 ]));
@@ -245,7 +254,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Status validation updated'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui status'));
         } catch (err) {
             console.log(err);
 
@@ -277,12 +286,12 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!validasiKorluhSayurBuah) {
-                res.status(404).json(response(404, 'Validasi korluh sayur buah not found'));
+                res.status(404).json(response(404, 'Validasi korluh sayur buah tidak dapat ditemukan'));
                 return;
             }
 
             if (validasiKorluhSayurBuah.status === 'terima') {
-                res.status(403).json(response(403, 'Korluh sayur buah have been validation'));
+                res.status(403).json(response(403, 'Korluh sayur buah sudah divalidasi'));
                 return;
             }
 
@@ -299,7 +308,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Status validation updated'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui status'));
         } catch (err) {
             console.log(err);
 
@@ -365,7 +374,7 @@ module.exports = {
 
             current = combineData(current, before);
 
-            res.status(200).json(response(200, 'Get korluh sayur dan buah successfully', current));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh sayur dan buah', current));
         } catch (err) {
             console.log(err);
 
