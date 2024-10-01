@@ -104,7 +104,7 @@ module.exports = {
                 limit: bantuanLimit,
             });
 
-            res.status(200).json(response(200, 'Get PSP dashboard data successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan PSP dashboard data', {
                 bantuanNonSubsidiCount,
                 bantuanSubsidiCount,
                 uppoCount,
