@@ -11,7 +11,7 @@ module.exports = {
         try {
             const korluhMasterSayurBuah = await KorluhMasterSayurBuah.findAll();
 
-            res.status(200).json(response(200, 'Get korluh master sayur dan buah successfully', korluhMasterSayurBuah));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh master sayur dan buah', korluhMasterSayurBuah));
         } catch (err) {
             console.log(err);
 
