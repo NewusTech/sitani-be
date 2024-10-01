@@ -129,7 +129,7 @@ module.exports = {
                 }
             }
 
-            res.status(200).json(response(200, 'Get status laporan korluh padi successfully', data));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar status laporan korluh padi', data));
         } catch (err) {
             console.log(err);
 
@@ -239,7 +239,7 @@ module.exports = {
                 }
             }
 
-            res.status(200).json(response(200, 'Get status laporan korluh palawija successfully', data));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar status laporan korluh palawija', data));
         } catch (err) {
             console.log(err);
 
@@ -349,7 +349,7 @@ module.exports = {
                 }
             }
 
-            res.status(200).json(response(200, 'Get status laporan korluh sayur buah successfully', data));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar status laporan korluh sayur buah', data));
         } catch (err) {
             console.log(err);
 
@@ -460,7 +460,7 @@ module.exports = {
                 }
             }
 
-            res.status(200).json(response(200, 'Get status laporan korluh tanaman biofarmaka successfully', data));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar status laporan korluh tanaman biofarmaka', data));
         } catch (err) {
             console.log(err);
 
@@ -571,7 +571,7 @@ module.exports = {
                 }
             }
 
-            res.status(200).json(response(200, 'Get status laporan korluh tanaman hias successfully', data));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar status laporan korluh tanaman hias', data));
         } catch (err) {
             console.log(err);
 
