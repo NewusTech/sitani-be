@@ -19,7 +19,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun psp penerima uppo successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun psp penerima uppo', tahun));
         } catch (err) {
             console.log(err);
 
@@ -43,7 +43,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun psp pupuk successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun psp pupuk', tahun));
         } catch (err) {
             console.log(err);
 
@@ -67,7 +67,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun psp bantuan successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun psp bantuan', tahun));
         } catch (err) {
             console.log(err);
 
