@@ -12,7 +12,7 @@ module.exports = {
                 order: [['nama', 'ASC']]
             });
 
-            res.status(200).json(response(200, 'Get kepang master komoditas successfully', kepangMasterKomoditas));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar kepang master komoditas', kepangMasterKomoditas));
         } catch (err) {
             console.log(err);
 
