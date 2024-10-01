@@ -164,7 +164,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data lahan sawah not found'));
+            res.status(404).json(response(404, 'Data lahan sawah tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -325,7 +325,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data lahan bukan sawah not found'));
+            res.status(404).json(response(404, 'Data lahan bukan sawah tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -517,7 +517,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data realisasi padi not found'));
+            res.status(404).json(response(404, 'Data realisasi padi tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -709,7 +709,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data realisasi palawija 1 not found'));
+            res.status(404).json(response(404, 'Data realisasi palawija 1 tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -901,7 +901,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data realisasi palawija 2 not found'));
+            res.status(404).json(response(404, 'Data realisasi palawija 2 tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
