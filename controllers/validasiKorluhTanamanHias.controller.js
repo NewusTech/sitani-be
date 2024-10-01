@@ -1,10 +1,12 @@
 const { ValidasiKorluhTanamanHias, KorluhMasterTanamanHias, KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, User, sequelize } = require('../models');
-const { dateGenerate, response, fixedNumber } = require('../helpers');
+const { customMessages, dateGenerate, response, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 const getInterval = (triwulan) => {
     const interval = {
@@ -206,7 +208,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -231,13 +233,22 @@ module.exports = {
                 (triwulan.start >= currentDate.getMonth() + 1 && tahun === currentDate.getFullYear())
                 ||
                 tahun > currentDate.getFullYear()
-                ||
-                korluhTanamanHiasCount === 0
             ) {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'invalid',
-                        message: "Action failed with the following triwulan",
+                        message: "Tidak dapat melakukan validasi diatas atau sama dengan triwulan berjalan",
+                        field: 'triwulan',
+                    },
+                ]));
+                return;
+            }
+
+            if (korluhTanamanHiasCount === 0) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'invalid',
+                        message: "Tidak dapat melakukan validasi saat data kosong",
                         field: 'triwulan',
                     },
                 ]));
@@ -268,7 +279,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Status validation updated'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui status'));
         } catch (err) {
             console.log(err);
 
@@ -300,12 +311,12 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!validasiKorluhTanamanHias) {
-                res.status(404).json(response(404, 'Validasi korluh tanaman hias not found'));
+                res.status(404).json(response(404, 'Validasi korluh tanaman hias tidak dapat ditemukan'));
                 return;
             }
 
             if (validasiKorluhTanamanHias.status === 'terima') {
-                res.status(403).json(response(403, 'Korluh tanaman hias have been validation'));
+                res.status(403).json(response(403, 'Korluh tanaman hias sudah divalidasi'));
                 return;
             }
 
@@ -322,7 +333,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Status validation updated'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui status'));
         } catch (err) {
             console.log(err);
 
@@ -406,7 +417,7 @@ module.exports = {
 
             current = combineData(current, before);
 
-            res.status(200).json(response(200, 'Get korluh tanaman hias successfully', current));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh tanaman hias', current));
         } catch (err) {
             console.log(err);
 
