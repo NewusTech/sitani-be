@@ -11,7 +11,7 @@ module.exports = {
         try {
             const korluhMasterTanamanBiofarmaka = await KorluhMasterTanamanBiofarmaka.findAll();
 
-            res.status(200).json(response(200, 'Get korluh master tanaman biofarmaka successfully', korluhMasterTanamanBiofarmaka));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh master tanaman biofarmaka', korluhMasterTanamanBiofarmaka));
         } catch (err) {
             console.log(err);
 
