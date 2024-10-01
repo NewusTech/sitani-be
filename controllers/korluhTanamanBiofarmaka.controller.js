@@ -6,14 +6,16 @@ const {
     User,
     sequelize
 } = require('../models');
+const { customMessages, dateGenerate, fixedNumber, response } = require('../helpers');
 const { getInterval } = require('./validasiKorluhTanamanBiofarmaka.controller')
-const { dateGenerate, fixedNumber, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 const coreSchema = {
     luas_panen_habis: {
@@ -111,7 +113,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -121,7 +123,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Korluh master tanaman biofarmaka doesn't exists",
+                        message: "Korluh master tanaman biofarmaka tidak dapat ditemukan",
                         field: 'korluh_master_tanaman_biofarmaka_id',
                     },
                 ]));
@@ -152,7 +154,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh tanaman biofarmaka, please use another master",
+                        message: "Tidak dapat menambahkan korluh tanaman biofarmaka, master sudah digunakan",
                         field: 'korluh_master_tanaman_biofarmaka_id',
                     },
                 ]));
@@ -177,7 +179,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Korluh tanaman biofarmaka created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan korluh tanaman biofarmaka'));
         } catch (err) {
             console.log(err);
 
@@ -347,7 +349,7 @@ module.exports = {
                 };
             });
 
-            res.status(200).json(response(200, 'Get korluh tanaman biofarmaka successfully', { data: korluhTanamanBiofarmaka, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh tanaman biofarmaka', { data: korluhTanamanBiofarmaka, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -384,11 +386,11 @@ module.exports = {
             });
 
             if (!korluhTanamanBiofarmakaList) {
-                res.status(404).json(response(404, 'Korluh tanaman biofarmaka not found'));
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get korluh tanaman biofarmaka successfully', korluhTanamanBiofarmakaList));
+            res.status(200).json(response(200, 'Berhasil mendapatkan korluh tanaman biofarmaka', korluhTanamanBiofarmakaList));
         } catch (err) {
             console.log(err);
 
@@ -417,7 +419,7 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!korluhTanamanBiofarmakaList) {
-                res.status(404).json(response(404, 'Korluh tanaman biofarmaka not found'));
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka tidak dapat ditemukan'));
                 return;
             }
 
@@ -429,7 +431,7 @@ module.exports = {
             const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findByPk(korluhTanamanBiofarmakaList.korluhTanamanBiofarmakaId);
 
             if (!korluhTanamanBiofarmaka) {
-                res.status(404).json(response(404, 'Korluh tanaman biofarmaka error'));
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka tidak sesuai'));
                 return;
             }
 
@@ -459,7 +461,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update korluh tanaman biofarmaka successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui korluh tanaman biofarmaka'));
         } catch (err) {
             console.log(err);
 
@@ -484,7 +486,7 @@ module.exports = {
             });
 
             if (!korluhTanamanBiofarmakaList) {
-                res.status(404).json(response(404, 'Korluh tanaman biofarmaka not found'));
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka tidak dapat ditemukan'));
                 return;
             }
 
@@ -493,7 +495,7 @@ module.exports = {
             const korluhTanamanBiofarmaka = await KorluhTanamanBiofarmaka.findByPk(korluhTanamanBiofarmakaId);
 
             if (!korluhTanamanBiofarmaka) {
-                res.status(404).json(response(404, 'Korluh tanaman biofarmaka error'));
+                res.status(404).json(response(404, 'Korluh tanaman biofarmaka tidak sesuai'));
                 return;
             }
 
@@ -511,7 +513,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete korluh tanaman biofarmaka successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus korluh tanaman biofarmaka'));
         } catch (err) {
             console.log(err);
 
