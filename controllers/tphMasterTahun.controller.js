@@ -15,7 +15,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun tph lahan bukan sawah successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun tph lahan bukan sawah', tahun));
         } catch (err) {
             console.log(err);
 
@@ -35,7 +35,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun tph lahan sawah successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun tph lahan sawah', tahun));
         } catch (err) {
             console.log(err);
 
@@ -59,7 +59,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun tph realisasi padi successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun tph realisasi padi', tahun));
         } catch (err) {
             console.log(err);
 
@@ -83,7 +83,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun tph realisasi palawija 1 successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun tph realisasi palawija 1', tahun));
         } catch (err) {
             console.log(err);
 
@@ -107,7 +107,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun tph realisasi palawija 2 successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun tph realisasi palawija 2', tahun));
         } catch (err) {
             console.log(err);
 
