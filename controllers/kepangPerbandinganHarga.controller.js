@@ -1,7 +1,7 @@
 const { KepangPedagangEceranList, KepangMasterKomoditas, KepangPedagangEceran, sequelize } = require('../models');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
+const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -71,7 +71,7 @@ module.exports = {
                 };
             })
 
-            res.status(200).json(response(200, 'Get kepang perbandingan harga successfully', { data, kepangPerbandinganHarga }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar kepang perbandingan harga', { data, kepangPerbandinganHarga }));
         } catch (err) {
             console.log(err);
 
