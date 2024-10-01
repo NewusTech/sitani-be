@@ -20,7 +20,7 @@ module.exports = {
                 where,
             });
 
-            res.status(200).json(response(200, 'Get perkebunan master komoditi successfully', kepangMasterKomoditas));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar perkebunan master komoditi', kepangMasterKomoditas));
         } catch (err) {
             console.log(err);
 
