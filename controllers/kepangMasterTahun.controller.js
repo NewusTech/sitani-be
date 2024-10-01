@@ -19,7 +19,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun kepang perbandingan harga successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun kepang perbandingan harga', tahun));
         } catch (err) {
             console.log(err);
 
@@ -43,7 +43,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun kepang produsen eceran successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun kepang produsen eceran', tahun));
         } catch (err) {
             console.log(err);
 
@@ -67,7 +67,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun kepang cv produksi successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun kepang cv produksi', tahun));
         } catch (err) {
             console.log(err);
 
@@ -91,7 +91,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun kepang cv produsen successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun kepang cv produsen', tahun));
         } catch (err) {
             console.log(err);
 
