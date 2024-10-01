@@ -14,9 +14,9 @@ const {
     KorluhPadi,
     sequelize
 } = require('../models');
+const { response, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response, fixedNumber } = require('../helpers');
 const { Op } = require('sequelize');
 
 const v = new Validator();
@@ -26,13 +26,12 @@ module.exports = {
         try {
             let { kecamatan, year, month, limit } = req.query;
 
+            kecamatan = isNaN(parseInt(kecamatan)) ? null : parseInt(kecamatan);
             limit = isNaN(parseInt(limit)) ? 10 : parseInt(limit);
 
             let where = {};
 
-            if (!isNaN(parseInt(kecamatan))) {
-                kecamatan = parseInt(kecamatan);
-
+            if (kecamatan) {
                 where.kecamatanId = kecamatan;
             }
             if (!isNaN(parseInt(year))) {
@@ -218,7 +217,7 @@ module.exports = {
                 harga: item.rerataHarga,
             }));
 
-            res.status(200).json(response(200, 'Get dashboard data successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan data dashboard', {
                 padiPanenCount,
                 padiTanamCount,
                 padiPusoCount,
