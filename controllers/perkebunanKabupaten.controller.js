@@ -196,7 +196,7 @@ module.exports = {
                 })
             })
 
-            res.status(200).json(response(200, 'Get perkebunan successfully', { yearBefore, currentYear, data }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar perkebunan kabupaten', { yearBefore, currentYear, data }));
         } catch (err) {
             console.log(err);
 
