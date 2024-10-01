@@ -1,10 +1,12 @@
 const { TphRealisasiPadiList, TphRealisasiPadi, Kecamatan, sequelize } = require('../models');
-const { dateGenerate, response } = require('../helpers');
+const { customMessages, dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 const coreSchema = {
     panen_lahan_sawah: {
@@ -82,7 +84,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -114,7 +116,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created realisasi padi, please use another kecamatan",
+                        message: "Tidak dapat menambahkan realisasi padi, kecamatan sudah digunakan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -167,7 +169,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Realisasi padi created'));
+            res.status(201).json(response(201, 'Realisasi padi berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -258,7 +260,7 @@ module.exports = {
                 }
             }
 
-            res.status(200).json(response(200, 'Get realisasi padi successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar realisasi padi', {
                 detail: tphRealisasiPadi,
                 produktivitasLahanKering,
                 produktivitasLahanSawah,
@@ -300,11 +302,11 @@ module.exports = {
             });
 
             if (!tphRealisasiPadiList) {
-                res.status(404).json(response(404, 'Realisasi padi not found'));
+                res.status(404).json(response(404, 'Realisasi padi tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get realisasi padi successfully', tphRealisasiPadiList));
+            res.status(200).json(response(200, 'Berhasil mendapatkan realisasi padi', tphRealisasiPadiList));
         } catch (err) {
             console.log(err);
 
@@ -332,13 +334,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!tphRealisasiPadiList) {
+                res.status(404).json(response(404, 'Realisasi padi tidak dapat ditemukan'));
                 return;
             }
 
-            if (!tphRealisasiPadiList) {
-                res.status(404).json(response(404, 'Realisasi padi not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -394,7 +396,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update realisasi padi successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui realisasi padi'));
         } catch (err) {
             console.log(err);
 
@@ -419,7 +421,7 @@ module.exports = {
             });
 
             if (!tphRealisasiPadiList) {
-                res.status(404).json(response(404, 'Realisasi padi not found'));
+                res.status(404).json(response(404, 'Realisasi padi tidak dapat ditemukan'));
                 return;
             }
 
@@ -439,7 +441,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete realisasi padi successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus realisasi padi'));
         } catch (err) {
             console.log(err);
 
