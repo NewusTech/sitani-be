@@ -1,11 +1,13 @@
 const { PspPenerimaUppo, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
+const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages,
+});
 
 module.exports = {
     create: async (req, res) => {
@@ -64,7 +66,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -75,7 +77,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Desa doesn't exists",
+                        message: "Desa tidak dapat ditemukan",
                         field: 'desa_id',
                     },
                 ]));
@@ -93,7 +95,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'PSP penerima uppo created'));
+            res.status(201).json(response(201, 'PSP penerima uppo berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -153,7 +155,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/psp/penerima-uppo/get');
 
-            res.status(200).json(response(200, 'Get PSP penerima uppo successfully', { data: pspPenerimaUppo, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar PSP penerima uppo', { data: pspPenerimaUppo, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -184,11 +186,11 @@ module.exports = {
             });
 
             if (!pspPenerimaUppo) {
-                res.status(404).json(response(404, 'Psp penerima uppo not found'));
+                res.status(404).json(response(404, 'Psp penerima uppo tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get PSP penerima uppo successfully', pspPenerimaUppo));
+            res.status(200).json(response(200, 'Berhasil mendapatkan PSP penerima uppo', pspPenerimaUppo));
         } catch (err) {
             console.log(err);
 
@@ -253,13 +255,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!pspPenerimaUppo) {
+                res.status(404).json(response(404, 'Psp penerima uppo tidak dapat ditemukan'));
                 return;
             }
 
-            if (!pspPenerimaUppo) {
-                res.status(404).json(response(404, 'Psp penerima uppo not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -297,7 +299,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update PSP penerima uppo successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui PSP penerima uppo'));
         } catch (err) {
             console.log(err);
 
@@ -322,7 +324,7 @@ module.exports = {
             });
 
             if (!pspPenerimaUppo) {
-                res.status(404).json(response(404, 'PSP penerima uppo not found'));
+                res.status(404).json(response(404, 'PSP penerima uppo tidak dapat ditemukan'));
                 return;
             }
 
@@ -330,7 +332,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete PSP penerima uppo successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus PSP penerima uppo'));
         } catch (err) {
             console.log(err);
 
