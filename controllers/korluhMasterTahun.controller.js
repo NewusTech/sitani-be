@@ -19,7 +19,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun korluh padi successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun korluh padi', tahun));
         } catch (err) {
             console.log(err);
 
@@ -43,7 +43,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun korluh palawija successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun korluh palawija', tahun));
         } catch (err) {
             console.log(err);
 
@@ -67,7 +67,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun korluh sayur dan buah successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun korluh sayur dan buah', tahun));
         } catch (err) {
             console.log(err);
 
@@ -91,7 +91,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun korluh tanaman biofarmaka successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun korluh tanaman biofarmaka', tahun));
         } catch (err) {
             console.log(err);
 
@@ -115,7 +115,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun korluh tanaman hias successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun korluh tanaman hias', tahun));
         } catch (err) {
             console.log(err);
 
