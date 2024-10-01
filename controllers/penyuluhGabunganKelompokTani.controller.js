@@ -1,11 +1,13 @@
 const { PenyuluhGabunganKelompokTani, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
+const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages,
+});
 
 const getSum = (arr) => {
     sum = 0;
@@ -143,7 +145,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -153,7 +155,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Desa doesn't exists",
+                        message: "Desa tidak dapat ditemukan",
                         field: 'desa_id',
                     },
                 ]));
@@ -179,7 +181,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Penyuluh gabungan kelompok tani created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan penyuluh gabungan kelompok tani'));
         } catch (err) {
             console.log(err);
 
@@ -254,7 +256,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/penyuluh-gabungan-kelompok-tani/get');
 
-            res.status(200).json(response(200, 'Get penyuluh gabungan kelompok tani successfully', { data: penyuluhGabunganKelompokTani, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar penyuluh gabungan kelompok tani', { data: penyuluhGabunganKelompokTani, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -285,11 +287,11 @@ module.exports = {
             });
 
             if (!penyuluhGabunganKelompokTani) {
-                res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani not found'));
+                res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get penyuluh gabungan kelompok tani successfully', penyuluhGabunganKelompokTani));
+            res.status(200).json(response(200, 'Berhasil mendapatkan penyuluh gabungan kelompok tani', penyuluhGabunganKelompokTani));
         } catch (err) {
             console.log(err);
 
@@ -340,7 +342,7 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!penyuluhGabunganKelompokTani) {
-                res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani not found'));
+                res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani tidak dapat ditemukan'));
                 return;
             }
 
@@ -412,7 +414,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update penyuluh gabungan kelompok tani successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui penyuluh gabungan kelompok tani'));
         } catch (err) {
             console.log(err);
 
@@ -437,7 +439,7 @@ module.exports = {
             });
 
             if (!penyuluhGabunganKelompokTani) {
-                res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani not found'));
+                res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani tidak dapat ditemukan'));
                 return;
             }
 
@@ -445,7 +447,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete penyuluh gabungan kelompok tani successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus penyuluh gabungan kelompok tani'));
         } catch (err) {
             console.log(err);
 
