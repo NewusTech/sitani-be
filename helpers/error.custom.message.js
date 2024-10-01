@@ -9,6 +9,7 @@ module.exports = {
         number: "'{field}' harus berupa angka / numeric",
         date: "'{field}' harus berupa format tanggal",
         string: "'{field}' harus berupa string",
+        array: "'{field}' harus berupa array",
         required: "'{field}' wajib diisi",
     },
 }
