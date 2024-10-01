@@ -1,11 +1,13 @@
+const { customMessages, dateGenerate, fixedNumber, response } = require('../helpers');
 const { KorluhPadi, Kecamatan, User, sequelize } = require('../models');
-const { dateGenerate, fixedNumber, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 const getSum = (index) => {
     let sum = null;
@@ -284,7 +286,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -304,7 +306,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh padi, please use another tanggal",
+                        message: "Tidak dapat menambahkan korluh padi, tanggal sudah digunakan",
                         field: 'tanggal',
                     },
                 ]));
@@ -390,7 +392,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Korluh padi created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan korluh padi'));
         } catch (err) {
             console.log(err);
 
@@ -491,7 +493,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/korluh/padi/get');
 
-            res.status(200).json(response(200, 'Get korluh padi successfully', { data: korluhPadi, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh padi', { data: korluhPadi, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -518,11 +520,11 @@ module.exports = {
             });
 
             if (!korluhPadi) {
-                res.status(404).json(response(404, 'Korluh padi not found'));
+                res.status(404).json(response(404, 'Korluh padi tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get korluh padi successfully', korluhPadi));
+            res.status(200).json(response(200, 'Berhasil mendapatkan korluh padi', korluhPadi));
         } catch (err) {
             console.log(err);
 
@@ -551,7 +553,7 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!korluhPadi) {
-                res.status(404).json(response(404, 'Korluh padi not found'));
+                res.status(404).json(response(404, 'Korluh padi tidak dapat ditemukan'));
                 return;
             }
 
@@ -674,7 +676,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update korluh padi successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui korluh padi'));
         } catch (err) {
             console.log(err);
 
@@ -699,7 +701,7 @@ module.exports = {
             });
 
             if (!korluhPadi) {
-                res.status(404).json(response(404, 'Korluh padi not found'));
+                res.status(404).json(response(404, 'Korluh padi tidak dapat ditemukan'));
                 return;
             }
 
@@ -707,7 +709,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete korluh padi successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus korluh padi'));
         } catch (err) {
             console.log(err);
 
