@@ -206,7 +206,7 @@ module.exports = {
                 }
             }
 
-            res.status(404).json(response(404, 'Kecamatan or penyuluh kecamatan not found'));
+            res.status(404).json(response(404, 'Kecamatan or penyuluh kecamatan tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -350,7 +350,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Penyuluh kelompok tani not found'));
+            res.status(404).json(response(404, 'Penyuluh kelompok tani tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -481,7 +481,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani not found'));
+            res.status(404).json(response(404, 'Penyuluh gabungan kelompok tani tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
