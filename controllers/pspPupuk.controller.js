@@ -62,7 +62,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'PSP pupuk created'));
+            res.status(201).json(response(201, 'PSP pupuk berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -113,7 +113,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/psp/pupuk/get');
 
-            res.status(200).json(response(200, 'Get PSP pupuk successfully', { data: pspPupuk, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar PSP pupuk', { data: pspPupuk, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -134,11 +134,11 @@ module.exports = {
             });
 
             if (!pspPupuk) {
-                res.status(404).json(response(404, 'Psp pupuk not found'));
+                res.status(404).json(response(404, 'Psp pupuk tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get PSP pupuk successfully', pspPupuk));
+            res.status(200).json(response(200, 'Berhasil mendapatkan PSP pupuk', pspPupuk));
         } catch (err) {
             console.log(err);
 
@@ -198,13 +198,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!pspPupuk) {
+                res.status(404).json(response(404, 'Psp pupuk tidak dapat ditemukan'));
                 return;
             }
 
-            if (!pspPupuk) {
-                res.status(404).json(response(404, 'Psp pupuk not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -226,7 +226,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update PSP pupuk successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui PSP pupuk'));
         } catch (err) {
             console.log(err);
 
@@ -251,7 +251,7 @@ module.exports = {
             });
 
             if (!pspPupuk) {
-                res.status(404).json(response(404, 'PSP pupuk not found'));
+                res.status(404).json(response(404, 'PSP pupuk tidak dapat ditemukan'));
                 return;
             }
 
@@ -259,7 +259,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete PSP pupuk successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus PSP pupuk'));
         } catch (err) {
             console.log(err);
 
