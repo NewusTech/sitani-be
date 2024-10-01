@@ -1,11 +1,13 @@
 const { KepangPedagangEceranList, KepangMasterKomoditas, KepangPedagangEceran, sequelize } = require('../models');
+const { customMessages, dateGenerate, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages,
+});
 
 const coreSchema = {
     minggu_1: {
@@ -82,7 +84,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kepang master komoditas doesn't exists",
+                        message: "Kepang master komoditas tidak dapat ditemukan",
                         field: 'kepang_master_komoditas_id',
                     },
                 ]));
@@ -112,7 +114,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created kepang pedagang eceran, please use another master",
+                        message: "Tidak dapat membuat kepang pedagang eceran, master komoditas sudah digunakan",
                         field: 'kepang_master_komoditas_id',
                     },
                 ]));
@@ -132,7 +134,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Kepang pedagang eceran created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan kepang pedagang eceran'));
         } catch (err) {
             console.log(err);
 
@@ -215,7 +217,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/kepang/pedagang-eceran/get');
 
-            res.status(200).json(response(200, 'Get kepang pedagang eceran successfully', { data: kepangPedagangEceran, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar kepang pedagang eceran', { data: kepangPedagangEceran, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -246,11 +248,11 @@ module.exports = {
             });
 
             if (!kepangPedagangEceranList) {
-                res.status(404).json(response(404, 'Kepang pedagang eceran not found'));
+                res.status(404).json(response(404, 'Kepang pedagang eceran tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get kepang pedagang eceran successfully', kepangPedagangEceranList));
+            res.status(200).json(response(200, 'Berhasil mendapatkan kepang pedagang eceran', kepangPedagangEceranList));
         } catch (err) {
             console.log(err);
 
@@ -278,13 +280,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!kepangPedagangEceranList) {
+                res.status(404).json(response(404, 'Kepang pedagang eceran tidak dapat ditemukan'));
                 return;
             }
 
-            if (!kepangPedagangEceranList) {
-                res.status(404).json(response(404, 'Kepang pedagang eceran not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -306,7 +308,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update kepang pedagang eceran successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui kepang pedagang eceran'));
         } catch (err) {
             console.log(err);
 
@@ -331,7 +333,7 @@ module.exports = {
             });
 
             if (!kepangPedagangEceranList) {
-                res.status(404).json(response(404, 'Kepang pedagang eceran not found'));
+                res.status(404).json(response(404, 'Kepang pedagang eceran tidak dapat ditemukan'));
                 return;
             }
 
@@ -351,7 +353,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete kepang pedagang eceran successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus kepang pedagang eceran'));
         } catch (err) {
             console.log(err);
 
