@@ -1,10 +1,12 @@
 const { TphRealisasiPalawija1List, TphRealisasiPalawija1, Kecamatan, sequelize } = require('../models');
-const { dateGenerate, response } = require('../helpers');
+const { customMessages, dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    message: customMessages
+});
 
 const coreSchema = {
     jagung_panen: {
@@ -100,7 +102,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -132,7 +134,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created realisasi palawija 1, please use another kecamatan",
+                        message: "Tidak dapat menambahkan realisasi palawija 1, kecamatan sudah digunakan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -156,7 +158,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Realisasi palawija 1 created'));
+            res.status(201).json(response(201, 'Realisasi palawija 1 berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -247,7 +249,7 @@ module.exports = {
                 }
             }
 
-            res.status(200).json(response(200, 'Get realisasi palawija 1 successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar realisasi palawija 1', {
                 detail: tphRealisasiPalawija1,
                 jagungPanen,
                 jagungProduktivitas,
@@ -289,11 +291,11 @@ module.exports = {
             });
 
             if (!tphRealisasiPalawija1List) {
-                res.status(404).json(response(404, 'Realisasi palawija 1 not found'));
+                res.status(404).json(response(404, 'Realisasi palawija 1 tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get realisasi palawija 1 successfully', tphRealisasiPalawija1List));
+            res.status(200).json(response(200, 'Berhasil mendapatkan realisasi palawija 1', tphRealisasiPalawija1List));
         } catch (err) {
             console.log(err);
 
@@ -321,13 +323,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!tphRealisasiPalawija1List) {
+                res.status(404).json(response(404, 'Realisasi palawija 1 tidak dapat ditemukan'));
                 return;
             }
 
-            if (!tphRealisasiPalawija1List) {
-                res.status(404).json(response(404, 'Realisasi palawija 1 not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -357,7 +359,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update realisasi palawija 1 successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui realisasi palawija 1'));
         } catch (err) {
             console.log(err);
 
@@ -382,7 +384,7 @@ module.exports = {
             });
 
             if (!tphRealisasiPalawija1List) {
-                res.status(404).json(response(404, 'Realisasi palawija 1 not found'));
+                res.status(404).json(response(404, 'Realisasi palawija 1 tidak dapat ditemukan'));
                 return;
             }
 
@@ -402,7 +404,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete realisasi palawija 1 successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus realisasi palawija 1'));
         } catch (err) {
             console.log(err);
 
