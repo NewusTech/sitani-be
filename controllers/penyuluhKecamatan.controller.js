@@ -1,11 +1,13 @@
 const { PenyuluhKecamatanDesabinaan, PenyuluhKecamatan, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
+const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 module.exports = {
     create: async (req, res) => {
@@ -73,7 +75,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -100,7 +102,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Penyuluh kecamatan created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan penyuluh kecamatan'));
         } catch (err) {
             console.log(err);
 
@@ -159,7 +161,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/penyuluh-kecamatan/get');
 
-            res.status(200).json(response(200, 'Get penyuluh kecamatan successfully', { data: penyuluhKecamatan, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar penyuluh kecamatan', { data: penyuluhKecamatan, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -186,11 +188,11 @@ module.exports = {
             });
 
             if (!penyuluhKecamatan) {
-                res.status(404).json(response(404, 'Penyuluh kecamatan not found'));
+                res.status(404).json(response(404, 'Penyuluh kecamatan tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get penyuluh kecamatan successfully', penyuluhKecamatan));
+            res.status(200).json(response(200, 'Berhasil mendapatkan penyuluh kecamatan', penyuluhKecamatan));
         } catch (err) {
             console.log(err);
 
@@ -273,7 +275,7 @@ module.exports = {
             }
 
             if (!penyuluhKecamatan) {
-                res.status(404).json(response(404, 'Penyuluh kecamatan not found'));
+                res.status(404).json(response(404, 'Penyuluh kecamatan tidak dapat ditemukan'));
                 return;
             }
 
@@ -321,7 +323,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update penyuluh kecamatan successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui penyuluh kecamatan'));
         } catch (err) {
             console.log(err);
 
@@ -346,7 +348,7 @@ module.exports = {
             });
 
             if (!penyuluhKecamatan) {
-                res.status(404).json(response(404, 'Penyuluh kecamatan not found'));
+                res.status(404).json(response(404, 'Penyuluh kecamatan tidak dapat ditemukan'));
                 return;
             }
 
@@ -358,7 +360,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete penyuluh kecamatan successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus penyuluh kecamatan'));
         } catch (err) {
             console.log(err);
 
