@@ -1,12 +1,14 @@
 const { KorluhMasterTanamanHias, KorluhTanamanHiasList, KorluhTanamanHias, Kecamatan, User, sequelize } = require('../models');
+const { customMessages, dateGenerate, response, fixedNumber } = require('../helpers');
 const { getInterval } = require('./validasiKorluhTanamanHias.controller');
-const { dateGenerate, response, fixedNumber } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages,
+});
 
 const coreSchema = {
     luas_panen_habis: {
@@ -109,7 +111,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -119,7 +121,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Korluh master tanaman hias doesn't exists",
+                        message: "Korluh master tanaman hias tidak dapat ditemukan",
                         field: 'korluh_master_tanaman_hias_id',
                     },
                 ]));
@@ -150,7 +152,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created korluh tanaman hias, please use another master",
+                        message: "Tidak dapat menambahkan korluh tanaman hias, master sudah digunakan",
                         field: 'korluh_master_tanaman_hias_id',
                     },
                 ]));
@@ -176,7 +178,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Korluh tanaman hias created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan korluh tanaman hias'));
         } catch (err) {
             console.log(err);
 
@@ -347,7 +349,7 @@ module.exports = {
                 };
             });
 
-            res.status(200).json(response(200, 'Get korluh tanaman hias successfully', { data: korluhTanamanHias, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar korluh tanaman hias', { data: korluhTanamanHias, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -384,11 +386,11 @@ module.exports = {
             });
 
             if (!korluhTanamanHiasList) {
-                res.status(404).json(response(404, 'Korluh tanaman hias not found'));
+                res.status(404).json(response(404, 'Korluh tanaman hias tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get korluh tanaman hias successfully', korluhTanamanHiasList));
+            res.status(200).json(response(200, 'Berhasil mendapatkan korluh tanaman hias', korluhTanamanHiasList));
         } catch (err) {
             console.log(err);
 
@@ -417,7 +419,7 @@ module.exports = {
             const validate = v.validate(req.body, schema);
 
             if (!korluhTanamanHiasList) {
-                res.status(404).json(response(404, 'Korluh tanaman hias not found'));
+                res.status(404).json(response(404, 'Korluh tanaman hias tidak dapat ditemukan'));
                 return;
             }
 
@@ -461,7 +463,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update korluh tanaman hias successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui korluh tanaman hias'));
         } catch (err) {
             console.log(err);
 
@@ -486,7 +488,7 @@ module.exports = {
             });
 
             if (!korluhTanamanHiasList) {
-                res.status(404).json(response(404, 'Korluh tanaman hias not found'));
+                res.status(404).json(response(404, 'Korluh tanaman hias tidak dapat ditemukan'));
                 return;
             }
 
@@ -513,7 +515,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete korluh tanaman hias successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus korluh tanaman hias'));
         } catch (err) {
             console.log(err);
 
