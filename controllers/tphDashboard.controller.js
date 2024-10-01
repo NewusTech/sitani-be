@@ -11,7 +11,7 @@ const {
     TphLahanSawah,
     sequelize
 } = require('../models');
-const { response, dateGenerate, getFirstLastDate, fixedNumber } = require('../helpers');
+const { response, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -177,7 +177,7 @@ module.exports = {
             tphRealisasiPalawija2 = temp;
             temp = {};
 
-            res.status(200).json(response(200, 'Get TPH dashboard data successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan TPH dashboard data', {
                 ...fixedNumber({
                     lahanBukanSawahSum,
                     lahanSawahSum,
