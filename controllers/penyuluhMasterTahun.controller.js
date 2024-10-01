@@ -19,7 +19,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun penyuluh kelompok tani successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun penyuluh kelompok tani', tahun));
         } catch (err) {
             console.log(err);
 
@@ -43,7 +43,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun penyuluh gabungan kelompok tani successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun penyuluh gabungan kelompok tani', tahun));
         } catch (err) {
             console.log(err);
 
