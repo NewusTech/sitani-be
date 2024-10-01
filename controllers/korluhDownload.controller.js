@@ -408,7 +408,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data korluh padi not found'));
+            res.status(404).json(response(404, 'Data korluh padi tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -740,7 +740,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data korluh palawija not found'));
+            res.status(404).json(response(404, 'Data korluh palawija tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -1073,7 +1073,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data korluh sayur dan buah not found'));
+            res.status(404).json(response(404, 'Data korluh sayur dan buah tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -1406,7 +1406,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data korluh biofarmaka not found'));
+            res.status(404).json(response(404, 'Data korluh biofarmaka tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -1753,7 +1753,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data korluh hias not found'));
+            res.status(404).json(response(404, 'Data korluh hias tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
