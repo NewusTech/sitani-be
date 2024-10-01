@@ -1,11 +1,13 @@
 const { KepangProdusenEceranList, KepangMasterKomoditas, KepangProdusenEceran, sequelize } = require('../models');
+const { customMessages, dateGenerate, response } = require('../helpers');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages,
+});
 
 const coreSchema = {
     satuan: {
@@ -66,7 +68,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kepang master komoditas doesn't exists",
+                        message: "Kepang master komoditas tidak dapat ditemukan",
                         field: 'kepang_master_komoditas_id',
                     },
                 ]));
@@ -95,7 +97,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created kepang produsen dan eceran, please use another master",
+                        message: "Tidak dapat menambahkan kepang produsen dan eceran, master komoditas sudah digunakan",
                         field: 'kepang_master_komoditas_id',
                     },
                 ]));
@@ -113,7 +115,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Kepang produsen dan eceran created'));
+            res.status(201).json(response(201, 'Berhasil menambahkan kepang produsen dan eceran'));
         } catch (err) {
             console.log(err);
 
@@ -198,7 +200,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/kepang/produsen-eceran/get');
 
-            res.status(200).json(response(200, 'Get kepang produsen eceran successfully', { data: kepangProdusenEceran, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar kepang produsen eceran', { data: kepangProdusenEceran, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -229,11 +231,11 @@ module.exports = {
             });
 
             if (!kepangProdusenEceranList) {
-                res.status(404).json(response(404, 'Kepang produsen eceran not found'));
+                res.status(404).json(response(404, 'Kepang produsen eceran tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get kepang produsen eceran successfully', kepangProdusenEceranList));
+            res.status(200).json(response(200, 'Berhasil mendapatkan kepang produsen eceran', kepangProdusenEceranList));
         } catch (err) {
             console.log(err);
 
@@ -261,13 +263,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!kepangProdusenEceranList) {
+                res.status(404).json(response(404, 'Kepang produsen eceran tidak dapat ditemukan'));
                 return;
             }
 
-            if (!kepangProdusenEceranList) {
-                res.status(404).json(response(404, 'Kepang produsen eceran not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -285,7 +287,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update kepang produsen eceran successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui kepang produsen eceran'));
         } catch (err) {
             console.log(err);
 
@@ -310,7 +312,7 @@ module.exports = {
             });
 
             if (!kepangProdusenEceranList) {
-                res.status(404).json(response(404, 'Kepang produsen eceran not found'));
+                res.status(404).json(response(404, 'Kepang produsen eceran tidak dapat ditemukan'));
                 return;
             }
 
@@ -330,7 +332,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete kepang produsen eceran successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus kepang produsen eceran'));
         } catch (err) {
             console.log(err);
 
