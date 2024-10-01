@@ -1,10 +1,12 @@
 const { TphLahanBukanSawahList, TphLahanBukanSawah, Kecamatan, sequelize } = require('../models');
+const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 const coreSchema = {
     tegal: {
@@ -102,7 +104,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -129,7 +131,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: "Cannot created lahan bukan sawah, please use another kecamatan",
+                        message: "Tidak dapat menambahkan lahan bukan sawah, kecamatan sudah digunakan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -171,7 +173,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Lahan bukan sawah created'));
+            res.status(201).json(response(201, 'Lahan bukan sawah berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -263,7 +265,7 @@ module.exports = {
                 }
             }
 
-            res.status(200).json(response(200, 'Get lahan bukan sawah successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar lahan bukan sawah', {
                 detail: tphLahanBukanSawah,
                 total,
                 jumlahLahanBukanSawah,
@@ -307,11 +309,11 @@ module.exports = {
             });
 
             if (!tphLahanBukanSawahList) {
-                res.status(404).json(response(404, 'Lahan bukan sawah not found'));
+                res.status(404).json(response(404, 'Lahan bukan sawah tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get lahan bukan sawah successfully', tphLahanBukanSawahList));
+            res.status(200).json(response(200, 'Berhasil mendapatkan lahan bukan sawah', tphLahanBukanSawahList));
         } catch (err) {
             console.log(err);
 
@@ -339,13 +341,13 @@ module.exports = {
 
             const validate = v.validate(req.body, schema);
 
-            if (validate.length > 0) {
-                res.status(400).json(response(400, 'Bad Request', validate));
+            if (!tphLahanBukanSawahList) {
+                res.status(404).json(response(404, 'Lahan bukan sawah tidak dapat ditemukan'));
                 return;
             }
 
-            if (!tphLahanBukanSawahList) {
-                res.status(404).json(response(404, 'Lahan bukan sawah not found'));
+            if (validate.length > 0) {
+                res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
@@ -393,7 +395,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update lahan bukan sawah successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui lahan bukan sawah'));
         } catch (err) {
             console.log(err);
 
@@ -418,7 +420,7 @@ module.exports = {
             });
 
             if (!tphLahanBukanSawahList) {
-                res.status(404).json(response(404, 'Lahan bukan sawah not found'));
+                res.status(404).json(response(404, 'Lahan bukan sawah tidak dapat ditemukan'));
                 return;
             }
 
@@ -438,7 +440,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete lahan bukan sawah successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus lahan bukan sawah'));
         } catch (err) {
             console.log(err);
 
