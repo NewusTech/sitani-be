@@ -19,7 +19,7 @@ module.exports = {
 
             tahun = tahun.map(item => item.tahun);
 
-            res.status(200).json(response(200, 'Get tahun perkebunan kecamatan successfully', tahun));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar tahun perkebunan kecamatan', tahun));
         } catch (err) {
             console.log(err);
 
