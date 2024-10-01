@@ -5,7 +5,7 @@ const {
     PerkebunanKecamatan,
     sequelize
 } = require('../models');
-const { response, dateGenerate, getFirstLastDate, fixedNumber } = require('../helpers');
+const { response, fixedNumber } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
@@ -78,7 +78,7 @@ module.exports = {
                 });
             });
 
-            res.status(200).json(response(200, 'Get perkebunan dashboard data successfully', {
+            res.status(200).json(response(200, 'Berhasil mendapatkan perkebunan dashboard data', {
                 jumlahProduktivitas,
                 jumlahProduksi,
                 list,
