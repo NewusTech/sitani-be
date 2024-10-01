@@ -1,5 +1,7 @@
 module.exports = {
     customMessages: {
+        arrayUnique: "'{field}' harus berisi daftar item yang unik atau tidak ada yang sama",
+        arrayMin: "'{field}' harus berisi lebih atau sama dengan {expected} item",
         stringMax: "'{field}' harus kurang atau sama dengan {expected} karakter",
         stringMin: "'{field}' harus lebih atau sama dengan {expected} karakter",
         numberMax: "'{field}' harus kurang atau sama dengan {expected}",
