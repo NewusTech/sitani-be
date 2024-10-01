@@ -105,7 +105,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data perbandingan harga not found'));
+            res.status(404).json(response(404, 'Data perbandingan harga tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -217,7 +217,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data pedagang eceran not found'));
+            res.status(404).json(response(404, 'Data pedagang eceran tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -354,7 +354,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data produsen eceran not found'));
+            res.status(404).json(response(404, 'Data produsen eceran tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -453,7 +453,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data cv tk produksi not found'));
+            res.status(404).json(response(404, 'Data cv tk produksi tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
@@ -571,7 +571,7 @@ module.exports = {
                 return;
             }
 
-            res.status(404).json(response(404, 'Data cv tk produsen not found'));
+            res.status(404).json(response(404, 'Data cv tk produsen tidak dapat ditemukan'));
         } catch (err) {
             console.log(err);
 
