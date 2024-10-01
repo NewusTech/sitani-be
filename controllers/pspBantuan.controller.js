@@ -1,11 +1,13 @@
+const { customMessages, dateGenerate, response } = require('../helpers');
 const { PspBantuan, Kecamatan, Desa, sequelize } = require('../models');
 const { generatePagination } = require('../pagination/pagination');
-const { dateGenerate, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 module.exports = {
     create: async (req, res) => {
@@ -57,7 +59,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Kecamatan doesn't exists",
+                        message: "Kecamatan tidak dapat ditemukan",
                         field: 'kecamatan_id',
                     },
                 ]));
@@ -68,7 +70,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'notFound',
-                        message: "Desa doesn't exists",
+                        message: "Desa tidak dapat ditemukan",
                         field: 'desa_id',
                     },
                 ]));
@@ -87,7 +89,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'PSP bantuan created'));
+            res.status(201).json(response(201, 'PSP bantuan berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -167,7 +169,7 @@ module.exports = {
 
             const pagination = generatePagination(count, page, limit, '/api/psp/bantuan/get');
 
-            res.status(200).json(response(200, 'Get PSP bantuan successfully', { data: pspBantuan, pagination }));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar PSP bantuan', { data: pspBantuan, pagination }));
         } catch (err) {
             console.log(err);
 
@@ -198,11 +200,11 @@ module.exports = {
             });
 
             if (!pspBantuan) {
-                res.status(404).json(response(404, 'Psp bantuan not found'));
+                res.status(404).json(response(404, 'Psp bantuan tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get PSP bantuan successfully', pspBantuan));
+            res.status(200).json(response(200, 'Berhasil mendapatkan PSP bantuan', pspBantuan));
         } catch (err) {
             console.log(err);
 
@@ -266,7 +268,7 @@ module.exports = {
             }
 
             if (!pspBantuan) {
-                res.status(404).json(response(404, 'Psp bantuan not found'));
+                res.status(404).json(response(404, 'Psp bantuan tidak dapat ditemukan'));
                 return;
             }
 
@@ -306,7 +308,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update PSP bantuan successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui PSP bantuan'));
         } catch (err) {
             console.log(err);
 
@@ -331,7 +333,7 @@ module.exports = {
             });
 
             if (!pspBantuan) {
-                res.status(404).json(response(404, 'PSP bantuan not found'));
+                res.status(404).json(response(404, 'PSP bantuan tidak dapat ditemukan'));
                 return;
             }
 
@@ -339,7 +341,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete PSP bantuan successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus PSP bantuan'));
         } catch (err) {
             console.log(err);
 
