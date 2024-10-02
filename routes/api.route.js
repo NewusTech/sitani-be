@@ -47,6 +47,7 @@ const tphLahanSawahRoute = require('./tphLahanSawah.route');
 const pspDashboardRoute = require('./pspDashboard.route');
 const tphDashboardRoute = require('./tphDashboard.route');
 const kepegawaianRoute = require('./kepegawaian.route');
+const pspAlsintanRoute = require('./pspAlsintan.route');
 const korluhPadiRoute = require('./korluhPadi.route');
 const permissionRoute = require('./permission.route');
 const pspBantuanRoute = require('./pspBantuan.route');
@@ -112,6 +113,7 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, pspDashboardRoute);
     app.use(urlApi, tphDashboardRoute);
     app.use(urlApi, kepegawaianRoute);
+    app.use(urlApi, pspAlsintanRoute);
     app.use(urlApi, korluhPadiRoute);
     app.use(urlApi, permissionRoute);
     app.use(urlApi, pspBantuanRoute);
