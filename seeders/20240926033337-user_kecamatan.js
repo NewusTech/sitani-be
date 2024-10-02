@@ -14,7 +14,7 @@ module.exports = {
         */
         const dataList = [
             {
-                user_id: 9,
+                user_id: 5,
                 kecamatan_id: 1,
             },
         ];
