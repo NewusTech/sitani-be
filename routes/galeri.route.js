@@ -18,7 +18,7 @@ const allowPermissions = [
 
 let prefix = '/galeri';
 /* -- ROUTE -- */
-route.post(prefix + '/create', [mid.checkPermissionAndLogout([allowPermissions.slice(0, 2)])], upload.fields([{ name: 'image', maxCount: 1 }]), galeriController.create);
+route.post(prefix + '/create', [mid.checkPermissionAndLogout(allowPermissions.slice(0, 2))], upload.fields([{ name: 'image', maxCount: 1 }]), galeriController.create);
 route.get(prefix + '/get', galeriController.getAll);
 route.get(prefix + '/get/:id', galeriController.getOneById);
 route.put(prefix + '/update/:id', [mid.checkPermissionAndLogout([allowPermissions[0], allowPermissions[3]])], upload.fields([{ name: 'image', maxCount: 1 }]), galeriController.update);

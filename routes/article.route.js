@@ -18,7 +18,7 @@ const allowPermissions = [
 
 let prefix = '/article';
 /* -- ROUTE -- */
-route.post(prefix + '/create', [mid.checkPermissionAndLogout([allowPermissions.slice(0, 2)])], upload.fields([{ name: 'image', maxCount: 1 }]), articleController.create);
+route.post(prefix + '/create', [mid.checkPermissionAndLogout(allowPermissions.slice(0, 2))], upload.fields([{ name: 'image', maxCount: 1 }]), articleController.create);
 route.get(prefix + '/get', articleController.getAll);
 route.get(prefix + '/get/:slug', articleController.getOneBySlug);
 route.put(prefix + '/update/:slug', [mid.checkPermissionAndLogout([allowPermissions[0], allowPermissions[3]])], upload.fields([{ name: 'image', maxCount: 1 }]), articleController.update);
