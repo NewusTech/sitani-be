@@ -19,12 +19,12 @@ module.exports = {
             'super admin',
             'bidang master',
             'bidang ketahanan pangan',
-            'bidang tanaman pangan dan hortikultura',
-            'bidang perkebunan',
-            'bidang penyuluh',
-            'bidang psp',
             'bidang kepegawaian',
             'korluh',
+            'bidang penyuluh',
+            'bidang perkebunan',
+            'bidang psp',
+            'bidang tanaman pangan dan hortikultura',
         ]) {
             roles.push({
                 id: i,
