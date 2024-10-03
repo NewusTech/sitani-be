@@ -126,6 +126,6 @@ module.exports = function (app, urlApi) {
     app.use(urlApi, desaRoute);
     app.use(urlApi, roleRoute);
     // app.use(urlApi, seedRoute);
-    // app.use(urlApi, userRoute);
+    app.use(urlApi, userRoute);
     app.use(urlApi, bidangRoute);
 }

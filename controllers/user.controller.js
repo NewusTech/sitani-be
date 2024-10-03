@@ -1,10 +1,13 @@
-const { User, sequelize } = require('../models');
+const { RolePermissions, UserKecamatan, UserRoles, Kecamatan, Role, User, sequelize } = require('../models');
+const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
 const passwordHash = require('password-hash');
-const { response } = require('../helpers');
+const { Op } = require('sequelize');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 module.exports = {
     create: async (req, res) => {
@@ -37,6 +40,19 @@ module.exports = {
                     optional: true,
                     max: 255,
                 },
+                role_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                kecamatan_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
             };
 
             const validate = v.validate(req.body, schema);
@@ -46,9 +62,46 @@ module.exports = {
                 return;
             }
 
-            const { password, pangkat, email, name, nip } = req.body;
+            const { kecamatan_id, password, pangkat, role_id, email, name, nip } = req.body;
 
-            await User.create({
+            const kecamatan = await Kecamatan.findByPk(kecamatan_id);
+            const role = await Role.findByPk(role_id);
+
+            if (!role) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: 'Role tidak dapat ditemukan',
+                        field: 'role_id',
+                    },
+                ]));
+                return;
+            }
+
+            const korluhCek = await RolePermissions.count({
+                where: {
+                    roleId: role.id,
+                    permissionId: {
+                        [Op.or]: {
+                            [Op.gte]: 35,
+                            [Op.lte]: 54,
+                        }
+                    }
+                }
+            });
+
+            if (!kecamatan && korluhCek) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: 'Kecamatan tidak dapat ditemukan',
+                        field: 'kecamatan_id',
+                    },
+                ]));
+                return;
+            }
+
+            const user = await User.create({
                 password: passwordHash.generate(password),
                 nip: String(nip),
                 pangkat,
@@ -56,9 +109,21 @@ module.exports = {
                 name,
             });
 
+            await UserRoles.create({
+                roleId: role.id,
+                userId: user.id,
+            });
+
+            if (korluhCek) {
+                await UserKecamatan.create({
+                    kecamatanId: kecamatan.id,
+                    userId: user.id,
+                });
+            }
+
             await transaction.commit();
 
-            res.status(201).json(response(201, 'User created'));
+            res.status(201).json(response(201, 'Pengguna berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -71,12 +136,12 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: 'Cannot created user, please use another email or nip',
+                        message: 'Tidak dapat menambahkan pengguna, email atau nip sudah digunakan',
                         field: 'email',
                     },
                     {
                         type: 'duplicate',
-                        message: 'Cannot created user, please use another email or nip',
+                        message: 'Tidak dapat menambahkan pengguna, email atau nip sudah digunakan',
                         field: 'nip',
                     },
                 ]));
@@ -90,10 +155,20 @@ module.exports = {
     getAll: async (req, res) => {
         try {
             const users = await User.findAll({
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatans',
+                    },
+                    {
+                        model: Role,
+                        as: 'roles',
+                    }
+                ],
                 attributes: { exclude: ['password'] },
             });
 
-            res.status(200).json(response(200, 'Get users successfully', users));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar pengguna', users));
         } catch (err) {
             console.log(err);
 
@@ -110,16 +185,26 @@ module.exports = {
             const { id } = req.params;
 
             const user = await User.findOne({
-                where: { id },
+                include: [
+                    {
+                        model: Kecamatan,
+                        as: 'kecamatans',
+                    },
+                    {
+                        model: Role,
+                        as: 'roles',
+                    }
+                ],
                 attributes: { exclude: ['password'] },
+                where: { id },
             });
 
             if (!user) {
-                res.status(404).json(response(404, 'User not found'));
+                res.status(404).json(response(404, 'Pengguna tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get user successfully', user));
+            res.status(200).json(response(200, 'Berhasil mendapatkan pengguna', user));
         } catch (err) {
             console.log(err);
 
@@ -171,21 +256,71 @@ module.exports = {
                     optional: true,
                     max: 255,
                 },
+                role_id: {
+                    type: "number",
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
+                kecamatan_id: {
+                    type: "number",
+                    optional: true,
+                    positive: true,
+                    integer: true,
+                    convert: true,
+                },
             };
 
             const validate = v.validate(req.body, schema);
+
+            if (!user) {
+                res.status(404).json(response(404, 'Pengguna tidak dapat ditemukan'));
+                return;
+            }
 
             if (validate.length > 0) {
                 res.status(400).json(response(400, 'Bad Request', validate));
                 return;
             }
 
-            if (!user) {
-                res.status(404).json(response(404, 'User not found'));
+            let { kecamatan_id, password, pangkat, role_id, email, name, nip } = req.body;
+
+            const kecamatan = await Kecamatan.findByPk(kecamatan_id);
+            const role = await Role.findByPk(role_id);
+
+            if (!role) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: 'Role tidak dapat ditemukan',
+                        field: 'role_id',
+                    },
+                ]));
                 return;
             }
 
-            let { password, pangkat, email, name, nip } = req.body;
+            const korluhCek = await RolePermissions.count({
+                where: {
+                    roleId: role.id,
+                    permissionId: {
+                        [Op.or]: {
+                            [Op.gte]: 35,
+                            [Op.lte]: 54,
+                        }
+                    }
+                }
+            });
+
+            if (!kecamatan && korluhCek) {
+                res.status(400).json(response(400, 'Bad Request', [
+                    {
+                        type: 'notFound',
+                        message: 'Kecamatan tidak dapat ditemukan',
+                        field: 'kecamatan_id',
+                    },
+                ]));
+                return;
+            }
 
             password = password ? passwordHash.generate(password) : user.password;
             pangkat = pangkat ?? user.pangkat;
@@ -195,9 +330,32 @@ module.exports = {
 
             await user.update({ password, pangkat, email, name, nip });
 
+            await UserRoles.destroy({
+                where: {
+                    userId: user.id
+                }
+            });
+            await UserKecamatan.destroy({
+                where: {
+                    userId: user.id
+                }
+            });
+
+            await UserRoles.create({
+                roleId: role.id,
+                userId: user.id,
+            });
+
+            if (korluhCek) {
+                await UserKecamatan.create({
+                    kecamatanId: kecamatan.id,
+                    userId: user.id,
+                });
+            }
+
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update user successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui pengguna'));
         } catch (err) {
             console.log(err);
 
@@ -210,12 +368,12 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: 'Cannot updated user, please use another email or nip',
+                        message: 'Tidak dapat menambahkan pengguna, email atau nip sudah digunakan',
                         field: 'email',
                     },
                     {
                         type: 'duplicate',
-                        message: 'Cannot updated user, please use another email or nip',
+                        message: 'Tidak dapat menambahkan pengguna, email atau nip sudah digunakan',
                         field: 'nip',
                     },
                 ]));
@@ -237,15 +395,27 @@ module.exports = {
             });
 
             if (!user) {
-                res.status(404).json(response(404, 'User not found'));
+                res.status(404).json(response(404, 'Pengguna tidak dapat ditemukan'));
                 return;
             }
+
+            await UserRoles.destroy({
+                where: {
+                    userId: user.id
+                }
+            });
+
+            await UserKecamatan.destroy({
+                where: {
+                    userId: user.id
+                }
+            });
 
             await user.destroy();
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete user successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus pengguna'));
         } catch (err) {
             console.log(err);
 
