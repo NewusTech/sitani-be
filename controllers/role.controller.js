@@ -1,4 +1,4 @@
-const { Permission, Role, sequelize } = require('../models');
+const { RolePermissions, Permission, Role, sequelize } = require('../models');
 const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -21,7 +21,18 @@ module.exports = {
                 description: {
                     type: "string",
                     optional: true,
-                }
+                },
+                permission_list: {
+                    type: "array",
+                    unique: true,
+                    min: 1,
+                    items: {
+                        type: "number",
+                        positive: true,
+                        integer: true,
+                        convert: true,
+                    }
+                },
             };
 
             const validate = v.validate(req.body, schema);
@@ -31,12 +42,21 @@ module.exports = {
                 return;
             }
 
-            const { role_name, description } = req.body;
+            const { permission_list, role_name, description } = req.body;
 
-            await Role.create({
+            const role = await Role.create({
                 roleName: role_name,
                 description,
             });
+
+            const permissionList = await Permission.findAll({ where: { id: permission_list } });
+
+            for (let permission of permissionList) {
+                await RolePermissions.create({
+                    permissionId: permission.id,
+                    roleId: role.id,
+                });
+            }
 
             await transaction.commit();
 
@@ -138,7 +158,19 @@ module.exports = {
                 description: {
                     type: "string",
                     optional: true,
-                }
+                },
+                permission_list: {
+                    type: "array",
+                    optional: true,
+                    unique: true,
+                    min: 1,
+                    items: {
+                        type: "number",
+                        positive: true,
+                        integer: true,
+                        convert: true,
+                    }
+                },
             };
 
             const validate = v.validate(req.body, schema);
@@ -153,12 +185,29 @@ module.exports = {
                 return;
             }
 
-            let { role_name, description } = req.body;
+            let { permission_list, role_name, description } = req.body;
 
             description = description ?? role.description;
             role_name = role_name ?? role.roleName;
 
             await role.update({ roleName: role_name, description });
+
+            if (permission_list?.length) {
+                const permissionList = await Permission.findAll({ where: { id: permission_list } });
+
+                if (permissionList?.length) {
+                    await RolePermissions.destroy({
+                        where: { roleId: role.id }
+                    });
+
+                    for (const permission of permissionList) {
+                        await RolePermissions.create({
+                            permissionId: permission.id,
+                            roleId: role.id,
+                        });
+                    }
+                }
+            }
 
             await transaction.commit();
 
@@ -207,6 +256,10 @@ module.exports = {
                 res.status(404).json(response(404, 'Role tidak dapat ditemukan'));
                 return;
             }
+
+            await RolePermissions.destroy({
+                where: { roleId: id }
+            });
 
             await role.destroy();
 
