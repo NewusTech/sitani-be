@@ -1,9 +1,11 @@
-const { Role, sequelize } = require('../models');
+const { Permission, Role, sequelize } = require('../models');
+const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
-const { response } = require('../helpers');
 
-const v = new Validator();
+const v = new Validator({
+    messages: customMessages
+});
 
 module.exports = {
     create: async (req, res) => {
@@ -38,7 +40,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(201).json(response(201, 'Role created'));
+            res.status(201).json(response(201, 'Role berhasil ditambahkan'));
         } catch (err) {
             console.log(err);
 
@@ -51,7 +53,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: 'Cannot created role, please use another role name',
+                        message: 'Tidak dapat menambahkan role, nama role sudah digunakan',
                         field: 'role_name',
                     }
                 ]));
@@ -66,7 +68,7 @@ module.exports = {
         try {
             const roles = await Role.findAll();
 
-            res.status(200).json(response(200, 'Get roles successfully', roles));
+            res.status(200).json(response(200, 'Berhasil mendapatkan daftar role', roles));
         } catch (err) {
             console.log(err);
 
@@ -83,15 +85,21 @@ module.exports = {
             const { id } = req.params;
 
             const role = await Role.findOne({
+                include: [
+                    {
+                        model: Permission,
+                        as: 'permissions'
+                    }
+                ],
                 where: { id },
             });
 
             if (!role) {
-                res.status(404).json(response(404, 'Role not found'));
+                res.status(404).json(response(404, 'Role tidak dapat ditemukan'));
                 return;
             }
 
-            res.status(200).json(response(200, 'Get role successfully', role));
+            res.status(200).json(response(200, 'Berhasil mendapatkan role', role));
         } catch (err) {
             console.log(err);
 
@@ -107,7 +115,14 @@ module.exports = {
         const transaction = await sequelize.transaction();
 
         try {
-            const { id } = req.params;
+            let { id } = req.params;
+
+            id = !isNaN(parseInt(id)) ? parseInt(id) : 0;
+
+            if (id <= 9) {
+                res.status(404).json(response(404, 'Role tidak dapat diperbaharui'));
+                return;
+            }
 
             const role = await Role.findOne({
                 where: { id },
@@ -134,7 +149,7 @@ module.exports = {
             }
 
             if (!role) {
-                res.status(404).json(response(404, 'Role not found'));
+                res.status(404).json(response(404, 'Role tidak dapat ditemukan'));
                 return;
             }
 
@@ -147,7 +162,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Update role successfully'));
+            res.status(200).json(response(200, 'Berhasil memperbaharui role'));
         } catch (err) {
             console.log(err);
 
@@ -160,7 +175,7 @@ module.exports = {
                 res.status(400).json(response(400, 'Bad Request', [
                     {
                         type: 'duplicate',
-                        message: 'Cannot updated role, please use another role name',
+                        message: 'Tidak dapat memperbaharui role, nama role sudah digunakan',
                         field: 'role_name',
                     }
                 ]));
@@ -175,14 +190,21 @@ module.exports = {
         const transaction = await sequelize.transaction();
 
         try {
-            const { id } = req.params;
+            let { id } = req.params;
+
+            id = !isNaN(parseInt(id)) ? parseInt(id) : 0;
+
+            if (id <= 9) {
+                res.status(404).json(response(404, 'Role tidak dapat dihapus'));
+                return;
+            }
 
             const role = await Role.findOne({
                 where: { id },
             });
 
             if (!role) {
-                res.status(404).json(response(404, 'Role not found'));
+                res.status(404).json(response(404, 'Role tidak dapat ditemukan'));
                 return;
             }
 
@@ -190,7 +212,7 @@ module.exports = {
 
             await transaction.commit();
 
-            res.status(200).json(response(200, 'Delete role successfully'));
+            res.status(200).json(response(200, 'Berhasil menghapus role'));
         } catch (err) {
             console.log(err);
 
