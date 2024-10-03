@@ -1,4 +1,4 @@
-const { RolePermissions, Permission, Role, sequelize } = require('../models');
+const { RolePermissions, UserRoles, Permission, Role, sequelize } = require('../models');
 const { customMessages, response } = require('../helpers');
 const logger = require('../errorHandler/logger');
 const Validator = require("fastest-validator");
@@ -256,6 +256,10 @@ module.exports = {
                 res.status(404).json(response(404, 'Role tidak dapat ditemukan'));
                 return;
             }
+
+            await UserRoles.destroy({
+                where: { roleId: id }
+            });
 
             await RolePermissions.destroy({
                 where: { roleId: id }
