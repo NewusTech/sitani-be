@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'user_kecamatan',
         modelName: 'UserKecamatan',
+        createdAt: false,
         updatedAt: false,
         deletedAt: false,
         sequelize,
