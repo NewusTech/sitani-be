@@ -759,6 +759,7 @@ module.exports = {
                     }],
                     where,
                     attributes: [
+                        'id',
                         'nama',
                         'nip',
                         'tempat_lahir',
@@ -796,6 +797,7 @@ module.exports = {
                     }],
                     where,
                     attributes: [
+                        'id',
                         'nama',
                         'nip',
                         'tempat_lahir',
