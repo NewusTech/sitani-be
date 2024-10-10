@@ -86,7 +86,14 @@ module.exports = {
 
     getAll: async (req, res) => {
         try {
-            const roles = await Role.findAll();
+            const roles = await Role.findAll({
+                include: [
+                    {
+                        model: Permission,
+                        as: 'permissions'
+                    }
+                ],
+            });
 
             res.status(200).json(response(200, 'Berhasil mendapatkan daftar role', roles));
         } catch (err) {
