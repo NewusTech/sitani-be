@@ -9,7 +9,7 @@ const allowPermissions = [
 	"psp alsintan",
 ];
 
-let prefix = '/psp/alsintan/';
+let prefix = '/psp/alsintan';
 /* -- ROUTE -- */
 route.get(prefix + '/kecamatan', [mid.checkPermissionAndLogout(allowPermissions)], pspAlsintanController.getKecamatan);
 /* -- ROUTE -- */
